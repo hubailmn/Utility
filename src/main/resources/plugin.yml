@@ -1,0 +1,8 @@
+name: Utility
+version: 'v0.1'
+main: me.hubailmn.plugin.Plugin
+api-version: '1.19'
+load: STARTUP
+authors: [ hubailmn ]
+description: A Quick Shop GUI System
+website: https://discord.gg/TugD8pv3RG
