@@ -1,0 +1,26 @@
+# Configuration for database settings
+database:
+  # Specify the database module to use [SQLite, MySQL]
+  module: 'SQLite'
+
+  # Configuration for SQLite
+  SQLite:
+    # Path to the SQLite database file
+    # Note: Place the SQLite database file in the plugin's data folder
+    path: 'database.db'
+
+  # Configuration for MySQL
+  MySQL:
+    # JDBC connection string for MySQL database
+    # If provided, other MySQL settings below are not required
+    connection-string: 'jdbc:mysql://username:password@endpoint/database'
+
+    # MySQL server address and port
+    endpoint: 'ADDRESS'
+
+    # Name of the MySQL database
+    database-name: 'DATABASE_NAME'
+
+    # MySQL user credentials
+    username: 'USERNAME'
+    password: 'PASSWORD'

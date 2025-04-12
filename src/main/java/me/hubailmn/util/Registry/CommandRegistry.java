@@ -1,5 +1,6 @@
 package me.hubailmn.util.Registry;
 
+import me.hubailmn.util.BasePlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
@@ -22,7 +23,7 @@ public class CommandRegistry {
 
             CommandMap commandMap = (CommandMap) commandMapField.get(Bukkit.getServer());
             DynamicCommand dynamicCommand = new DynamicCommand(commandName, executor);
-            commandMap.register(commandName, "quickshopgui", dynamicCommand);
+            commandMap.register(commandName, BasePlugin.getPluginName(), dynamicCommand);
 
             registeredCommands.add(commandName);
 
@@ -48,7 +49,7 @@ public class CommandRegistry {
 
             for (String commandName : registeredCommands) {
                 knownCommands.remove(commandName);
-                knownCommands.remove("quickshopgui:" + commandName);
+                knownCommands.remove(BasePlugin.getPluginName() + ":" + commandName);
             }
 
             registeredCommands.clear();

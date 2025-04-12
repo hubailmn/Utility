@@ -23,7 +23,7 @@ public class ConfigBuilder {
     public ConfigBuilder() {
         LoadConfig annotation = this.getClass().getAnnotation(LoadConfig.class);
         if (annotation == null) {
-            throw new IllegalStateException("Missing @AutoLoadConfig annotation for class: " + this.getClass().getName());
+            throw new IllegalStateException("Missing @LoadConfig annotation for class: " + this.getClass().getName());
         }
         this.fileName = annotation.path();
         this.file = new File(BasePlugin.getInstance().getDataFolder(), fileName);

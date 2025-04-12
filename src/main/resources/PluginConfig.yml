@@ -1,0 +1,7 @@
+plugin:
+
+  prefix: §a[QuickShopGUI]§r
+
+  version: ${project.version}
+
+  debug: true
