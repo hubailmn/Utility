@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import me.hubailmn.util.Registry.Register;
 import me.hubailmn.util.config.ConfigUtil;
-import me.hubailmn.util.config.file.PluginConfig;
+import me.hubailmn.util.config.file.Config;
 import me.hubailmn.util.database.DBConnection;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.bukkit.plugin.PluginManager;
@@ -19,7 +19,7 @@ public abstract class BasePlugin extends JavaPlugin {
 
     @Getter
     @Setter
-    private static JavaPlugin instance;
+    private static BasePlugin instance;
 
     @Getter
     @Setter
@@ -59,8 +59,8 @@ public abstract class BasePlugin extends JavaPlugin {
     private void init() {
         Register.config();
 
-        setPrefix(ConfigUtil.getConfig(PluginConfig.class).getPrefix());
-        setDebug(ConfigUtil.getConfig(PluginConfig.class).isDebug());
+        setPrefix(ConfigUtil.getConfig(Config.class).getPrefix());
+        setDebug(ConfigUtil.getConfig(Config.class).isDebug());
 
         Register.database();
         Register.commands();

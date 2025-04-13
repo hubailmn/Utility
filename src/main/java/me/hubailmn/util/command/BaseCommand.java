@@ -3,8 +3,8 @@ package me.hubailmn.util.command;
 import lombok.Getter;
 import lombok.Setter;
 import me.hubailmn.util.BasePlugin;
-import me.hubailmn.util.annotation.RegisterCommand;
-import org.bukkit.command.Command;
+import me.hubailmn.util.command.annotation.Command;
+import me.hubailmn.util.command.annotation.SubCommand;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
@@ -26,27 +26,22 @@ public abstract class BaseCommand implements TabExecutor {
     private Map<String, BaseSubCommand> subCommands = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     public BaseCommand() {
-        RegisterCommand annotation = this.getClass().getAnnotation(RegisterCommand.class);
+        Command annotation = this.getClass().getAnnotation(Command.class);
         this.name = annotation.name();
         this.description = annotation.description();
         this.usageMessage = annotation.usage();
         this.permission = annotation.permission();
 
-
-
         addSubCommand();
     }
 
     public void addSubCommand() {
-        Reflections reflections = new Reflections(
-                "me.hubailmn." + BasePlugin.getPluginName().toLowerCase() + ".command",
-                "me.hubailmn." + BasePlugin.getPluginName().toLowerCase() + ".subcommand"
-        );
+        Reflections reflections = new Reflections("me.hubailmn." + BasePlugin.getPluginName().toLowerCase() + ".command");
 
-        Set<Class<?>> subCommandClasses = reflections.getTypesAnnotatedWith(me.hubailmn.util.annotation.SubCommand.class);
+        Set<Class<?>> subCommandClasses = reflections.getTypesAnnotatedWith(SubCommand.class);
 
         for (Class<?> clazz : subCommandClasses) {
-            me.hubailmn.util.annotation.SubCommand subAnnotation = clazz.getAnnotation(me.hubailmn.util.annotation.SubCommand.class);
+            SubCommand subAnnotation = clazz.getAnnotation(SubCommand.class);
 
             if (subAnnotation.baseCommand().equals(this.getClass())) {
                 try {
@@ -60,7 +55,7 @@ public abstract class BaseCommand implements TabExecutor {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length < 1) {
             if (sender.hasPermission(getPermission()) || getPermission().isEmpty()) {
                 return preform(sender);
@@ -92,7 +87,7 @@ public abstract class BaseCommand implements TabExecutor {
 
     @Nullable
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command, @NotNull String label, @NotNull String[] args) {
         TabComplete tabComplBuilder = new TabComplete(sender, command, label, args);
 
         if (args.length == 1) {

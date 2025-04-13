@@ -1,15 +1,15 @@
 package me.hubailmn.util.Registry;
 
 import me.hubailmn.util.BasePlugin;
-import me.hubailmn.util.annotation.DataBaseTable;
-import me.hubailmn.util.annotation.LoadConfig;
-import me.hubailmn.util.annotation.RegisterCommand;
-import me.hubailmn.util.annotation.RegisterEventListener;
+import me.hubailmn.util.annotation.EventListener;
 import me.hubailmn.util.command.BaseCommand;
+import me.hubailmn.util.command.annotation.Command;
 import me.hubailmn.util.config.ConfigBuilder;
 import me.hubailmn.util.config.ConfigUtil;
+import me.hubailmn.util.config.annotation.LoadConfig;
 import me.hubailmn.util.database.DBConnection;
 import me.hubailmn.util.database.DBTable;
+import me.hubailmn.util.database.annotation.DataBaseTable;
 import me.hubailmn.util.interaction.CSend;
 import org.bukkit.event.Listener;
 import org.reflections.Reflections;
@@ -27,7 +27,7 @@ public class Register {
 
     public static void eventsListener() {
         Reflections reflections = new Reflections(BASE_PACKAGE + ".listener");
-        Set<Class<?>> listenerClasses = reflections.getTypesAnnotatedWith(RegisterEventListener.class);
+        Set<Class<?>> listenerClasses = reflections.getTypesAnnotatedWith(EventListener.class);
 
         for (Class<?> clazz : listenerClasses) {
             try {
@@ -49,7 +49,7 @@ public class Register {
     public static void commands() {
         Reflections reflections = new Reflections(BASE_PACKAGE + ".command");
 
-        Set<Class<?>> annotatedClasses = reflections.getTypesAnnotatedWith(RegisterCommand.class);
+        Set<Class<?>> annotatedClasses = reflections.getTypesAnnotatedWith(Command.class);
 
         for (Class<?> annotatedClass : annotatedClasses) {
             if (!BaseCommand.class.isAssignableFrom(annotatedClass)) {
@@ -59,7 +59,7 @@ public class Register {
 
             try {
                 BaseCommand executor = (BaseCommand) annotatedClass.getDeclaredConstructor().newInstance();
-                String commandName = annotatedClass.getAnnotation(RegisterCommand.class).name();
+                String commandName = annotatedClass.getAnnotation(Command.class).name();
 
                 CommandRegistry.registerCommand(commandName, executor);
             } catch (Exception e) {

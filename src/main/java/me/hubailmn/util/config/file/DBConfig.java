@@ -1,8 +1,8 @@
 package me.hubailmn.util.config.file;
 
 import lombok.Getter;
-import me.hubailmn.util.annotation.LoadConfig;
 import me.hubailmn.util.config.ConfigBuilder;
+import me.hubailmn.util.config.annotation.LoadConfig;
 import org.bukkit.configuration.file.FileConfiguration;
 
 @LoadConfig(path = "DBConfig.yml")

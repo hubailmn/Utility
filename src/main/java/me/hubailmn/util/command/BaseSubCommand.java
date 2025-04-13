@@ -2,7 +2,7 @@ package me.hubailmn.util.command;
 
 import lombok.Getter;
 import lombok.Setter;
-import me.hubailmn.util.annotation.SubCommand;
+import me.hubailmn.util.command.annotation.SubCommand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 

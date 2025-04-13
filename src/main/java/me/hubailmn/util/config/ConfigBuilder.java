@@ -2,7 +2,7 @@ package me.hubailmn.util.config;
 
 import lombok.Data;
 import me.hubailmn.util.BasePlugin;
-import me.hubailmn.util.annotation.LoadConfig;
+import me.hubailmn.util.config.annotation.LoadConfig;
 import me.hubailmn.util.interaction.CSend;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;

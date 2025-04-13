@@ -1,4 +1,4 @@
-package me.hubailmn.util.annotation;
+package me.hubailmn.util.database.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

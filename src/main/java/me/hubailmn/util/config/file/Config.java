@@ -1,10 +1,10 @@
 package me.hubailmn.util.config.file;
 
-import me.hubailmn.util.annotation.LoadConfig;
 import me.hubailmn.util.config.ConfigBuilder;
+import me.hubailmn.util.config.annotation.LoadConfig;
 
-@LoadConfig(path = "PluginConfig.yml")
-public class PluginConfig extends ConfigBuilder {
+@LoadConfig(path = "Config.yml")
+public class Config extends ConfigBuilder {
 
     private static final String path = "plugin.";
 

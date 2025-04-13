@@ -1,4 +1,4 @@
-package me.hubailmn.util.annotation;
+package me.hubailmn.util.command.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,7 +13,7 @@ public @interface SubCommand {
 
     String permission() default "";
 
-    boolean requiresPlayer() default false;
+    boolean requiresPlayer() default true;
 
     Class<?> baseCommand();
 

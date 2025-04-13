@@ -1,4 +1,4 @@
-package me.hubailmn.util.annotation;
+package me.hubailmn.util.command.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface RegisterCommand {
+public @interface Command {
 
     String name();
 
@@ -18,8 +18,5 @@ public @interface RegisterCommand {
     String permission() default "";
 
     String[] aliases() default {};
-
-    SubCommand[] subcommands() default {};
-
 
 }

@@ -1,4 +1,4 @@
-package me.hubailmn.util.annotation;
+package me.hubailmn.util.menu.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,5 +7,10 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface RegisterEventListener {
+public @interface Menu {
+
+    String title();
+
+    int size();
+
 }

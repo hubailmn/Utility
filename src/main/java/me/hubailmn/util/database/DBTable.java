@@ -1,12 +1,14 @@
 package me.hubailmn.util.database;
 
-import me.hubailmn.util.annotation.DataBaseTable;
+import lombok.Getter;
+import me.hubailmn.util.database.annotation.DataBaseTable;
 
 import java.sql.Connection;
 
+@Getter
 public abstract class DBTable {
 
-    protected final String tableName;
+    protected final String name;
     protected final Connection connection;
 
     public DBTable() {
@@ -17,7 +19,7 @@ public abstract class DBTable {
             throw new IllegalStateException("DBTable subclass must be annotated with @DataBaseTable.");
         }
 
-        this.tableName = annotation.name();
+        this.name = annotation.name();
 
         createTable();
     }
