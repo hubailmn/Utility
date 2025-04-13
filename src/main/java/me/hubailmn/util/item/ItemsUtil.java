@@ -24,7 +24,7 @@ public class ItemsUtil {
         return false;
     }
 
-    public static boolean removeCurrency(PlayerInventory inventory, ItemStack target, int amount) {
+    public static boolean removeItem(PlayerInventory inventory, ItemStack target, int amount) {
         if (target == null || amount <= 0) return false;
         if (!hasEnough(inventory, target, amount)) return false;
 

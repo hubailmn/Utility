@@ -3,18 +3,16 @@ package me.hubailmn.util.command;
 import lombok.Getter;
 import lombok.Setter;
 import me.hubailmn.util.BasePlugin;
+import me.hubailmn.util.annotation.RegisterCommand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.reflections.Reflections;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 @Getter
 @Setter
@@ -25,27 +23,39 @@ public abstract class BaseCommand implements TabExecutor {
     String usageMessage;
     String permission;
 
-    private Map<String, SubCommand> subCommands = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    private Map<String, BaseSubCommand> subCommands = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
-    public BaseCommand(String name) {
-        this(name, "", "/" + name);
+    public BaseCommand() {
+        RegisterCommand annotation = this.getClass().getAnnotation(RegisterCommand.class);
+        this.name = annotation.name();
+        this.description = annotation.description();
+        this.usageMessage = annotation.usage();
+        this.permission = annotation.permission();
+
+
+
+        addSubCommand();
     }
 
-    public BaseCommand(String name, String description, String usageMessage) {
-        this.name = name;
-        this.description = description;
-        this.usageMessage = usageMessage;
+    public void addSubCommand() {
+        Reflections reflections = new Reflections(
+                "me.hubailmn." + BasePlugin.getPluginName().toLowerCase() + ".command",
+                "me.hubailmn." + BasePlugin.getPluginName().toLowerCase() + ".subcommand"
+        );
 
-        PluginCommand command = BasePlugin.getInstance().getCommand(getName());
-        if (command != null) {
-            command.setExecutor(this);
-            command.setTabCompleter(this);
-        }
-    }
+        Set<Class<?>> subCommandClasses = reflections.getTypesAnnotatedWith(me.hubailmn.util.annotation.SubCommand.class);
 
-    public void addSubCommand(SubCommand... subCommands) {
-        for (SubCommand subCommand : subCommands) {
-            this.subCommands.put(subCommand.getName(), subCommand);
+        for (Class<?> clazz : subCommandClasses) {
+            me.hubailmn.util.annotation.SubCommand subAnnotation = clazz.getAnnotation(me.hubailmn.util.annotation.SubCommand.class);
+
+            if (subAnnotation.baseCommand().equals(this.getClass())) {
+                try {
+                    BaseSubCommand baseSubCommand = (BaseSubCommand) clazz.getDeclaredConstructor().newInstance();
+                    this.subCommands.put(baseSubCommand.getName(), baseSubCommand);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to load subcommand: " + clazz.getName(), e);
+                }
+            }
         }
     }
 
@@ -59,25 +69,25 @@ public abstract class BaseCommand implements TabExecutor {
         }
 
         String subCommandName = args[0];
-        SubCommand subCommand = subCommands.get(subCommandName);
+        BaseSubCommand baseSubCommand = subCommands.get(subCommandName);
 
-        if (subCommand == null) {
+        if (baseSubCommand == null) {
             return sendHelp(sender);
         }
 
-        if (subCommand.isRequiresPlayer() && !(sender instanceof Player)) {
+        if (baseSubCommand.isRequiresPlayer() && !(sender instanceof Player)) {
             sender.sendMessage(BasePlugin.getPrefix() + "§c Only players can execute this command.");
             return true;
         }
 
-        if (!subCommand.getPermission().isEmpty()) {
-            if (!sender.hasPermission(subCommand.getPermission())) {
+        if (!baseSubCommand.getPermission().isEmpty()) {
+            if (!sender.hasPermission(baseSubCommand.getPermission())) {
                 sender.sendMessage(BasePlugin.getPrefix() + "§c You don't have permission to execute this command.");
                 return true;
             }
         }
 
-        return subCommand.execute(sender, command, label, args);
+        return baseSubCommand.execute(sender, command, label, args);
     }
 
     @Nullable
@@ -87,19 +97,19 @@ public abstract class BaseCommand implements TabExecutor {
 
         if (args.length == 1) {
             List<String> completions = new ArrayList<>();
-            for (Map.Entry<String, SubCommand> entry : subCommands.entrySet()) {
+            for (Map.Entry<String, BaseSubCommand> entry : subCommands.entrySet()) {
                 String subCommandName = entry.getKey();
-                SubCommand subCommand = entry.getValue();
-                if (subCommand.getPermission().isEmpty() || sender.hasPermission(subCommand.getPermission())) {
+                BaseSubCommand baseSubCommand = entry.getValue();
+                if (baseSubCommand.getPermission().isEmpty() || sender.hasPermission(baseSubCommand.getPermission())) {
                     completions.add(subCommandName);
                 }
             }
             tabComplBuilder.add(0, completions.toArray(new String[0]));
         } else if (args.length > 1) {
             String subCommandName = args[0].toLowerCase();
-            SubCommand subCommand = subCommands.get(subCommandName);
-            if (subCommand != null && (subCommand.getPermission().isEmpty() || sender.hasPermission(subCommand.getPermission()))) {
-                return subCommand.onTabComplete(sender, command, label, args);
+            BaseSubCommand baseSubCommand = subCommands.get(subCommandName);
+            if (baseSubCommand != null && (baseSubCommand.getPermission().isEmpty() || sender.hasPermission(baseSubCommand.getPermission()))) {
+                return baseSubCommand.onTabComplete(sender, command, label, args);
             }
         }
 

@@ -54,7 +54,6 @@ public abstract class BasePlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         DBConnection.close();
-
     }
 
     private void init() {

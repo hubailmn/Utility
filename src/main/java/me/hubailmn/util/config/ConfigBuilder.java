@@ -22,10 +22,11 @@ public class ConfigBuilder {
 
     public ConfigBuilder() {
         LoadConfig annotation = this.getClass().getAnnotation(LoadConfig.class);
-        if (annotation == null) {
-            throw new IllegalStateException("Missing @LoadConfig annotation for class: " + this.getClass().getName());
-        }
+
         this.fileName = annotation.path();
+
+        CSend.debug("Loaded config: " + fileName);
+
         this.file = new File(BasePlugin.getInstance().getDataFolder(), fileName);
         createAndLoad();
     }

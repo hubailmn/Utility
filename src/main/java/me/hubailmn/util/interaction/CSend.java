@@ -5,11 +5,12 @@ import org.bukkit.Bukkit;
 
 public final class CSend {
 
-    private static final String PREFIX = BasePlugin.getPrefix();
-
-
     private CSend() {
         throw new UnsupportedOperationException("This is a utility class.");
+    }
+
+    private static String getPrefix() {
+        return BasePlugin.getPrefix() != null ? BasePlugin.getPrefix() : "";
     }
 
     public static void plain(String message) {
@@ -17,7 +18,7 @@ public final class CSend {
     }
 
     public static void prefixed(String message) {
-        plain(PREFIX + " " + message);
+        plain(getPrefix() + " " + message);
     }
 
     public static void info(String message) {

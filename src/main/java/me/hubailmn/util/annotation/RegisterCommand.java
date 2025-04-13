@@ -19,5 +19,7 @@ public @interface RegisterCommand {
 
     String[] aliases() default {};
 
+    SubCommand[] subcommands() default {};
+
 
 }

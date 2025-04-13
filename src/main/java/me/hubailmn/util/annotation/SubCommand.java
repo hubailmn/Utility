@@ -9,7 +9,11 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface SubCommand {
 
-    String subCommand();
+    String name();
+
+    String permission() default "";
+
+    boolean requiresPlayer() default false;
 
     Class<?> baseCommand();
 
