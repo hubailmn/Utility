@@ -1,5 +1,6 @@
 package me.hubailmn.util.config.file;
 
+import me.hubailmn.util.BasePlugin;
 import me.hubailmn.util.config.ConfigBuilder;
 import me.hubailmn.util.config.annotation.LoadConfig;
 
@@ -20,4 +21,8 @@ public class Config extends ConfigBuilder {
         return getConfig().getString(PREFIX + "version");
     }
 
+    public Config() {
+        getConfig().set(PREFIX + "prefix", getPrefix().replace("%plugin_name%", BasePlugin.getPluginName()));
+        getConfig().set(PREFIX + "version", BasePlugin.getPluginVersion());
+    }
 }

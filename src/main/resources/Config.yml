@@ -1,7 +1,7 @@
 plugin:
 
-  prefix: §a[${project.name}]§r
+  prefix: §a[%plugin_name%]§r
 
-  version: ${project.version}
+  version: %plugin_version%
 
-  debug: true
+  debug: false
