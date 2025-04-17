@@ -52,6 +52,10 @@ public abstract class BasePlugin extends JavaPlugin {
     @Setter
     private static boolean checkUpdates;
 
+    @Getter
+    @Setter
+    private static boolean smirks;
+
 
     @Override
     public void onEnable() {
@@ -63,7 +67,7 @@ public abstract class BasePlugin extends JavaPlugin {
         pluginName = getName();
         pluginVersion = getDescription().getVersion();
 
-        preInit();
+        preEnable();
         init();
 
         CSend.debug("Plugin has been enabled.");
@@ -77,6 +81,8 @@ public abstract class BasePlugin extends JavaPlugin {
             DBConnection.close();
         }
 
+        preDisable();
+
         CSend.debug("Plugin has been disabled.");
     }
 
@@ -88,14 +94,14 @@ public abstract class BasePlugin extends JavaPlugin {
         setPrefix(ConfigUtil.getConfig(Config.class).getPrefix());
         setDebug(ConfigUtil.getConfig(Config.class).isDebug());
 
-        if (isDatabase()) {
-            CSend.debug("Initializing Database Connection...");
-            Register.database();
-        }
-
         if (isLicense()) {
             CSend.debug("Checking plugin license...");
             License.checkLicense();
+        }
+
+        if (isDatabase()) {
+            CSend.debug("Initializing Database Connection...");
+            Register.database();
         }
 
         CSend.debug("Registering Commands...");
@@ -104,14 +110,22 @@ public abstract class BasePlugin extends JavaPlugin {
         CSend.debug("Registering Listeners...");
         Register.eventsListener();
 
-        CSend.debug("Plugin has been initialized.");
-
         if (isCheckUpdates()) {
             CSend.info("Checking for updates...");
             CheckUpdates.checkForUpdates();
         }
+
+        if (isSmirks()) {
+            CSend.info("Smirking...");
+            //TODO: :smirk:
+        }
+
+        CSend.debug("Plugin has been initialized.");
     }
 
-    protected void preInit() {
+    protected void preEnable() {
+    }
+
+    protected void preDisable() {
     }
 }
