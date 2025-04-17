@@ -10,8 +10,11 @@ import me.hubailmn.util.interaction.CSend;
 import me.hubailmn.util.plugin.CheckUpdates;
 import me.hubailmn.util.plugin.License;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Objects;
 
 
 public abstract class BasePlugin extends JavaPlugin {
@@ -65,11 +68,11 @@ public abstract class BasePlugin extends JavaPlugin {
     public void onEnable() {
         Configurator.setLevel("me.hubailmn.shaded.reflections", org.apache.logging.log4j.Level.OFF);
 
-        instance = this;
+        getInstance();
 
         pluginManager = getServer().getPluginManager();
-        pluginName = getName();
-        pluginVersion = getDescription().getVersion();
+        pluginName = getInstance().getName();
+        pluginVersion = getInstance().getDescription().getVersion();
 
         preEnable();
         init();
@@ -134,5 +137,23 @@ public abstract class BasePlugin extends JavaPlugin {
     }
 
     protected void preDisable() {
+    }
+
+    public static BasePlugin getInstance() {
+        if (instance == null) {
+            try {
+                instance = JavaPlugin.getPlugin(BasePlugin.class);
+
+            } catch (final IllegalStateException ex) {
+                if (Bukkit.getPluginManager().getPlugin("PlugMan") != null)
+                    Bukkit.getLogger().severe("Failed to get instance of the plugin, if you reloaded using PlugMan you need to do a clean restart instead.");
+
+                throw ex;
+            }
+
+            Objects.requireNonNull(instance, "Cannot get a new instance! Have you reloaded?");
+        }
+
+        return instance;
     }
 }
