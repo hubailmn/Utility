@@ -102,6 +102,8 @@ public abstract class BasePlugin extends JavaPlugin {
 
         if (!isForceDebug()) {
             setDebug(ConfigUtil.getConfig(Config.class).isDebug());
+        } else {
+            setDebug(true);
         }
 
         if (isLicense()) {
