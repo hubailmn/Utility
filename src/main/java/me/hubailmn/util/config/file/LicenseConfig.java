@@ -5,7 +5,7 @@ import me.hubailmn.util.config.ConfigBuilder;
 import me.hubailmn.util.config.annotation.LoadConfig;
 
 @LoadConfig(path = "License.yml")
-@IgnoreFile
+@IgnoreFile(ifNoLicense = true)
 public class LicenseConfig extends ConfigBuilder {
 
     public String getKey() {
