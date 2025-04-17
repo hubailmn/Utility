@@ -68,7 +68,7 @@ public abstract class BasePlugin extends JavaPlugin {
     public void onEnable() {
         Configurator.setLevel("me.hubailmn.shaded.reflections", org.apache.logging.log4j.Level.OFF);
 
-        getInstance();
+        setInstance(getInstance());
 
         pluginManager = getServer().getPluginManager();
         pluginName = getInstance().getName();
