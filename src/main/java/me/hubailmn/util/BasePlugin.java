@@ -68,7 +68,7 @@ public abstract class BasePlugin extends JavaPlugin {
     public void onEnable() {
         Configurator.setLevel("me.hubailmn.shaded.reflections", org.apache.logging.log4j.Level.OFF);
 
-        setInstance(getInstance());
+        setInstance(this);
 
         pluginManager = getServer().getPluginManager();
         pluginName = getInstance().getName();
@@ -141,21 +141,4 @@ public abstract class BasePlugin extends JavaPlugin {
     protected void preDisable() {
     }
 
-    public static BasePlugin getInstance() {
-        if (instance == null) {
-            try {
-                instance = JavaPlugin.getPlugin(BasePlugin.class);
-
-            } catch (final IllegalStateException ex) {
-                if (Bukkit.getPluginManager().getPlugin("PlugMan") != null)
-                    Bukkit.getLogger().severe("Failed to get instance of the plugin, if you reloaded using PlugMan you need to do a clean restart instead.");
-
-                throw ex;
-            }
-
-            Objects.requireNonNull(instance, "Cannot get a new instance! Have you reloaded?");
-        }
-
-        return instance;
-    }
 }

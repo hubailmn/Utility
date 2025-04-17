@@ -1,8 +1,0 @@
-name: QuickShopGUI
-version: '${project.version}'
-main: me.hubailmn.plugin.Plugin
-api-version: '1.19'
-load: STARTUP
-authors: [ hubailmn ]
-description: A Utility plugin.
-website: https://discord.gg/TugD8pv3RG
