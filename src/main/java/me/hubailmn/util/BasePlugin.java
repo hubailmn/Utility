@@ -42,6 +42,10 @@ public abstract class BasePlugin extends JavaPlugin {
 
     @Getter
     @Setter
+    private static boolean forceDebug;
+
+    @Getter
+    @Setter
     private static boolean database = true;
 
     @Getter
@@ -92,7 +96,10 @@ public abstract class BasePlugin extends JavaPlugin {
         Register.config();
 
         setPrefix(ConfigUtil.getConfig(Config.class).getPrefix());
-        setDebug(ConfigUtil.getConfig(Config.class).isDebug());
+
+        if (!isForceDebug()) {
+            setDebug(ConfigUtil.getConfig(Config.class).isDebug());
+        }
 
         if (isLicense()) {
             CSend.debug("Checking plugin license...");
