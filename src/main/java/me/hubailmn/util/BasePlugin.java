@@ -7,6 +7,8 @@ import me.hubailmn.util.config.ConfigUtil;
 import me.hubailmn.util.config.file.Config;
 import me.hubailmn.util.database.DBConnection;
 import me.hubailmn.util.interaction.CSend;
+import me.hubailmn.util.plugin.CheckUpdates;
+import me.hubailmn.util.plugin.License;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -36,11 +38,19 @@ public abstract class BasePlugin extends JavaPlugin {
 
     @Getter
     @Setter
+    private static boolean debug;
+
+    @Getter
+    @Setter
     private static boolean database = true;
 
     @Getter
     @Setter
-    private static boolean debug;
+    private static boolean license;
+
+    @Getter
+    @Setter
+    private static boolean checkUpdates;
 
 
     @Override
@@ -52,7 +62,6 @@ public abstract class BasePlugin extends JavaPlugin {
         pluginManager = getServer().getPluginManager();
         pluginName = getName();
         pluginVersion = getDescription().getVersion();
-
 
         preInit();
         init();
@@ -84,6 +93,11 @@ public abstract class BasePlugin extends JavaPlugin {
             Register.database();
         }
 
+        if (isLicense()) {
+            CSend.debug("Checking plugin license...");
+            License.checkLicense();
+        }
+
         CSend.debug("Registering Commands...");
         Register.commands();
 
@@ -91,6 +105,11 @@ public abstract class BasePlugin extends JavaPlugin {
         Register.eventsListener();
 
         CSend.debug("Plugin has been initialized.");
+
+        if (isCheckUpdates()) {
+            CSend.info("Checking for updates...");
+            CheckUpdates.checkForUpdates();
+        }
     }
 
     protected void preInit() {

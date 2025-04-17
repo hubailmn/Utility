@@ -1,6 +1,6 @@
 plugin:
 
-  prefix: §a[QuickShopGUI]§r
+  prefix: §a[${project.name}]§r
 
   version: ${project.version}
 

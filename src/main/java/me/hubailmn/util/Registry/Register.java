@@ -2,6 +2,7 @@ package me.hubailmn.util.Registry;
 
 import me.hubailmn.util.BasePlugin;
 import me.hubailmn.util.annotation.EventListener;
+import me.hubailmn.util.annotation.IgnoreFile;
 import me.hubailmn.util.command.BaseCommand;
 import me.hubailmn.util.command.annotation.Command;
 import me.hubailmn.util.config.ConfigBuilder;
@@ -32,7 +33,7 @@ public class Register {
         for (Class<?> clazz : listenerClasses) {
             try {
                 if (!Listener.class.isAssignableFrom(clazz)) {
-                    CSend.error("Class " + clazz.getName() + " is annotated with @RegisterEventListener but does not implement Listener.");
+                    CSend.error("Class " + clazz.getName() + " is annotated with @EventListener but does not implement Listener.");
                     continue;
                 }
 
@@ -54,7 +55,7 @@ public class Register {
 
         for (Class<?> annotatedClass : annotatedClasses) {
             if (!BaseCommand.class.isAssignableFrom(annotatedClass)) {
-                CSend.warn(annotatedClass.getName() + " is annotated with @RegisterCommand but does not extend BaseCommand.");
+                CSend.warn(annotatedClass.getName() + " is annotated with @Command but does not extend BaseCommand.");
                 continue;
             }
 
@@ -80,7 +81,10 @@ public class Register {
         Set<Class<? extends DBTable>> tableClasses = reflections.getSubTypesOf(DBTable.class);
 
         for (Class<? extends DBTable> tableClass : tableClasses) {
-            if (!tableClass.isAnnotationPresent(DataBaseTable.class)) continue;
+            if (!tableClass.isAnnotationPresent(DataBaseTable.class)) {
+                CSend.error(tableClass.getName() + " is annotated with @DataBaseTable. but does not extend DBTable.");
+                continue;
+            }
 
             try {
                 tableClass.getDeclaredConstructor().newInstance();
@@ -97,31 +101,38 @@ public class Register {
     public static void config() {
         Reflections reflections = new Reflections(
                 UTIL_PACKAGE + ".config.file",
-                BASE_PACKAGE + ".config");
+                BASE_PACKAGE + ".config"
+        );
 
         Set<Class<?>> configClasses = reflections.getTypesAnnotatedWith(LoadConfig.class);
 
         for (Class<?> clazz : configClasses) {
-            if (!ConfigBuilder.class.isAssignableFrom(clazz)) continue;
+            if (!ConfigBuilder.class.isAssignableFrom(clazz)) {
+                CSend.warn(clazz.getName() + " is annotated with @LoadConfig but does not extend ConfigBuilder.");
+                continue;
+            }
 
             @SuppressWarnings("unchecked")
             Class<? extends ConfigBuilder> typedClass = (Class<? extends ConfigBuilder>) clazz;
 
-            try {
-                if (!BasePlugin.isDatabase() && clazz.getSimpleName().equalsIgnoreCase("DBConfig")) {
+            if (clazz.isAnnotationPresent(IgnoreFile.class)) {
+                IgnoreFile ignore = clazz.getAnnotation(IgnoreFile.class);
+                if (!BasePlugin.isDatabase() || !BasePlugin.isLicense()) {
                     continue;
                 }
+            }
 
+            try {
                 ConfigBuilder config = typedClass.getDeclaredConstructor().newInstance();
                 ConfigUtil.getCONFIG_INSTANCE().put(typedClass, config);
 
                 CSend.debug("Registered config " + clazz.getSimpleName() + ".");
-
             } catch (Exception e) {
                 CSend.error("Failed to load config: " + typedClass.getSimpleName());
                 throw new RuntimeException(e);
             }
         }
     }
+
 
 }

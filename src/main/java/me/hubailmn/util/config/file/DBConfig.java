@@ -1,11 +1,13 @@
 package me.hubailmn.util.config.file;
 
 import lombok.Getter;
+import me.hubailmn.util.annotation.IgnoreFile;
 import me.hubailmn.util.config.ConfigBuilder;
 import me.hubailmn.util.config.annotation.LoadConfig;
 import org.bukkit.configuration.file.FileConfiguration;
 
 @LoadConfig(path = "DBConfig.yml")
+@IgnoreFile
 public class DBConfig extends ConfigBuilder {
 
     public String getModule() {
