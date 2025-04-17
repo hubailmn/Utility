@@ -117,7 +117,11 @@ public class Register {
 
             if (clazz.isAnnotationPresent(IgnoreFile.class)) {
                 IgnoreFile ignore = clazz.getAnnotation(IgnoreFile.class);
-                if (!BasePlugin.isDatabase() || !BasePlugin.isLicense()) {
+                if (!BasePlugin.isDatabase()) {
+                    CSend.debug("Skipping config " + clazz.getSimpleName() + " due to @IgnoreFile conditions.");
+                    continue;
+                } else if (!BasePlugin.isLicense()){
+                    CSend.debug("Skipping config " + clazz.getSimpleName() + " due to @IgnoreFile conditions.");
                     continue;
                 }
             }
