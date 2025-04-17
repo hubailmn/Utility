@@ -43,7 +43,7 @@ public abstract class BaseCommand implements TabExecutor {
         for (Class<?> clazz : subCommandClasses) {
             SubCommand subAnnotation = clazz.getAnnotation(SubCommand.class);
 
-            if (subAnnotation.baseCommand().equals(this.getClass())) {
+            if (subAnnotation.command().equals(this.getClass())) {
                 try {
                     BaseSubCommand baseSubCommand = (BaseSubCommand) clazz.getDeclaredConstructor().newInstance();
                     this.subCommands.put(baseSubCommand.getName(), baseSubCommand);

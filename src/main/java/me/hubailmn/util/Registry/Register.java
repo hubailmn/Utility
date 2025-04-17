@@ -38,6 +38,7 @@ public class Register {
 
                 Listener listener = (Listener) clazz.getDeclaredConstructor().newInstance();
                 BasePlugin.getPluginManager().registerEvents(listener, BasePlugin.getInstance());
+                CSend.debug("Registered listener " + clazz.getName());
 
             } catch (Exception e) {
                 CSend.error("Failed to register listener: " + clazz.getSimpleName());
@@ -53,7 +54,7 @@ public class Register {
 
         for (Class<?> annotatedClass : annotatedClasses) {
             if (!BaseCommand.class.isAssignableFrom(annotatedClass)) {
-                System.out.println("Warning: " + annotatedClass.getName() + " is annotated with @RegisterCommand but does not extend BaseCommand.");
+                CSend.warn(annotatedClass.getName() + " is annotated with @RegisterCommand but does not extend BaseCommand.");
                 continue;
             }
 
@@ -62,6 +63,9 @@ public class Register {
                 String commandName = annotatedClass.getAnnotation(Command.class).name();
 
                 CommandRegistry.registerCommand(commandName, executor);
+
+                CSend.debug("Registered command " + commandName + ".");
+
             } catch (Exception e) {
                 throw new RuntimeException("Failed to register command: " + annotatedClass.getName(), e);
             }
@@ -80,6 +84,9 @@ public class Register {
 
             try {
                 tableClass.getDeclaredConstructor().newInstance();
+
+                CSend.debug("Registered Database table " + tableClass.getSimpleName() + ".");
+
             } catch (Exception e) {
                 throw new RuntimeException("Failed to initialize DBTable: " + tableClass.getSimpleName(), e);
             }
@@ -101,8 +108,15 @@ public class Register {
             Class<? extends ConfigBuilder> typedClass = (Class<? extends ConfigBuilder>) clazz;
 
             try {
+                if (!BasePlugin.isDatabase() && clazz.getSimpleName().equalsIgnoreCase("DBConfig")) {
+                    continue;
+                }
+
                 ConfigBuilder config = typedClass.getDeclaredConstructor().newInstance();
                 ConfigUtil.getCONFIG_INSTANCE().put(typedClass, config);
+
+                CSend.debug("Registered config " + clazz.getSimpleName() + ".");
+
             } catch (Exception e) {
                 CSend.error("Failed to load config: " + typedClass.getSimpleName());
                 throw new RuntimeException(e);

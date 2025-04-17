@@ -6,6 +6,7 @@ import me.hubailmn.util.Registry.Register;
 import me.hubailmn.util.config.ConfigUtil;
 import me.hubailmn.util.config.file.Config;
 import me.hubailmn.util.database.DBConnection;
+import me.hubailmn.util.interaction.CSend;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -31,11 +32,16 @@ public abstract class BasePlugin extends JavaPlugin {
 
     @Getter
     @Setter
-    private static boolean debug;
+    private static String pluginVersion;
 
     @Getter
     @Setter
-    private static String pluginVersion;
+    private static boolean database = true;
+
+    @Getter
+    @Setter
+    private static boolean debug;
+
 
     @Override
     public void onEnable() {
@@ -47,24 +53,46 @@ public abstract class BasePlugin extends JavaPlugin {
         pluginName = getName();
         pluginVersion = getDescription().getVersion();
 
+
+        preInit();
         init();
 
+        CSend.debug("Plugin has been enabled.");
     }
 
     @Override
     public void onDisable() {
-        DBConnection.close();
+
+        if (isDatabase()) {
+            CSend.debug("Closing Database Connection...");
+            DBConnection.close();
+        }
+
+        CSend.debug("Plugin has been disabled.");
     }
 
     private void init() {
+
+        CSend.debug("Initializing Config Files...");
         Register.config();
 
         setPrefix(ConfigUtil.getConfig(Config.class).getPrefix());
         setDebug(ConfigUtil.getConfig(Config.class).isDebug());
 
-        Register.database();
+        if (isDatabase()) {
+            CSend.debug("Initializing Database Connection...");
+            Register.database();
+        }
+
+        CSend.debug("Registering Commands...");
         Register.commands();
+
+        CSend.debug("Registering Listeners...");
         Register.eventsListener();
 
+        CSend.debug("Plugin has been initialized.");
+    }
+
+    protected void preInit() {
     }
 }

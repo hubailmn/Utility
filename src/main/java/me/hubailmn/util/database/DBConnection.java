@@ -76,7 +76,7 @@ public class DBConnection {
         hikariConfig.setUsername(mysql.getUsername());
         hikariConfig.setPassword(mysql.getPassword());
         hikariConfig.setMaximumPoolSize(10);
-        hikariConfig.setPoolName("QuickShopGUI-Pool");
+        hikariConfig.setPoolName(BasePlugin.getPluginName() + "-Pool");
 
         @SuppressWarnings("resource")
         HikariDataSource dataSource = new HikariDataSource(hikariConfig);

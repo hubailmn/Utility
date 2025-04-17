@@ -11,11 +11,11 @@ public @interface SubCommand {
 
     String name();
 
+    Class<?> command();
+
     String permission() default "";
 
     boolean requiresPlayer() default true;
-
-    Class<?> baseCommand();
 
 
 }
