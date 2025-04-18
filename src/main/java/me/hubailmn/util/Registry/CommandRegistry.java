@@ -37,8 +37,6 @@ public class CommandRegistry {
             DynamicCommand dynamicCommand = new DynamicCommand(commandName, executor);
             commandMap.register(BasePlugin.getPluginName(), dynamicCommand);
             registeredCommands.add(commandName);
-
-            CSend.debug("Registered command: " + commandName);
         } catch (Exception e) {
             CSend.error("Error registering command '" + commandName + "': " + e.getMessage());
             e.printStackTrace();

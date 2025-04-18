@@ -56,7 +56,6 @@ public abstract class BasePlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // Silence Reflections library logging
         Configurator.setLevel("me.hubailmn.shaded.reflections", org.apache.logging.log4j.Level.OFF);
 
         setInstance(this);
@@ -76,7 +75,6 @@ public abstract class BasePlugin extends JavaPlugin {
 
         MenuManager.shutdown();
 
-        CSend.debug("Unregistering Commands...");
         CommandRegistry.unRegisterCommands();
 
         if (isDatabase()) {
