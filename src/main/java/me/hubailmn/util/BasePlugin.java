@@ -2,19 +2,18 @@ package me.hubailmn.util;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.hubailmn.util.Registry.CommandRegistry;
 import me.hubailmn.util.Registry.Register;
 import me.hubailmn.util.config.ConfigUtil;
 import me.hubailmn.util.config.file.Config;
 import me.hubailmn.util.database.DBConnection;
 import me.hubailmn.util.interaction.CSend;
+import me.hubailmn.util.menu.MenuManager;
 import me.hubailmn.util.plugin.CheckUpdates;
 import me.hubailmn.util.plugin.License;
 import org.apache.logging.log4j.core.config.Configurator;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.Objects;
 
 
 public abstract class BasePlugin extends JavaPlugin {
@@ -82,13 +81,17 @@ public abstract class BasePlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        preDisable();
+
+        MenuManager.shutdown();
+
+        CSend.debug("UnRegistering Commands...");
+        CommandRegistry.unRegisterCommands();
 
         if (isDatabase()) {
             CSend.debug("Closing Database Connection...");
             DBConnection.close();
         }
-
-        preDisable();
 
         CSend.debug("Plugin has been disabled.");
     }

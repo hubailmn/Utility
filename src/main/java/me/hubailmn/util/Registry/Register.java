@@ -27,7 +27,9 @@ public class Register {
     }
 
     public static void eventsListener() {
-        Reflections reflections = new Reflections(BASE_PACKAGE + ".listener");
+        Reflections reflections = new Reflections(
+                BASE_PACKAGE + ".listener",
+                UTIL_PACKAGE + ".menu.listener");
         Set<Class<?>> listenerClasses = reflections.getTypesAnnotatedWith(EventListener.class);
 
         for (Class<?> clazz : listenerClasses) {

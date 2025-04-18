@@ -1,7 +1,8 @@
-package me.hubailmn.util.menu.listeners;
+package me.hubailmn.util.menu.listener;
 
 import me.hubailmn.util.annotation.EventListener;
-import me.hubailmn.util.menu.Menu;
+import me.hubailmn.util.menu.MenuManager;
+import me.hubailmn.util.menu.type.MenuBuilder;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,19 +16,19 @@ public class MenuCloseListener implements Listener {
     public void onInventoryClose(InventoryCloseEvent e) {
         if (!(e.getPlayer() instanceof Player player)) return;
 
-        Menu menu = Menu.getActiveMenu(player);
+        MenuBuilder menu = MenuManager.getActiveMenu(player);
         if (menu == null) return;
 
-        Menu.clearActiveMenu(player);
+        MenuManager.clearActiveMenu(player);
     }
 
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent e) {
         Player player = e.getPlayer();
-        Menu menu = Menu.getActiveMenu(player);
+        MenuBuilder menu = MenuManager.getActiveMenu(player);
         if (menu == null) return;
 
-        Menu.clearActiveMenu(player);
+        MenuManager.clearActiveMenu(player);
     }
 }

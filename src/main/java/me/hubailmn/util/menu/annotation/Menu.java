@@ -13,4 +13,10 @@ public @interface Menu {
 
     int size();
 
+    boolean buttonClickCancel() default true;
+
+    boolean playerInvClickCancel() default true;
+
+    boolean inventoryClickCancel() default true;
+
 }
