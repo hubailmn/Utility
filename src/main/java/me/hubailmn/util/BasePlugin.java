@@ -18,19 +18,41 @@ import org.bukkit.plugin.java.JavaPlugin;
 public abstract class BasePlugin extends JavaPlugin {
 
 
-    @Getter @Setter private static BasePlugin instance;
-    @Getter @Setter private static PluginManager pluginManager;
-    @Getter @Setter private static String pluginName;
-    @Getter @Setter private static String pluginVersion;
-    @Getter @Setter private static String prefix;
+    @Getter
+    @Setter
+    private static BasePlugin instance;
+    @Getter
+    @Setter
+    private static PluginManager pluginManager;
+    @Getter
+    @Setter
+    private static String pluginName;
+    @Getter
+    @Setter
+    private static String pluginVersion;
+    @Getter
+    @Setter
+    private static String prefix;
 
 
-    @Getter @Setter private static boolean debug = false;
-    @Getter @Setter private static boolean forceDebug = false;
-    @Getter @Setter private static boolean database = true;
-    @Getter @Setter private static boolean license = false;
-    @Getter @Setter private static boolean checkUpdates = false;
-    @Getter @Setter private static boolean smirks = false;
+    @Getter
+    @Setter
+    private static boolean debug = false;
+    @Getter
+    @Setter
+    private static boolean forceDebug = false;
+    @Getter
+    @Setter
+    private static boolean database = true;
+    @Getter
+    @Setter
+    private static boolean license = false;
+    @Getter
+    @Setter
+    private static boolean checkUpdates = false;
+    @Getter
+    @Setter
+    private static boolean smirks = false;
 
     @Override
     public void onEnable() {
