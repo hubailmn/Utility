@@ -15,66 +15,35 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-
 public abstract class BasePlugin extends JavaPlugin {
 
-    @Getter
-    @Setter
-    private static String pluginName;
 
-    @Getter
-    @Setter
-    private static BasePlugin instance;
+    @Getter @Setter private static BasePlugin instance;
+    @Getter @Setter private static PluginManager pluginManager;
+    @Getter @Setter private static String pluginName;
+    @Getter @Setter private static String pluginVersion;
+    @Getter @Setter private static String prefix;
 
-    @Getter
-    @Setter
-    private static PluginManager pluginManager;
 
-    @Getter
-    @Setter
-    private static String prefix;
-
-    @Getter
-    @Setter
-    private static String pluginVersion;
-
-    @Getter
-    @Setter
-    private static boolean debug;
-
-    @Getter
-    @Setter
-    private static boolean forceDebug;
-
-    @Getter
-    @Setter
-    private static boolean database = true;
-
-    @Getter
-    @Setter
-    private static boolean license;
-
-    @Getter
-    @Setter
-    private static boolean checkUpdates;
-
-    @Getter
-    @Setter
-    private static boolean smirks;
-
+    @Getter @Setter private static boolean debug = false;
+    @Getter @Setter private static boolean forceDebug = false;
+    @Getter @Setter private static boolean database = true;
+    @Getter @Setter private static boolean license = false;
+    @Getter @Setter private static boolean checkUpdates = false;
+    @Getter @Setter private static boolean smirks = false;
 
     @Override
     public void onEnable() {
+        // Silence Reflections library logging
         Configurator.setLevel("me.hubailmn.shaded.reflections", org.apache.logging.log4j.Level.OFF);
 
         setInstance(this);
-
-        pluginManager = getServer().getPluginManager();
-        pluginName = getInstance().getName();
-        pluginVersion = getInstance().getDescription().getVersion();
+        setPluginManager(getServer().getPluginManager());
+        setPluginName(getInstance().getName());
+        setPluginVersion(getInstance().getDescription().getVersion());
 
         preEnable();
-        init();
+        initialize();
 
         CSend.debug("Plugin has been enabled.");
     }
@@ -85,7 +54,7 @@ public abstract class BasePlugin extends JavaPlugin {
 
         MenuManager.shutdown();
 
-        CSend.debug("UnRegistering Commands...");
+        CSend.debug("Unregistering Commands...");
         CommandRegistry.unRegisterCommands();
 
         if (isDatabase()) {
@@ -96,18 +65,17 @@ public abstract class BasePlugin extends JavaPlugin {
         CSend.debug("Plugin has been disabled.");
     }
 
-    private void init() {
-
+    /**
+     * Core initialization logic for configs, license, db, commands, listeners, and updates
+     */
+    private void initialize() {
         CSend.debug("Initializing Config Files...");
         Register.config();
 
-        setPrefix(ConfigUtil.getConfig(Config.class).getPrefix());
+        Config mainConfig = ConfigUtil.getConfig(Config.class);
+        setPrefix(mainConfig.getPrefix());
 
-        if (!isForceDebug()) {
-            setDebug(ConfigUtil.getConfig(Config.class).isDebug());
-        } else {
-            setDebug(true);
-        }
+        setDebug(forceDebug || mainConfig.isDebug());
 
         if (isLicense()) {
             CSend.debug("Checking plugin license...");
@@ -122,7 +90,7 @@ public abstract class BasePlugin extends JavaPlugin {
         CSend.debug("Registering Commands...");
         Register.commands();
 
-        CSend.debug("Registering Listeners...");
+        CSend.debug("Registering Event Listeners...");
         Register.eventsListener();
 
         if (isCheckUpdates()) {
@@ -132,16 +100,21 @@ public abstract class BasePlugin extends JavaPlugin {
 
         if (isSmirks()) {
             CSend.info("Smirking...");
-            //TODO: :smirk:
+            // TODO: Smirk intensifies
         }
 
         CSend.debug("Plugin has been initialized.");
     }
 
+    /**
+     * Optional method to run logic *before* enable logic runs (override in subclasses)
+     */
     protected void preEnable() {
     }
 
+    /**
+     * Optional method to run logic *before* plugin is disabled (override in subclasses)
+     */
     protected void preDisable() {
     }
-
 }
