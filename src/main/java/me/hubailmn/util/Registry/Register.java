@@ -27,82 +27,67 @@ public final class Register {
     }
 
     public static void eventsListener() {
-        scanAndRegister(
-                new Reflections(BASE_PACKAGE + ".listener", UTIL_PACKAGE + ".menu.listener")
-                        .getTypesAnnotatedWith(EventListener.class),
-                "Event Listener",
-                clazz -> {
-                    if (!Listener.class.isAssignableFrom(clazz)) {
-                        CSend.error("Class " + clazz.getName() + " is annotated with @EventListener but does not implement Listener.");
-                        return;
-                    }
+        scanAndRegister(new Reflections(BASE_PACKAGE + ".listener", UTIL_PACKAGE + ".menu.listener").getTypesAnnotatedWith(EventListener.class), "Event Listener", clazz -> {
+            if (!Listener.class.isAssignableFrom(clazz)) {
+                CSend.error("Class " + clazz.getName() + " is annotated with @EventListener but does not implement Listener.");
+                return;
+            }
 
-                    Listener listener = (Listener) clazz.getDeclaredConstructor().newInstance();
-                    BasePlugin.getPluginManager().registerEvents(listener, BasePlugin.getInstance());
-                    CSend.debug("Registered listener: " + clazz.getSimpleName());
-                });
+            Listener listener = (Listener) clazz.getDeclaredConstructor().newInstance();
+            BasePlugin.getPluginManager().registerEvents(listener, BasePlugin.getInstance());
+            CSend.debug("Registered listener: " + clazz.getSimpleName());
+        });
     }
 
     public static void commands() {
-        scanAndRegister(
-                new Reflections(BASE_PACKAGE + ".command").getTypesAnnotatedWith(Command.class),
-                "Command",
-                clazz -> {
-                    if (!BaseCommand.class.isAssignableFrom(clazz)) {
-                        CSend.warn(clazz.getName() + " is annotated with @Command but does not extend BaseCommand.");
-                        return;
-                    }
+        scanAndRegister(new Reflections(BASE_PACKAGE + ".command").getTypesAnnotatedWith(Command.class), "Command", clazz -> {
+            if (!BaseCommand.class.isAssignableFrom(clazz)) {
+                CSend.warn(clazz.getName() + " is annotated with @Command but does not extend BaseCommand.");
+                return;
+            }
 
-                    BaseCommand executor = (BaseCommand) clazz.getDeclaredConstructor().newInstance();
-                    String commandName = clazz.getAnnotation(Command.class).name();
-                    CommandRegistry.registerCommand(commandName, executor);
-                    CSend.debug("Registered command: " + commandName);
-                });
+            BaseCommand executor = (BaseCommand) clazz.getDeclaredConstructor().newInstance();
+            String commandName = clazz.getAnnotation(Command.class).name();
+            CommandRegistry.registerCommand(commandName, executor);
+            CSend.debug("Registered command: " + commandName);
+        });
     }
 
     public static void database() {
         DBConnection.initialize();
 
-        scanAndRegister(
-                new Reflections(BASE_PACKAGE + ".database").getSubTypesOf(DBTable.class),
-                "Database Table",
-                tableClass -> {
-                    if (!tableClass.isAnnotationPresent(DataBaseTable.class)) {
-                        CSend.error(tableClass.getName() + " extends DBTable but is missing @DataBaseTable.");
-                        return;
-                    }
+        scanAndRegister(new Reflections(BASE_PACKAGE + ".database").getSubTypesOf(DBTable.class), "Database Table", tableClass -> {
+            if (!tableClass.isAnnotationPresent(DataBaseTable.class)) {
+                CSend.error(tableClass.getName() + " extends DBTable but is missing @DataBaseTable.");
+                return;
+            }
 
-                    tableClass.getDeclaredConstructor().newInstance();
-                    CSend.debug("Registered database table: " + tableClass.getSimpleName());
-                });
+            tableClass.getDeclaredConstructor().newInstance();
+            CSend.debug("Registered database table: " + tableClass.getSimpleName());
+        });
     }
 
     public static void config() {
-        scanAndRegister(
-                new Reflections(UTIL_PACKAGE + ".config.file", BASE_PACKAGE + ".config")
-                        .getTypesAnnotatedWith(LoadConfig.class),
-                "Config",
-                clazz -> {
-                    if (!ConfigBuilder.class.isAssignableFrom(clazz)) {
-                        CSend.warn(clazz.getName() + " is annotated with @LoadConfig but does not extend ConfigBuilder.");
-                        return;
-                    }
+        scanAndRegister(new Reflections(UTIL_PACKAGE + ".config.file", BASE_PACKAGE + ".config").getTypesAnnotatedWith(LoadConfig.class), "Config", clazz -> {
+            if (!ConfigBuilder.class.isAssignableFrom(clazz)) {
+                CSend.warn(clazz.getName() + " is annotated with @LoadConfig but does not extend ConfigBuilder.");
+                return;
+            }
 
-                    @SuppressWarnings("unchecked")
-                    Class<? extends ConfigBuilder> typedClass = (Class<? extends ConfigBuilder>) clazz;
+            @SuppressWarnings("unchecked") Class<? extends ConfigBuilder> typedClass = (Class<? extends ConfigBuilder>) clazz;
 
-                    if (clazz.isAnnotationPresent(IgnoreFile.class)) {
-                        IgnoreFile ignore = clazz.getAnnotation(IgnoreFile.class);
-                        if ((ignore.ifNoDatabase() && !BasePlugin.isDatabase()) || (ignore.ifNoLicense() && !BasePlugin.isLicense())) {
-                            CSend.debug("Skipping config " + clazz.getSimpleName() + " due to @IgnoreFile conditions.");
-                            return;
-                        }
-                    }
+            if (clazz.isAnnotationPresent(IgnoreFile.class)) {
+                IgnoreFile ignore = clazz.getAnnotation(IgnoreFile.class);
+                if ((ignore.ifNoDatabase() && !BasePlugin.isDatabase()) || (ignore.ifNoLicense() && !BasePlugin.isLicense())) {
+                    CSend.debug("Skipping config " + clazz.getSimpleName() + " due to @IgnoreFile conditions.");
+                    return;
+                }
+            }
 
-                    ConfigBuilder config = typedClass.getDeclaredConstructor().newInstance();
-                    ConfigUtil.getCONFIG_INSTANCE().put(typedClass, config);
-                    CSend.debug("Registered config: " + clazz.getSimpleName());
-                });
+            ConfigBuilder config = typedClass.getDeclaredConstructor().newInstance();
+            ConfigUtil.getCONFIG_INSTANCE().put(typedClass, config);
+            CSend.debug("Registered config: " + clazz.getSimpleName());
+        });
     }
 
     private static <T> void scanAndRegister(Set<Class<? extends T>> classes, String label, RegistryAction action) {

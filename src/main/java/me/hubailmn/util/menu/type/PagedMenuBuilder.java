@@ -74,8 +74,7 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
             e.setCancelled(true);
             page--;
             loadPage(e.getInventory());
-        } else if (nextPageButton != null && slot == nextPageButton.getSlot()
-                && (page + 1) * (endSlot - startSlot + 1) < items.size()) {
+        } else if (nextPageButton != null && slot == nextPageButton.getSlot() && (page + 1) * (endSlot - startSlot + 1) < items.size()) {
             e.setCancelled(true);
             page++;
             loadPage(e.getInventory());

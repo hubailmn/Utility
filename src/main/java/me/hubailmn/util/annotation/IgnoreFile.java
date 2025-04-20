@@ -9,5 +9,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface IgnoreFile {
     boolean ifNoDatabase() default false;
+
     boolean ifNoLicense() default false;
 }

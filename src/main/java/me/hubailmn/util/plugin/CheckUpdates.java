@@ -15,12 +15,11 @@ import java.net.URL;
 
 public class CheckUpdates {
 
+    private static final String API_URL_TEMPLATE = "https://api.github.com/repos/hubailmn/%s/releases/latest";
+    private static final String RELEASE_PAGE_TEMPLATE = "https://github.com/hubailmn/%s/releases";
     @Getter
     @Setter
     private static boolean needUpdate = false;
-
-    private static final String API_URL_TEMPLATE = "https://api.github.com/repos/hubailmn/%s/releases/latest";
-    private static final String RELEASE_PAGE_TEMPLATE = "https://github.com/hubailmn/%s/releases";
 
     public static void checkForUpdates() {
         final String pluginName = BasePlugin.getPluginName();
@@ -40,8 +39,7 @@ public class CheckUpdates {
 
                 int responseCode = connection.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {
-                    try (InputStream inputStream = connection.getInputStream();
-                         InputStreamReader reader = new InputStreamReader(inputStream)) {
+                    try (InputStream inputStream = connection.getInputStream(); InputStreamReader reader = new InputStreamReader(inputStream)) {
 
                         JSONObject json = (JSONObject) new JSONParser().parse(reader);
                         String latestVersion = (String) json.get("tag_name");

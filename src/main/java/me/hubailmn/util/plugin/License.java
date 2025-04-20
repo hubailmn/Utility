@@ -52,12 +52,7 @@ public class License {
 
     public static void endLicenseSession() {
         try {
-            String url = String.format("%send-session?key=%s&ip=%s:%d&plugin=%s",
-                    LICENSE_URL,
-                    encode(licenseKey),
-                    encode(ipAddress),
-                    Bukkit.getServer().getPort(),
-                    encode(BasePlugin.getPluginName()));
+            String url = String.format("%send-session?key=%s&ip=%s:%d&plugin=%s", LICENSE_URL, encode(licenseKey), encode(ipAddress), Bukkit.getServer().getPort(), encode(BasePlugin.getPluginName()));
 
             HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
             connection.setRequestMethod("GET");
@@ -70,12 +65,7 @@ public class License {
 
     private static boolean isLicenseInvalid() {
         try {
-            String url = String.format("%svalidate-license?key=%s&ip=%s:%d&plugin=%s",
-                    LICENSE_URL,
-                    encode(licenseKey),
-                    encode(ipAddress),
-                    Bukkit.getServer().getPort(),
-                    encode(BasePlugin.getPluginName()));
+            String url = String.format("%svalidate-license?key=%s&ip=%s:%d&plugin=%s", LICENSE_URL, encode(licenseKey), encode(ipAddress), Bukkit.getServer().getPort(), encode(BasePlugin.getPluginName()));
 
             HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
             connection.setRequestMethod("GET");

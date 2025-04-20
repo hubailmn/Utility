@@ -9,6 +9,11 @@ public class Config extends ConfigBuilder {
 
     private static final String PREFIX = "plugin.";
 
+    public Config() {
+        getConfig().set(PREFIX + "prefix", getPrefix().replace("%plugin_name%", BasePlugin.getPluginName()));
+        getConfig().set(PREFIX + "version", BasePlugin.getPluginVersion());
+    }
+
     public String getPrefix() {
         return getConfig().getString(PREFIX + "prefix");
     }
@@ -19,10 +24,5 @@ public class Config extends ConfigBuilder {
 
     public String getConfigVersion() {
         return getConfig().getString(PREFIX + "version");
-    }
-
-    public Config() {
-        getConfig().set(PREFIX + "prefix", getPrefix().replace("%plugin_name%", BasePlugin.getPluginName()));
-        getConfig().set(PREFIX + "version", BasePlugin.getPluginVersion());
     }
 }

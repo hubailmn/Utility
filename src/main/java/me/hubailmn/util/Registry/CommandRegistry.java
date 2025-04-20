@@ -68,8 +68,7 @@ public class CommandRegistry {
                 CSend.debug("Successfully unregistered command: " + commandName);
 
                 for (String alias : command.getAliases()) {
-                    if (knownCommands.containsKey(alias) &&
-                            knownCommands.get(alias).toString().toLowerCase().contains(pluginPrefix)) {
+                    if (knownCommands.containsKey(alias) && knownCommands.get(alias).toString().toLowerCase().contains(pluginPrefix)) {
                         knownCommands.remove(alias);
                         CSend.debug("Removed alias '" + alias + "' for command '" + commandName + "'");
                     }
