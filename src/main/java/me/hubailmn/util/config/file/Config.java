@@ -12,6 +12,7 @@ public class Config extends ConfigBuilder {
     public Config() {
         getConfig().set(PREFIX + "prefix", getPrefix().replace("%plugin_name%", BasePlugin.getPluginName()));
         getConfig().set(PREFIX + "version", BasePlugin.getPluginVersion());
+        save();
     }
 
     public String getPrefix() {

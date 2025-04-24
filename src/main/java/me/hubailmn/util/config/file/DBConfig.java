@@ -21,6 +21,8 @@ public class DBConfig extends ConfigBuilder {
         } else if (rawPath == null) {
             getConfig().set(key, BasePlugin.getPluginName() + ".db");
         }
+
+        save();
     }
 
     public String getModule() {
