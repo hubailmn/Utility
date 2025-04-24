@@ -13,6 +13,10 @@ public class ConfigUtil {
     @Getter
     private static final Map<Class<?>, ConfigBuilder> CONFIG_INSTANCE = new HashMap<>();
 
+    private ConfigUtil() {
+        throw new UnsupportedOperationException("This is a utility class.");
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> T getConfig(Class<T> clazz) {
         return (T) CONFIG_INSTANCE.get(clazz);

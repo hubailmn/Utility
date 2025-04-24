@@ -6,7 +6,7 @@ import me.hubailmn.util.Registry.CommandRegistry;
 import me.hubailmn.util.Registry.Register;
 import me.hubailmn.util.config.ConfigUtil;
 import me.hubailmn.util.config.file.Config;
-import me.hubailmn.util.database.DBConnection;
+import me.hubailmn.util.database.DataBaseConnection;
 import me.hubailmn.util.interaction.CSend;
 import me.hubailmn.util.menu.MenuManager;
 import me.hubailmn.util.plugin.CheckUpdates;
@@ -79,7 +79,7 @@ public abstract class BasePlugin extends JavaPlugin {
 
         if (isDatabase()) {
             CSend.debug("Closing Database Connection...");
-            DBConnection.close();
+            DataBaseConnection.close();
         }
 
         CSend.debug("Plugin has been disabled.");

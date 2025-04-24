@@ -16,7 +16,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class DBConnection {
+public class DataBaseConnection {
 
     @Getter
     private static final DBConfig config = ConfigUtil.getConfig(DBConfig.class);
@@ -24,14 +24,14 @@ public class DBConnection {
     @Setter
     private static Connection connection;
 
-    private DBConnection() {
+    private DataBaseConnection() {
         throw new IllegalStateException("Utility class");
     }
 
     @SneakyThrows
     public static Connection getConnection() {
         if (connection == null || connection.isClosed()) {
-            synchronized (DBConnection.class) {
+            synchronized (DataBaseConnection.class) {
                 if (connection == null || connection.isClosed()) {
                     initialize();
                 }

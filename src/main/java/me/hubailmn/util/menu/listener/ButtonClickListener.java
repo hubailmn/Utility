@@ -8,9 +8,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 @EventListener
-public class MenuClickListener implements Listener {
+public class ButtonClickListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
@@ -38,5 +40,17 @@ public class MenuClickListener implements Listener {
                 return;
             }
         }
+    }
+
+    @EventHandler
+    public void onClose(InventoryCloseEvent e) {
+        if (e.getPlayer() instanceof Player player) {
+            MenuManager.clearActiveMenu(player);
+        }
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        MenuManager.clearActiveMenu(e.getPlayer());
     }
 }

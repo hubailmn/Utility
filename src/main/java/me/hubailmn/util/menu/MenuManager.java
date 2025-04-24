@@ -20,6 +20,12 @@ public class MenuManager {
                 .orElse(null);
     }
 
+    public static void clearActiveMenu(Player player) {
+        if (player.hasMetadata("activeMenu")) {
+            player.removeMetadata("activeMenu", BasePlugin.getInstance());
+        }
+    }
+
     public static void shutdown() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.closeInventory();

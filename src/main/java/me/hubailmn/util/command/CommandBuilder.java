@@ -16,16 +16,16 @@ import java.util.*;
 
 @Getter
 @Setter
-public abstract class BaseCommand implements TabExecutor {
+public abstract class CommandBuilder implements TabExecutor {
 
     String name;
     String description;
     String usageMessage;
     String permission;
 
-    private Map<String, BaseSubCommand> subCommands = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    private Map<String, SubCommandBuilder> subCommands = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
-    public BaseCommand() {
+    public CommandBuilder() {
         Command annotation = this.getClass().getAnnotation(Command.class);
         this.name = annotation.name();
         this.description = annotation.description();
@@ -45,7 +45,7 @@ public abstract class BaseCommand implements TabExecutor {
 
             if (subAnnotation.command().equals(this.getClass())) {
                 try {
-                    BaseSubCommand baseSubCommand = (BaseSubCommand) clazz.getDeclaredConstructor().newInstance();
+                    SubCommandBuilder baseSubCommand = (SubCommandBuilder) clazz.getDeclaredConstructor().newInstance();
                     this.subCommands.put(baseSubCommand.getName(), baseSubCommand);
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to load subcommand: " + clazz.getName(), e);
@@ -64,7 +64,7 @@ public abstract class BaseCommand implements TabExecutor {
         }
 
         String subCommandName = args[0];
-        BaseSubCommand baseSubCommand = subCommands.get(subCommandName);
+        SubCommandBuilder baseSubCommand = subCommands.get(subCommandName);
 
         if (baseSubCommand == null) {
             return sendHelp(sender);
@@ -92,9 +92,9 @@ public abstract class BaseCommand implements TabExecutor {
 
         if (args.length == 1) {
             List<String> completions = new ArrayList<>();
-            for (Map.Entry<String, BaseSubCommand> entry : subCommands.entrySet()) {
+            for (Map.Entry<String, SubCommandBuilder> entry : subCommands.entrySet()) {
                 String subCommandName = entry.getKey();
-                BaseSubCommand baseSubCommand = entry.getValue();
+                SubCommandBuilder baseSubCommand = entry.getValue();
                 if (baseSubCommand.getPermission().isEmpty() || sender.hasPermission(baseSubCommand.getPermission())) {
                     completions.add(subCommandName);
                 }
@@ -102,7 +102,7 @@ public abstract class BaseCommand implements TabExecutor {
             tabComplBuilder.add(0, completions.toArray(new String[0]));
         } else if (args.length > 1) {
             String subCommandName = args[0].toLowerCase();
-            BaseSubCommand baseSubCommand = subCommands.get(subCommandName);
+            SubCommandBuilder baseSubCommand = subCommands.get(subCommandName);
             if (baseSubCommand != null && (baseSubCommand.getPermission().isEmpty() || sender.hasPermission(baseSubCommand.getPermission()))) {
                 return baseSubCommand.onTabComplete(sender, command, label, args);
             }

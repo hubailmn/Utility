@@ -40,6 +40,7 @@ public abstract class MenuBuilder {
     }
 
     public void display(Player player) {
+        MenuManager.clearActiveMenu(player);
         Inventory inventory = Bukkit.createInventory(player, getSize(), getTitle());
         buttons.clear();
 

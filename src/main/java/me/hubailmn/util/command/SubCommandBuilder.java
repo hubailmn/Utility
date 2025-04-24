@@ -10,13 +10,13 @@ import java.util.List;
 
 @Getter
 @Setter
-public abstract class BaseSubCommand {
+public abstract class SubCommandBuilder {
 
     private String name;
     private String permission;
     private boolean requiresPlayer;
 
-    public BaseSubCommand() {
+    public SubCommandBuilder() {
         SubCommand annotation = this.getClass().getAnnotation(SubCommand.class);
         this.name = annotation.name();
         this.permission = annotation.permission();

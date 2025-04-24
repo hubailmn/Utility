@@ -6,13 +6,13 @@ import me.hubailmn.util.database.annotation.DataBaseTable;
 import java.sql.Connection;
 
 @Getter
-public abstract class DBTable {
+public abstract class TableBuilder {
 
     protected final String name;
     protected final Connection connection;
 
-    public DBTable() {
-        this.connection = DBConnection.getConnection();
+    public TableBuilder() {
+        this.connection = DataBaseConnection.getConnection();
 
         DataBaseTable annotation = this.getClass().getAnnotation(DataBaseTable.class);
         if (annotation == null) {

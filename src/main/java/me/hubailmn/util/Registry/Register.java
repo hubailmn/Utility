@@ -3,13 +3,13 @@ package me.hubailmn.util.Registry;
 import me.hubailmn.util.BasePlugin;
 import me.hubailmn.util.annotation.EventListener;
 import me.hubailmn.util.annotation.IgnoreFile;
-import me.hubailmn.util.command.BaseCommand;
+import me.hubailmn.util.command.CommandBuilder;
 import me.hubailmn.util.command.annotation.Command;
 import me.hubailmn.util.config.ConfigBuilder;
 import me.hubailmn.util.config.ConfigUtil;
 import me.hubailmn.util.config.annotation.LoadConfig;
-import me.hubailmn.util.database.DBConnection;
-import me.hubailmn.util.database.DBTable;
+import me.hubailmn.util.database.DataBaseConnection;
+import me.hubailmn.util.database.TableBuilder;
 import me.hubailmn.util.database.annotation.DataBaseTable;
 import me.hubailmn.util.interaction.CSend;
 import org.bukkit.event.Listener;
@@ -41,12 +41,12 @@ public final class Register {
 
     public static void commands() {
         scanAndRegister(new Reflections(BASE_PACKAGE + ".command").getTypesAnnotatedWith(Command.class), "Command", clazz -> {
-            if (!BaseCommand.class.isAssignableFrom(clazz)) {
+            if (!CommandBuilder.class.isAssignableFrom(clazz)) {
                 CSend.warn(clazz.getName() + " is annotated with @Command but does not extend BaseCommand.");
                 return;
             }
 
-            BaseCommand executor = (BaseCommand) clazz.getDeclaredConstructor().newInstance();
+            CommandBuilder executor = (CommandBuilder) clazz.getDeclaredConstructor().newInstance();
             String commandName = clazz.getAnnotation(Command.class).name();
             CommandRegistry.registerCommand(commandName, executor);
             CSend.debug("Registered command: " + commandName);
@@ -54,9 +54,9 @@ public final class Register {
     }
 
     public static void database() {
-        DBConnection.initialize();
+        DataBaseConnection.initialize();
 
-        scanAndRegister(new Reflections(BASE_PACKAGE + ".database").getSubTypesOf(DBTable.class), "Database Table", tableClass -> {
+        scanAndRegister(new Reflections(BASE_PACKAGE + ".database").getSubTypesOf(TableBuilder.class), "Database Table", tableClass -> {
             if (!tableClass.isAnnotationPresent(DataBaseTable.class)) {
                 CSend.error(tableClass.getName() + " extends DBTable but is missing @DataBaseTable.");
                 return;

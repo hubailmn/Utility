@@ -11,18 +11,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 @IgnoreFile(ifNoDatabase = true)
 public class DBConfig extends ConfigBuilder {
 
-    public String getModule() {
-        return getConfig().getString("database.module");
-    }
-
-    public MySQLConfig getMySQLConfig() {
-        return new MySQLConfig(getConfig());
-    }
-
-    public SQLiteConfig getSQLiteConfig() {
-        return new SQLiteConfig(getConfig());
-    }
-
     public DBConfig() {
         String key = "database.SQLite.path";
         String rawPath = getConfig().getString(key);
@@ -35,6 +23,17 @@ public class DBConfig extends ConfigBuilder {
         }
     }
 
+    public String getModule() {
+        return getConfig().getString("database.module");
+    }
+
+    public MySQLConfig getMySQLConfig() {
+        return new MySQLConfig(getConfig());
+    }
+
+    public SQLiteConfig getSQLiteConfig() {
+        return new SQLiteConfig(getConfig());
+    }
 
     @Getter
     public static class MySQLConfig {
