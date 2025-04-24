@@ -47,25 +47,47 @@ public abstract class MenuBuilder {
 
         setupButtons(player);
 
+        setItems(inventory);
+
         for (Button button : buttons) {
-            inventory.setItem(button.getSlot(), button.getItem());
+            int slot = button.getSlot();
+            if (slot >= 0 && slot < inventory.getSize()) {
+                inventory.setItem(slot, button.getItem());
+            }
         }
 
         MenuManager.setActiveMenu(player, this);
         player.openInventory(inventory);
     }
 
-    public abstract void setupButtons(Player player);
 
+    /**
+     * Fills the entire inventory with the given filler ItemStack,
+     * except for the slots already occupied by buttons.
+     */
     protected void fillInventory(Inventory inventory, ItemStack filler) {
+        if (filler == null) return;
+
         for (int i = 0; i < inventory.getSize(); i++) {
-            inventory.setItem(i, filler);
+            if (inventory.getItem(i) == null) {
+                inventory.setItem(i, filler);
+            }
         }
     }
 
     public void addButtons(Button... buttons) {
-        Collections.addAll(this.buttons, buttons);
+        if (buttons != null) {
+            Collections.addAll(this.buttons, buttons);
+        }
     }
 
+    /**
+     * Called after buttons are placed. Use this to place additional items.
+     */
     public abstract void setItems(Inventory inventory);
+
+    /**
+     * Called before inventory is created. Use this to register buttons via addButtons(...).
+     */
+    public abstract void setupButtons(Player player);
 }
