@@ -4,18 +4,16 @@ import me.hubailmn.util.BasePlugin;
 import me.hubailmn.util.interaction.CSend;
 import org.bukkit.Bukkit;
 import org.bukkit.command.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class CommandRegistry {
 
     private static final Set<String> registeredCommands = new HashSet<>();
-    private static CommandMap commandMap;
-    private static Map<String, Command> knownCommands;
+    private static final CommandMap commandMap;
+    private static final Map<String, Command> knownCommands;
 
     static {
         try {
@@ -23,7 +21,7 @@ public class CommandRegistry {
             knownCommands = getKnownCommands((SimpleCommandMap) commandMap);
         } catch (Exception e) {
             CSend.error("Failed to initialize CommandRegistry: " + e.getMessage());
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -39,7 +37,7 @@ public class CommandRegistry {
             registeredCommands.add(commandName);
         } catch (Exception e) {
             CSend.error("Error registering command '" + commandName + "': " + e.getMessage());
-            e.printStackTrace();
+            CSend.error(e);
         }
     }
 
@@ -78,7 +76,7 @@ public class CommandRegistry {
             }
         } catch (Exception e) {
             CSend.error("Failed to unregister command '" + commandName + "': " + e.getMessage());
-            e.printStackTrace();
+            CSend.error(e);
         }
     }
 
@@ -104,13 +102,13 @@ public class CommandRegistry {
         }
 
         @Override
-        public boolean execute(CommandSender sender, String label, String[] args) {
+        public boolean execute(@NotNull CommandSender sender, @NotNull String label, String[] args) {
             return executor.onCommand(sender, this, label, args);
         }
 
         @Override
-        public List<String> tabComplete(CommandSender sender, String alias, String[] args) {
-            return executor.onTabComplete(sender, this, alias, args);
+        public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, String[] args) {
+            return Objects.requireNonNull(executor.onTabComplete(sender, this, alias, args));
         }
     }
 

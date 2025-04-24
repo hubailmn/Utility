@@ -5,6 +5,7 @@ import lombok.Setter;
 import me.hubailmn.util.menu.MenuManager;
 import me.hubailmn.util.menu.annotation.Menu;
 import me.hubailmn.util.menu.interactive.Button;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -20,7 +21,7 @@ public abstract class MenuBuilder {
 
     protected final List<Button> buttons = new ArrayList<>();
 
-    protected String title;
+    protected Component title;
     protected int size;
     protected boolean buttonClickCancel;
     protected boolean playerInventoryClickCancel;
@@ -32,7 +33,7 @@ public abstract class MenuBuilder {
             throw new IllegalStateException("Missing @Menu annotation on " + getClass().getName());
         }
 
-        this.title = annotation.title();
+        this.title = Component.text(annotation.title());
         this.size = annotation.rows() * 9;
         this.buttonClickCancel = annotation.buttonClickCancel();
         this.playerInventoryClickCancel = annotation.playerInvClickCancel();

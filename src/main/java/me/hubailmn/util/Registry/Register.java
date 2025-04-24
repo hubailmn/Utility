@@ -96,7 +96,7 @@ public final class Register {
                 action.execute(clazz);
             } catch (Exception e) {
                 CSend.error("Failed to register " + label + ": " + clazz.getSimpleName() + " - " + e.getMessage());
-                e.printStackTrace();
+                CSend.error(e);
             }
         }
     }

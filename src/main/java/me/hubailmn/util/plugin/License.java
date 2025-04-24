@@ -60,6 +60,7 @@ public class License {
             connection.getInputStream().close();
         } catch (Exception e) {
             CSend.warn("§7Failed to end license session.");
+            CSend.error(e);
         }
     }
 
@@ -79,6 +80,7 @@ public class License {
             }
         } catch (Exception e) {
             CSend.error("§cError occurred during license validation: " + e.getMessage());
+            CSend.error(e);
             return true;
         }
     }

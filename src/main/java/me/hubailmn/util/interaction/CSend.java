@@ -38,4 +38,17 @@ public final class CSend {
             prefixed("§b[DEBUG] §r" + message);
         }
     }
+
+    public static void error(Throwable throwable) {
+        if (throwable == null) {
+            CSend.error("Unknown error (null throwable).");
+            return;
+        }
+
+        CSend.error("Exception: " + throwable.getMessage());
+        for (StackTraceElement ste : throwable.getStackTrace()) {
+            CSend.debug("  at " + ste.toString());
+        }
+    }
+
 }

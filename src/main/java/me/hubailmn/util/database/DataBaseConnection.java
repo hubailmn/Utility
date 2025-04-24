@@ -4,7 +4,6 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.SneakyThrows;
 import me.hubailmn.util.BasePlugin;
 import me.hubailmn.util.config.ConfigUtil;
 import me.hubailmn.util.config.file.DBConfig;
@@ -16,41 +15,52 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class DataBaseConnection {
+public final class DataBaseConnection {
 
     @Getter
-    private static final DBConfig config = ConfigUtil.getConfig(DBConfig.class);
+    private static DBConfig config = ConfigUtil.getConfig(DBConfig.class);
 
     @Setter
     private static Connection connection;
 
+    private static HikariDataSource hikariDataSource;
+
     private DataBaseConnection() {
-        throw new IllegalStateException("Utility class");
+        throw new UnsupportedOperationException("Utility class");
     }
 
-    @SneakyThrows
     public static Connection getConnection() {
-        if (connection == null || connection.isClosed()) {
-            synchronized (DataBaseConnection.class) {
-                if (connection == null || connection.isClosed()) {
-                    initialize();
+        try {
+            if (connection == null || connection.isClosed()) {
+                synchronized (DataBaseConnection.class) {
+                    if (connection == null || connection.isClosed()) {
+                        initialize();
+                    }
                 }
             }
+        } catch (SQLException e) {
+            CSend.error("§cFailed to check or establish a database connection.");
+            CSend.error(e);
         }
         return connection;
     }
 
-
     public static void initialize() {
         String module = config.getModule();
         if (module == null) {
+            CSend.error("§cConfig value 'database.module' is missing.");
             throw new RuntimeException("Config value 'database.module' is missing.");
         }
 
-        if (module.equalsIgnoreCase("mysql")) {
-            connectToMySQL();
-        } else {
-            connectToSQLite();
+        try {
+            if (module.equalsIgnoreCase("mysql")) {
+                connectToMySQL();
+            } else {
+                connectToSQLite();
+            }
+        } catch (Exception e) {
+            CSend.error("§cDatabase initialization failed.");
+            CSend.error(e);
         }
     }
 
@@ -62,12 +72,16 @@ public class DataBaseConnection {
             }
         } catch (SQLException e) {
             CSend.error("§cError while closing the database connection.");
-            throw new RuntimeException(e);
+            CSend.error(e);
+        }
+
+        if (hikariDataSource != null && !hikariDataSource.isClosed()) {
+            hikariDataSource.close();
+            CSend.info("§fHikariCP connection pool has been closed.");
         }
     }
 
-    @SneakyThrows
-    private static void connectToMySQL() {
+    private static void connectToMySQL() throws SQLException {
         DBConfig.MySQLConfig mysql = config.getMySQLConfig();
         CSend.info("§fConnecting to §9MySQL with HikariCP...");
 
@@ -76,19 +90,24 @@ public class DataBaseConnection {
         hikariConfig.setUsername(mysql.getUsername());
         hikariConfig.setPassword(mysql.getPassword());
         hikariConfig.setMaximumPoolSize(10);
-        hikariConfig.setPoolName(BasePlugin.getPluginName() + "-Pool");
+        hikariConfig.setPoolName(BasePlugin.getPluginName() + "-Hikari");
 
-        @SuppressWarnings("resource")
-        HikariDataSource dataSource = new HikariDataSource(hikariConfig);
-        setConnection(dataSource.getConnection());
+        hikariDataSource = new HikariDataSource(hikariConfig);
+        connection = hikariDataSource.getConnection();
+
+        CSend.info("§aMySQL connection established.");
     }
 
-
-    @SneakyThrows
     private static void connectToSQLite() {
-        CSend.info("§fConnecting to §9SQLite...");
-        String path = getSQLitePath();
-        setConnection(DriverManager.getConnection("jdbc:sqlite:" + path));
+        try {
+            CSend.info("§fConnecting to §9SQLite...");
+            String path = getSQLitePath();
+            connection = DriverManager.getConnection("jdbc:sqlite:" + path);
+            CSend.info("§aSQLite connection established.");
+        } catch (SQLException e) {
+            CSend.error("§cFailed to connect to SQLite.");
+            CSend.error(e);
+        }
     }
 
     private static String getSQLitePath() {
@@ -98,20 +117,30 @@ public class DataBaseConnection {
         File dataFolder = new File(BasePlugin.getInstance().getDataFolder(), "database");
         File dbFile = new File(dataFolder, fileName);
 
-        if (!dbFile.exists()) {
-            if (!dataFolder.exists() && !dataFolder.mkdirs()) {
-                throw new RuntimeException("Could not create database folder.");
-            }
+        if (!dataFolder.exists() && !dataFolder.mkdirs()) {
+            CSend.error("§cCould not create database folder.");
+        }
 
+        if (!dbFile.exists()) {
             try {
                 if (!dbFile.createNewFile()) {
-                    throw new IOException("Could not create SQLite database file.");
+                    CSend.error("§cCould not create SQLite database file.");
                 }
             } catch (IOException e) {
-                throw new RuntimeException("Failed to create the database file", e);
+                CSend.error("§cError while creating SQLite database file.");
+                CSend.error(e);
             }
         }
 
         return dbFile.getPath();
     }
+
+    public static void reload() {
+        CSend.info("§6Reloading database connection...");
+        close();
+        ConfigUtil.reload(DBConfig.class);
+        config = ConfigUtil.getConfig(DBConfig.class);
+        initialize();
+    }
+
 }

@@ -8,8 +8,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+
+import java.util.List;
 
 @EventListener
 public class ButtonClickListener implements Listener {
@@ -19,7 +20,14 @@ public class ButtonClickListener implements Listener {
         if (!(e.getWhoClicked() instanceof Player player)) return;
 
         MenuBuilder menu = MenuManager.getActiveMenu(player);
-        if (menu == null) return;
+        if (menu == null) {
+            return;
+        }
+
+        if (!menu.getTitle().equals(e.getView().title())) {
+            MenuManager.clearActiveMenu(player);
+            return;
+        }
 
         if (!e.isCancelled()) {
             e.setCancelled(menu.isInventoryClickCancel());
@@ -32,8 +40,14 @@ public class ButtonClickListener implements Listener {
 
         e.setCancelled(menu.isInventoryClickCancel());
 
-        int slot = e.getSlot();
-        for (Button button : menu.getButtons()) {
+        int slot = e.getRawSlot();
+        if (slot < 0 || slot >= e.getInventory().getSize()) return;
+
+        List<Button> buttons = menu.getButtons();
+        if (buttons == null) return;
+
+        for (Button button : buttons) {
+
             if (button.getSlot() == slot) {
                 e.setCancelled(menu.isButtonClickCancel());
                 button.onClick(player);
@@ -42,15 +56,9 @@ public class ButtonClickListener implements Listener {
         }
     }
 
-//    @EventHandler
-//    public void onClose(InventoryCloseEvent e) {
-//        if (e.getPlayer() instanceof Player player) {
-//            MenuManager.clearActiveMenu(player);
-//        }
-//    }
-
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
+        e.getPlayer().closeInventory();
         MenuManager.clearActiveMenu(e.getPlayer());
     }
 }

@@ -64,7 +64,7 @@ public class CheckUpdates {
 
             } catch (Exception e) {
                 CSend.error("Error occurred while checking for plugin updates:");
-                e.printStackTrace();
+                CSend.error(e);
             } finally {
                 if (connection != null) {
                     connection.disconnect();
