@@ -42,12 +42,12 @@ public class ButtonClickListener implements Listener {
         }
     }
 
-    @EventHandler
-    public void onClose(InventoryCloseEvent e) {
-        if (e.getPlayer() instanceof Player player) {
-            MenuManager.clearActiveMenu(player);
-        }
-    }
+//    @EventHandler
+//    public void onClose(InventoryCloseEvent e) {
+//        if (e.getPlayer() instanceof Player player) {
+//            MenuManager.clearActiveMenu(player);
+//        }
+//    }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
