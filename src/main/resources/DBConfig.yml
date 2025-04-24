@@ -7,7 +7,7 @@ database:
   SQLite:
     # Path to the SQLite database file
     # Note: Place the SQLite database file in the plugin's data folder
-    path: 'database.db'
+    path: '%plugin_name%.db'
 
   # Configuration for MySQL
   MySQL:

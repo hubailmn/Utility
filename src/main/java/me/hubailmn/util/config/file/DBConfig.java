@@ -1,6 +1,7 @@
 package me.hubailmn.util.config.file;
 
 import lombok.Getter;
+import me.hubailmn.util.BasePlugin;
 import me.hubailmn.util.annotation.IgnoreFile;
 import me.hubailmn.util.config.ConfigBuilder;
 import me.hubailmn.util.config.annotation.LoadConfig;
@@ -21,6 +22,19 @@ public class DBConfig extends ConfigBuilder {
     public SQLiteConfig getSQLiteConfig() {
         return new SQLiteConfig(getConfig());
     }
+
+    public DBConfig() {
+        String key = "database.SQLite.path";
+        String rawPath = getConfig().getString(key);
+
+        if (rawPath != null && rawPath.contains("%plugin_name%")) {
+            String resolvedPath = rawPath.replace("%plugin_name%", BasePlugin.getPluginName());
+            getConfig().set(key, resolvedPath);
+        } else if (rawPath == null) {
+            getConfig().set(key, BasePlugin.getPluginName() + ".db");
+        }
+    }
+
 
     @Getter
     public static class MySQLConfig {
