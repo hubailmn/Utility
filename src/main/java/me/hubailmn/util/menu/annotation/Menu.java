@@ -11,7 +11,7 @@ public @interface Menu {
 
     String title();
 
-    int size();
+    int rows();
 
     boolean buttonClickCancel() default true;
 

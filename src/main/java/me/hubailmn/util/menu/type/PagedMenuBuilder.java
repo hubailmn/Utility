@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import me.hubailmn.util.menu.MenuManager;
 import me.hubailmn.util.menu.interactive.Button;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -25,20 +26,16 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
     protected int page = 0;
     protected boolean itemClickedCancel = true;
 
-    public PagedMenuBuilder(Player player) {
-        super(player);
-    }
-
     public void addItems(ItemStack... items) {
         Collections.addAll(this.items, items);
     }
 
     @Override
-    public void display() {
+    public void display(Player player) {
         player.closeInventory();
-        Inventory inventory = createInventory();
+        Inventory inventory = Bukkit.createInventory(player, getSize(), getTitle());
         loadPage(inventory);
-        MenuManager.addActiveMenu(player, this);
+        MenuManager.setActiveMenu(player, this);
         player.openInventory(inventory);
     }
 
@@ -82,6 +79,5 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
     }
 
     protected void onPageChange(int newPage) {
-        // Optional override
     }
 }

@@ -2,7 +2,6 @@ package me.hubailmn.util.menu.type;
 
 import lombok.Getter;
 import lombok.Setter;
-import me.hubailmn.util.BasePlugin;
 import me.hubailmn.util.menu.MenuManager;
 import me.hubailmn.util.menu.annotation.Menu;
 import me.hubailmn.util.menu.interactive.Button;
@@ -19,8 +18,6 @@ import java.util.List;
 @Setter
 public abstract class MenuBuilder {
 
-    protected final Player player;
-    protected final BasePlugin plugin;
     protected final List<Button> buttons = new ArrayList<>();
 
     protected String title;
@@ -29,45 +26,40 @@ public abstract class MenuBuilder {
     protected boolean playerInventoryClickCancel;
     protected boolean inventoryClickCancel;
 
-    public MenuBuilder(Player player) {
-        this.plugin = BasePlugin.getInstance();
-        this.player = player;
-
+    public MenuBuilder() {
         Menu annotation = this.getClass().getAnnotation(Menu.class);
         if (annotation == null) {
             throw new IllegalStateException("Missing @Menu annotation on " + getClass().getName());
         }
 
         this.title = annotation.title();
-        this.size = annotation.size();
+        this.size = annotation.rows() * 9;
         this.buttonClickCancel = annotation.buttonClickCancel();
         this.playerInventoryClickCancel = annotation.playerInvClickCancel();
         this.inventoryClickCancel = annotation.inventoryClickCancel();
     }
 
-    protected Inventory createInventory() {
-        return Bukkit.createInventory(player, size, title);
-    }
+    public void display(Player player) {
+        Inventory inventory = Bukkit.createInventory(player, getSize(), getTitle());
+        buttons.clear();
 
-    public void display() {
-        player.closeInventory();
-        Inventory inventory = createInventory();
-        setItems(inventory);
+        setupButtons(player);
 
         for (Button button : buttons) {
             inventory.setItem(button.getSlot(), button.getItem());
         }
 
-        MenuManager.addActiveMenu(player, this);
+        MenuManager.setActiveMenu(player, this);
         player.openInventory(inventory);
     }
+
+    public abstract void setupButtons(Player player);
 
     protected void fillInventory(Inventory inventory, ItemStack filler) {
         for (int i = 0; i < inventory.getSize(); i++) {
             inventory.setItem(i, filler);
         }
     }
-
 
     public void addButtons(Button... buttons) {
         Collections.addAll(this.buttons, buttons);
