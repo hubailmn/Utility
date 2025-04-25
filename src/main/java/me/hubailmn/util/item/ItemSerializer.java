@@ -9,9 +9,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 
-public class Base64Util {
+public class ItemSerializer {
 
-    private Base64Util() {
+    private ItemSerializer() {
         throw new UnsupportedOperationException("This is a utility class.");
     }
 

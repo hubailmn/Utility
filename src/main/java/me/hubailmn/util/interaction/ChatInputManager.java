@@ -2,6 +2,8 @@ package me.hubailmn.util.interaction;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import me.hubailmn.util.BasePlugin;
+import me.hubailmn.util.annotation.EventListener;
+import me.hubailmn.util.interaction.player.PlayerMessageUtil;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -12,39 +14,66 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
+@EventListener
 public class ChatInputManager implements Listener {
 
-    private static final Map<UUID, Consumer<String>> inputConsumers = new HashMap<>();
+    private static final Map<UUID, InputSession> sessions = new HashMap<>();
+    private static final long DEFAULT_TIMEOUT_TICKS = 20 * 30;
 
     public static void ask(Player player, String prompt, Consumer<String> callback) {
-        player.sendMessage(BasePlugin.getPrefix() + " " + prompt);
-        inputConsumers.put(player.getUniqueId(), callback);
+        ask(player, prompt, callback, s -> true, DEFAULT_TIMEOUT_TICKS);
     }
 
-    public static void handleInput(Player player, String message) {
-        Consumer<String> callback = inputConsumers.remove(player.getUniqueId());
-        if (callback != null) {
-            callback.accept(message);
+    public static void ask(Player player, String prompt, Consumer<String> callback, Predicate<String> validator, long timeoutTicks) {
+        UUID uuid = player.getUniqueId();
+
+        if (isAwaitingInput(player)) {
+            PlayerMessageUtil.send(player, PlayerMessageUtil.Type.CHAT, "§cYou're already being asked for input.");
+            return;
         }
+
+        PlayerMessageUtil.send(player, PlayerMessageUtil.Type.CHAT, prompt);
+
+        int taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(BasePlugin.getInstance(), () -> {
+            sessions.remove(uuid);
+            PlayerMessageUtil.send(player, PlayerMessageUtil.Type.CHAT, "§eInput timed out.");
+        }, timeoutTicks);
+
+        sessions.put(uuid, new InputSession(callback, validator, taskId));
     }
 
     public static boolean isAwaitingInput(Player player) {
-        return inputConsumers.containsKey(player.getUniqueId());
+        return sessions.containsKey(player.getUniqueId());
+    }
+
+    private static void handleInput(Player player, String message) {
+        UUID uuid = player.getUniqueId();
+        InputSession session = sessions.remove(uuid);
+        if (session == null) return;
+
+        Bukkit.getScheduler().cancelTask(session.taskId);
+
+        if (!session.validator.test(message)) {
+            PlayerMessageUtil.send(player, PlayerMessageUtil.Type.CHAT, "§cInvalid input. Try again.");
+            return;
+        }
+
+        session.callback.accept(message);
     }
 
     @EventHandler
     public void onPlayerChat(AsyncChatEvent event) {
         Player player = event.getPlayer();
+        if (!isAwaitingInput(player)) return;
 
-        if (ChatInputManager.isAwaitingInput(player)) {
-            event.setCancelled(true);
-            String input = PlainTextComponentSerializer.plainText().serialize(event.message());
+        event.setCancelled(true);
+        String message = PlainTextComponentSerializer.plainText().serialize(event.message());
 
-            Bukkit.getScheduler().runTask(BasePlugin.getInstance(), () ->
-                    ChatInputManager.handleInput(player, input)
-            );
-        }
+        Bukkit.getScheduler().runTask(BasePlugin.getInstance(), () -> handleInput(player, message));
     }
 
+    private record InputSession(Consumer<String> callback, Predicate<String> validator, int taskId) {
+    }
 }

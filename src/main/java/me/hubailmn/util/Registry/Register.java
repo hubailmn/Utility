@@ -27,7 +27,11 @@ public final class Register {
     }
 
     public static void eventsListener() {
-        scanAndRegister(new Reflections(BASE_PACKAGE + ".listener", UTIL_PACKAGE + ".menu.listener").getTypesAnnotatedWith(EventListener.class), "Event Listener", clazz -> {
+        scanAndRegister(new Reflections(
+                BASE_PACKAGE + ".listener",
+                UTIL_PACKAGE + ".menu.listener",
+                UTIL_PACKAGE + ".interaction"
+        ).getTypesAnnotatedWith(EventListener.class), "Event Listener", clazz -> {
             if (!Listener.class.isAssignableFrom(clazz)) {
                 CSend.error("Class " + clazz.getName() + " is annotated with @EventListener but does not implement Listener.");
                 return;
@@ -40,7 +44,9 @@ public final class Register {
     }
 
     public static void commands() {
-        scanAndRegister(new Reflections(BASE_PACKAGE + ".command").getTypesAnnotatedWith(Command.class), "Command", clazz -> {
+        scanAndRegister(new Reflections(
+                BASE_PACKAGE + ".command"
+        ).getTypesAnnotatedWith(Command.class), "Command", clazz -> {
             if (!CommandBuilder.class.isAssignableFrom(clazz)) {
                 CSend.warn(clazz.getName() + " is annotated with @Command but does not extend BaseCommand.");
                 return;
@@ -56,7 +62,9 @@ public final class Register {
     public static void database() {
         DataBaseConnection.initialize();
 
-        scanAndRegister(new Reflections(BASE_PACKAGE + ".database").getSubTypesOf(TableBuilder.class), "Database Table", tableClass -> {
+        scanAndRegister(new Reflections(
+                BASE_PACKAGE + ".database"
+        ).getSubTypesOf(TableBuilder.class), "Database Table", tableClass -> {
             if (!tableClass.isAnnotationPresent(DataBaseTable.class)) {
                 CSend.error(tableClass.getName() + " extends DBTable but is missing @DataBaseTable.");
                 return;
@@ -68,7 +76,10 @@ public final class Register {
     }
 
     public static void config() {
-        scanAndRegister(new Reflections(UTIL_PACKAGE + ".config.file", BASE_PACKAGE + ".config").getTypesAnnotatedWith(LoadConfig.class), "Config", clazz -> {
+        scanAndRegister(new Reflections(
+                UTIL_PACKAGE + ".config.file",
+                BASE_PACKAGE + ".config"
+        ).getTypesAnnotatedWith(LoadConfig.class), "Config", clazz -> {
             if (!ConfigBuilder.class.isAssignableFrom(clazz)) {
                 CSend.warn(clazz.getName() + " is annotated with @LoadConfig but does not extend ConfigBuilder.");
                 return;
