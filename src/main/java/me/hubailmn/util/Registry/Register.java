@@ -1,8 +1,8 @@
 package me.hubailmn.util.Registry;
 
 import me.hubailmn.util.BasePlugin;
-import me.hubailmn.util.annotation.EventListener;
 import me.hubailmn.util.annotation.IgnoreFile;
+import me.hubailmn.util.annotation.RegisterListener;
 import me.hubailmn.util.command.CommandBuilder;
 import me.hubailmn.util.command.annotation.Command;
 import me.hubailmn.util.config.ConfigBuilder;
@@ -31,7 +31,7 @@ public final class Register {
                 BASE_PACKAGE + ".listener",
                 UTIL_PACKAGE + ".menu.listener",
                 UTIL_PACKAGE + ".interaction"
-        ).getTypesAnnotatedWith(EventListener.class), "Event Listener", clazz -> {
+        ).getTypesAnnotatedWith(RegisterListener.class), "Event Listener", clazz -> {
             if (!Listener.class.isAssignableFrom(clazz)) {
                 CSend.error("Class " + clazz.getName() + " is annotated with @EventListener but does not implement Listener.");
                 return;

@@ -2,7 +2,7 @@ package me.hubailmn.util.interaction;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import me.hubailmn.util.BasePlugin;
-import me.hubailmn.util.annotation.EventListener;
+import me.hubailmn.util.annotation.RegisterListener;
 import me.hubailmn.util.interaction.player.PlayerMessageUtil;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
@@ -16,8 +16,8 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-@EventListener
-public class ChatInputManager implements Listener {
+@RegisterListener
+public class ChatInput implements Listener {
 
     private static final Map<UUID, InputSession> sessions = new HashMap<>();
     private static final long DEFAULT_TIMEOUT_TICKS = 20 * 30;

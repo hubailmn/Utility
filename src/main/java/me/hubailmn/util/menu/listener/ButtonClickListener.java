@@ -1,6 +1,6 @@
 package me.hubailmn.util.menu.listener;
 
-import me.hubailmn.util.annotation.EventListener;
+import me.hubailmn.util.annotation.RegisterListener;
 import me.hubailmn.util.menu.MenuManager;
 import me.hubailmn.util.menu.interactive.Button;
 import me.hubailmn.util.menu.type.MenuBuilder;
@@ -12,7 +12,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.List;
 
-@EventListener
+@RegisterListener
 public class ButtonClickListener implements Listener {
 
     @EventHandler
