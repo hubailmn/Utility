@@ -1,6 +1,8 @@
 package me.hubailmn.util.item;
 
 import me.hubailmn.util.other.StringUtil;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -51,13 +53,19 @@ public class ItemsUtil {
     }
 
     public static String getItemName(ItemStack item) {
-        if (item == null) return "Unknown Item";
-
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null && meta.hasDisplayName()) {
-            return meta.getDisplayName();
+        if (item == null || item.getType().isAir()) {
+            return "Unknown Item";
         }
 
-        return StringUtil.capitalizeWords(item.getType().name().toLowerCase().replace("_", " "));
+        ItemMeta meta = item.hasItemMeta() ? item.getItemMeta() : null;
+
+        if (meta != null && meta.hasDisplayName()) {
+            Component displayName = meta.displayName();
+            if (displayName != null) {
+                return PlainTextComponentSerializer.plainText().serialize(displayName);
+            }
+        }
+
+        return StringUtil.capitalizeWords(item.getType().name().toLowerCase().replace('_', ' '));
     }
 }

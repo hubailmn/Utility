@@ -1,5 +1,6 @@
 package me.hubailmn.util.item;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -19,6 +20,10 @@ public class ItemBuilder {
         this(new ItemStack(Material.STONE));
     }
 
+    public ItemBuilder(Material material) {
+        this(new ItemStack(material));
+    }
+
     public ItemBuilder(ItemStack itemStack) {
         this.stack = itemStack;
         this.meta = this.stack.getItemMeta();
@@ -29,23 +34,33 @@ public class ItemBuilder {
         return this;
     }
 
-    public ItemBuilder name(String name) {
-        this.meta.setDisplayName("§f" + name);
+    public ItemBuilder name(Component name) {
+        this.meta.displayName(name);
         return this;
     }
 
-    public ItemBuilder lore(String loreLine) {
-        List<String> lore = this.meta.getLore();
+    public ItemBuilder name(String name) {
+        return name(Component.text(name));
+    }
+
+    public ItemBuilder lore(Component line) {
+        List<Component> lore = this.meta.lore();
         if (lore == null) {
             lore = new ArrayList<>();
         }
-        lore.add("§f" + loreLine);
-        this.meta.setLore(lore);
+        lore.add(line);
+        this.meta.lore(lore);
         return this;
     }
 
-    public ItemBuilder lore(Iterable<String> loreList) {
-        loreList.forEach(this::lore);
+    public ItemBuilder lore(String line) {
+        return lore(Component.text(line));
+    }
+
+    public ItemBuilder lore(List<String> lines) {
+        for (String line : lines) {
+            lore(line);
+        }
         return this;
     }
 
@@ -59,23 +74,23 @@ public class ItemBuilder {
         return this;
     }
 
-    public ItemBuilder flag(ItemFlag... itemFlags) {
-        this.meta.addItemFlags(itemFlags);
+    public ItemBuilder flag(ItemFlag... flags) {
+        this.meta.addItemFlags(flags);
         return this;
     }
 
-    public ItemBuilder attribute(Attribute attribute, AttributeModifier attributeModifier) {
-        this.meta.addAttributeModifier(attribute, attributeModifier);
+    public ItemBuilder attribute(Attribute attribute, AttributeModifier modifier) {
+        this.meta.addAttributeModifier(attribute, modifier);
         return this;
     }
 
-    public ItemBuilder unbreakable(boolean isUnbreakable) {
-        this.meta.setUnbreakable(isUnbreakable);
+    public ItemBuilder unbreakable(boolean unbreakable) {
+        this.meta.setUnbreakable(unbreakable);
         return this;
     }
 
-    public ItemBuilder customModelData(int customModelData) {
-        this.meta.setCustomModelData(customModelData);
+    public ItemBuilder customModelData(int data) {
+        this.meta.setCustomModelData(data);
         return this;
     }
 
