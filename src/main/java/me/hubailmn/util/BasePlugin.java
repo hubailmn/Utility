@@ -15,6 +15,10 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public abstract class BasePlugin extends JavaPlugin {
 
 
@@ -57,6 +61,8 @@ public abstract class BasePlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         Configurator.setLevel("me.hubailmn.shaded.reflections", org.apache.logging.log4j.Level.OFF);
+
+        rotateLogs();
 
         setInstance(this);
         setPluginManager(getServer().getPluginManager());
@@ -125,6 +131,24 @@ public abstract class BasePlugin extends JavaPlugin {
 
         CSend.debug("Plugin has been initialized.");
     }
+
+    private void rotateLogs() {
+        File dataFolder = getDataFolder();
+        File debugLog = new File(dataFolder, "debug.log");
+        File errorLog = new File(dataFolder, "error.log");
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        String timestamp = sdf.format(new Date());
+
+        if (debugLog.exists()) {
+            debugLog.renameTo(new File(dataFolder, "debug_" + timestamp + ".log"));
+        }
+
+        if (errorLog.exists()) {
+            errorLog.renameTo(new File(dataFolder, "error_" + timestamp + ".log"));
+        }
+    }
+
 
     /**
      * Optional method to run logic *before* enable logic runs (override in subclasses)
