@@ -126,7 +126,7 @@ public abstract class BasePlugin extends JavaPlugin {
 
         if (isSmirks()) {
             CSend.info("Smirking...");
-            // TODO: Smirk intensifies
+            // TODO: Smirkies
         }
 
         CSend.debug("Plugin has been initialized.");
