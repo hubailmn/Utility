@@ -6,7 +6,7 @@
 
     <groupId>me.hubailmn</groupId>
     <artifactId>Utility</artifactId>
-    <version>v0.1.6</version>
+    <version>v0.1.7-Beta</version>
     <packaging>jar</packaging>
 
     <name>Utility</name>
