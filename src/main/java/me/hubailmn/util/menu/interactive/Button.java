@@ -1,19 +1,25 @@
 package me.hubailmn.util.menu.interactive;
 
-import lombok.Getter;
+import lombok.Data;
 import me.hubailmn.util.interaction.SoundPreset;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-@Getter
+@Data
 public abstract class Button {
 
     private final int slot;
     private final ItemStack item;
+    boolean clickCancel;
 
     public Button(int slot, ItemStack item) {
+        this(slot, item, true);
+    }
+
+    public Button(int slot, ItemStack item, boolean clickCancel) {
         this.slot = slot;
         this.item = item;
+        this.clickCancel = clickCancel;
     }
 
     public void onClick(Player player) {

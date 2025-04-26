@@ -20,25 +20,21 @@ public class ButtonClickListener implements Listener {
         if (!(e.getWhoClicked() instanceof Player player)) return;
 
         MenuBuilder menu = MenuManager.getActiveMenu(player);
-        if (menu == null) {
-            return;
-        }
+        if (menu == null) return;
 
         if (!menu.getTitle().equals(e.getView().title())) {
             MenuManager.clearActiveMenu(player);
             return;
         }
 
-        if (!e.isCancelled()) {
-            e.setCancelled(menu.isInventoryClickCancel());
+        if (e.getClickedInventory() == player.getOpenInventory().getTopInventory()) {
+            e.setCancelled(menu.isMenuClickCancelled());
         }
 
         if (e.getClickedInventory() == player.getInventory()) {
-            e.setCancelled(menu.isPlayerInventoryClickCancel());
+            e.setCancelled(menu.isInventoryClickCancelled());
             return;
         }
-
-        e.setCancelled(menu.isInventoryClickCancel());
 
         int slot = e.getRawSlot();
         if (slot < 0 || slot >= e.getInventory().getSize()) return;
@@ -47,9 +43,8 @@ public class ButtonClickListener implements Listener {
         if (buttons == null) return;
 
         for (Button button : buttons) {
-
             if (button.getSlot() == slot) {
-                e.setCancelled(menu.isButtonClickCancel());
+                e.setCancelled(button.isClickCancel());
                 button.onClick(player);
                 return;
             }

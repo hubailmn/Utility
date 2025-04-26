@@ -22,9 +22,8 @@ public abstract class MenuBuilder {
 
     protected Component title;
     protected int size;
-    protected boolean buttonClickCancel;
-    protected boolean playerInventoryClickCancel;
-    protected boolean inventoryClickCancel;
+    protected boolean inventoryClickCancelled;
+    protected boolean menuClickCancelled;
 
     public MenuBuilder() {
         Menu annotation = this.getClass().getAnnotation(Menu.class);
@@ -34,9 +33,8 @@ public abstract class MenuBuilder {
 
         this.title = Component.text(annotation.title());
         this.size = annotation.rows() * 9;
-        this.buttonClickCancel = annotation.buttonClickCancel();
-        this.playerInventoryClickCancel = annotation.playerInvClickCancel();
-        this.inventoryClickCancel = annotation.inventoryClickCancel();
+        this.inventoryClickCancelled = annotation.inventoryClickCancelled();
+        this.menuClickCancelled = annotation.menuClickCancelled();
     }
 
     public void display(Player player) {

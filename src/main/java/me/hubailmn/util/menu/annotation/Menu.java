@@ -13,10 +13,8 @@ public @interface Menu {
 
     int rows();
 
-    boolean buttonClickCancel() default true;
+    boolean inventoryClickCancelled() default true;
 
-    boolean playerInvClickCancel() default true;
-
-    boolean inventoryClickCancel() default true;
+    boolean menuClickCancelled() default true;
 
 }
