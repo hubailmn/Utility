@@ -27,11 +27,35 @@ jobs:
         run: mvn clean install
 
       - name: Create GitHub Release
+        id: create_release
         uses: softprops/action-gh-release@v1
         with:
-          files: target/*.jar
-          generate_release_notes: true
+          body: |
+            ## Installation via JitPack
+
+            Add JitPack to your repositories:
+            ```xml
+            <repositories>
+              <repository>
+                <id>jitpack.io</id>
+                <url>https://jitpack.io</url>
+              </repository>
+            </repositories>
+            ```
+
+            Add the dependency:
+            ```xml
+            <dependency>
+              <groupId>com.github.hubailmn</groupId>
+              <artifactId>Utility</artifactId>
+              <version>${{ github.ref_name }}</version>
+            </dependency>
+            ```
+
+            ---
+            > **Version**: `${{ github.ref_name }}`
           draft: false
+          generate_release_notes: true
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
