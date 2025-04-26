@@ -58,6 +58,13 @@ public abstract class BasePlugin extends JavaPlugin {
     @Setter
     private static boolean smirks = false;
 
+    /**
+     * Called when the plugin is enabled. Handles core initialization including:
+     * - Log configuration and rotation
+     * - Setting up plugin instance and manager
+     * - Running pre-enable hooks
+     * - Initializing core systems
+     */
     @Override
     public void onEnable() {
         Configurator.setLevel("me.hubailmn.shaded.reflections", org.apache.logging.log4j.Level.OFF);
@@ -75,6 +82,13 @@ public abstract class BasePlugin extends JavaPlugin {
         CSend.debug("Plugin has been enabled.");
     }
 
+    /**
+     * Called when the plugin is disabled. Handles cleanup including:
+     * - Running pre-disable hooks
+     * - Shutting down menu system
+     * - Unregistering commands
+     * - Closing database connections
+     */
     @Override
     public void onDisable() {
         preDisable();
@@ -92,7 +106,13 @@ public abstract class BasePlugin extends JavaPlugin {
     }
 
     /**
-     * Core initialization logic for configs, license, db, commands, listeners, and updates
+     * Core initialization method that handles:
+     * - Loading and initializing config files
+     * - Setting up prefix and debug mode
+     * - Checking plugin license if enabled
+     * - Establishing database connection if enabled
+     * - Registering commands and event listeners
+     * - Checking for updates if enabled
      */
     private void initialize() {
         CSend.debug("Initializing Config Files...");
@@ -132,6 +152,12 @@ public abstract class BasePlugin extends JavaPlugin {
         CSend.debug("Plugin has been initialized.");
     }
 
+    /**
+     * Handles log file rotation by:
+     * - Checking for existing debug and error logs
+     * - Renaming existing logs with timestamp suffix
+     * - Preparing clean log files for new session
+     */
     private void rotateLogs() {
         File dataFolder = getDataFolder();
         File debugLog = new File(dataFolder, "debug.log");

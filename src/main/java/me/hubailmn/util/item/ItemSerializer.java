@@ -22,8 +22,16 @@ public class ItemSerializer {
         throw new UnsupportedOperationException("This is a utility class.");
     }
 
-    public static String serializeItemStackArrayToBase64(ItemStack[] items) {
-        if (items == null) throw new IllegalArgumentException("ItemStack array cannot be null.");
+    /**
+     * Serializes an array of ItemStacks to a Base64 string.
+     *
+     * @param items The ItemStack array to serialize
+     * @return A Base64 encoded string representation of the ItemStack array
+     * @throws IllegalArgumentException if the ItemStack array is null
+     * @throws IllegalStateException    if serialization fails
+     */
+    public static String toBase64Array(ItemStack[] items) {
+        if (items == null) return null;
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
              BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream)) {
 
@@ -38,7 +46,14 @@ public class ItemSerializer {
         }
     }
 
-    public static ItemStack[] deserializeItemStackArrayFromBase64(String base64) {
+    /**
+     * Deserializes a Base64 string back into an array of ItemStacks.
+     *
+     * @param base64 The Base64 string to deserialize
+     * @return The deserialized ItemStack array
+     * @throws IllegalStateException if deserialization fails
+     */
+    public static ItemStack[] fromBase64Array(String base64) {
         if (base64 == null || base64.isEmpty()) return new ItemStack[0];
         byte[] data = Base64.getDecoder().decode(base64);
 
@@ -59,8 +74,16 @@ public class ItemSerializer {
         }
     }
 
-    public static String serializeItemStackToBase64(ItemStack item) {
-        if (item == null) throw new IllegalArgumentException("ItemStack cannot be null.");
+    /**
+     * Serializes a single ItemStack to a Base64 string.
+     *
+     * @param item The ItemStack to serialize
+     * @return A Base64 encoded string representation of the ItemStack
+     * @throws IllegalArgumentException if the ItemStack is null
+     * @throws IllegalStateException    if serialization fails
+     */
+    public static String toBase64(ItemStack item) {
+        if (item == null) return null;
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
              BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream)) {
 
@@ -72,7 +95,14 @@ public class ItemSerializer {
         }
     }
 
-    public static ItemStack deserializeItemStackFromBase64(String base64) {
+    /**
+     * Deserializes a Base64 string back into an ItemStack.
+     *
+     * @param base64 The Base64 string to deserialize
+     * @return The deserialized ItemStack, or null if the input is null or empty
+     * @throws IllegalStateException if deserialization fails
+     */
+    public static ItemStack fromBase64(String base64) {
         if (base64 == null || base64.isEmpty()) return null;
         byte[] data = Base64.getDecoder().decode(base64);
 
@@ -87,15 +117,27 @@ public class ItemSerializer {
     }
 
 
-    public static String serializeItemStackMapToJson(Map<Integer, ItemStack> quickBuy) {
+    /**
+     * Serializes a Map of Integer to ItemStack into a JSON string.
+     *
+     * @param quickBuy The Map of Integer to ItemStack to serialize
+     * @return A JSON string representation of the serialized map
+     */
+    public static String mapToJson(Map<Integer, ItemStack> quickBuy) {
         Map<Integer, String> serialized = new HashMap<>();
         for (Map.Entry<Integer, ItemStack> entry : quickBuy.entrySet()) {
-            serialized.put(entry.getKey(), ItemSerializer.serializeItemStackToBase64(entry.getValue()));
+            serialized.put(entry.getKey(), ItemSerializer.toBase64(entry.getValue()));
         }
         return gson.toJson(serialized);
     }
-
-    public static Map<Integer, ItemStack> deserializeItemStackMapFromJson(String json) {
+    
+    /**
+     * Deserializes a JSON string back into a Map of Integer to ItemStack.
+     *
+     * @param json The JSON string to deserialize
+     * @return The deserialized Map of Integer to ItemStack, or an empty map if input is null or empty
+     */
+    public static Map<Integer, ItemStack> mapFromJson(String json) {
         if (json == null || json.isEmpty()) {
             return new HashMap<>();
         }
@@ -104,7 +146,7 @@ public class ItemSerializer {
         Map<Integer, String> serialized = gson.fromJson(json, type);
         Map<Integer, ItemStack> quickBuy = new HashMap<>();
         for (Map.Entry<Integer, String> entry : serialized.entrySet()) {
-            quickBuy.put(entry.getKey(), ItemSerializer.deserializeItemStackFromBase64(entry.getValue()));
+            quickBuy.put(entry.getKey(), ItemSerializer.fromBase64(entry.getValue()));
         }
         return quickBuy;
     }

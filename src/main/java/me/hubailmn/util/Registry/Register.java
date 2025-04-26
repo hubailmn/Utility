@@ -26,6 +26,11 @@ public final class Register {
         throw new UnsupportedOperationException("Utility class");
     }
 
+    /**
+     * Registers all event listeners in the project that are annotated with @RegisterListener.
+     * Scans through specified packages for classes implementing Listener interface.
+     * Validates that annotated classes properly implement the Listener interface.
+     */
     public static void eventsListener() {
         scanAndRegister(new Reflections(
                 BASE_PACKAGE + ".listener",
@@ -43,6 +48,11 @@ public final class Register {
         });
     }
 
+    /**
+     * Registers all commands in the project that are annotated with @Command.
+     * Scans through command package for classes extending CommandBuilder.
+     * Validates that annotated classes properly extend CommandBuilder.
+     */
     public static void commands() {
         scanAndRegister(new Reflections(
                 BASE_PACKAGE + ".command"
@@ -59,6 +69,11 @@ public final class Register {
         });
     }
 
+    /**
+     * Initializes database connection and registers all database tables.
+     * Scans for classes extending TableBuilder and annotated with @DataBaseTable.
+     * Creates instances of found table classes to register them in the database.
+     */
     public static void database() {
         DataBaseConnection.initialize();
 
@@ -75,6 +90,12 @@ public final class Register {
         });
     }
 
+    /**
+     * Loads and registers all configuration files for the plugin.
+     * Scans for classes extending ConfigBuilder and annotated with @LoadConfig.
+     * Handles @IgnoreFile annotations for conditional loading based on database and license status.
+     * Stores configurations in the ConfigUtil registry.
+     */
     public static void config() {
         scanAndRegister(new Reflections(
                 UTIL_PACKAGE + ".config.file",
@@ -101,6 +122,14 @@ public final class Register {
         });
     }
 
+    /**
+     * Generic method to scan and register classes with error handling.
+     *
+     * @param classes Set of classes to process
+     * @param label   Label for logging purposes
+     * @param action  Registration action to perform on each class
+     * @param <T>     Type of classes being registered
+     */
     private static <T> void scanAndRegister(Set<Class<? extends T>> classes, String label, RegistryAction action) {
         for (Class<?> clazz : classes) {
             try {
