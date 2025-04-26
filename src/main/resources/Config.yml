@@ -1,6 +1,6 @@
 plugin:
 
-  prefix: '§a[%plugin_name%] §b§l>> §r'
+  prefix: '§a[%plugin_name%] §b§l>>§r'
 
   version: '%plugin_version%'
 

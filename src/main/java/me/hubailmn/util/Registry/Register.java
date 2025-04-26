@@ -34,6 +34,7 @@ public final class Register {
     public static void eventsListener() {
         scanAndRegister(new Reflections(
                 BASE_PACKAGE + ".listener",
+                BASE_PACKAGE + ".menu",
                 UTIL_PACKAGE + ".menu.listener",
                 UTIL_PACKAGE + ".interaction"
         ).getTypesAnnotatedWith(RegisterListener.class), "Event Listener", clazz -> {

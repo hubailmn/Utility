@@ -1,5 +1,6 @@
 package me.hubailmn.util.interaction.player;
 
+import me.hubailmn.util.BasePlugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.entity.Player;
@@ -22,6 +23,10 @@ public final class PlayerMessageUtil {
         }
     }
 
+    public static void prefixed(Player player, String content) {
+        player.sendMessage(BasePlugin.getPrefix() + " " + Component.text(content));
+    }
+
     public static void title(Player p, String main, String sub) {
         title(p, Component.text(main != null ? main : ""), Component.text(sub != null ? sub : ""));
     }
@@ -37,7 +42,7 @@ public final class PlayerMessageUtil {
         if (player == null || message == null) return;
 
         int centerPx = 154;
-        int messagePxSize = message.length() * 6; // Rough estimate
+        int messagePxSize = message.length() * 6;
         int spacesNeeded = (centerPx - messagePxSize / 2) / 4;
 
         player.sendMessage(Component.text(" ".repeat(Math.max(0, spacesNeeded)) + message));
