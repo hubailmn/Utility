@@ -96,6 +96,17 @@ public class ItemsUtil {
         }
     }
 
+
+    public static int getAmount(PlayerInventory inventory, ItemStack target) {
+        if (target == null) {
+            return 0;
+        }
+        return inventory.all(target).values().stream()
+                .mapToInt(ItemStack::getAmount)
+                .sum();
+    }
+
+
     /**
      * Gets the name of an ItemStack based on its display name, or its material name if no display name is set.
      *
