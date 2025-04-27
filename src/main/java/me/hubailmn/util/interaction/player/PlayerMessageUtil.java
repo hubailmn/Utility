@@ -9,7 +9,9 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.Duration;
 
@@ -22,23 +24,22 @@ public final class PlayerMessageUtil {
     }
 
     // ===================== BASIC SEND =====================
-    public static void send(Player p, Type type, String content) {
-        if (p == null || type == null || content == null) return;
-
-        Component message = LEGACY_SERIALIZER.deserialize(content);
-
-        switch (type) {
-            case CHAT -> p.sendMessage(message);
-            case ACTION -> p.sendActionBar(message);
-            case TITLE -> title(p, message, Component.empty());
-        }
+    public static void send(Player player, String content) {
+        if (player == null || content == null) return;
+        player.sendMessage(LEGACY_SERIALIZER.deserialize(content));
     }
 
     public static void prefixed(Player player, String content) {
-        if (player == null || content == null) return;
-        player.sendMessage(
-                LEGACY_SERIALIZER.deserialize(BasePlugin.getPrefix() + " " + content)
-        );
+        send(player, BasePlugin.getPrefix() + " " + content);
+    }
+
+    public static void sendActionBarMessage(Player player, String message) {
+        if (player == null || message == null) return;
+        player.sendActionBar(LEGACY_SERIALIZER.deserialize(message));
+    }
+
+    public static void sendPrefixedActionBarMessage(Player player, String message) {
+        sendActionBarMessage(player, BasePlugin.getPrefix() + " " + message);
     }
 
     public static void sendCenteredMessage(Player player, String message) {
@@ -125,31 +126,34 @@ public final class PlayerMessageUtil {
         return builder.build();
     }
 
-    public static void animateTitle(Player player, String[] frames, long frameDurationMillis) {
+    public static void animateTitle(Player player, String[] frames, long frameDurationMillis, Sound sound, float volume, float pitch) {
         if (player == null || frames == null || frames.length == 0) return;
 
-        new Thread(() -> {
-            try {
-                for (String frame : frames) {
-                    player.showTitle(Title.title(
-                            LEGACY_SERIALIZER.deserialize(frame),
-                            Component.empty(),
-                            Title.Times.times(
-                                    Duration.ofMillis(100),
-                                    Duration.ofMillis(frameDurationMillis),
-                                    Duration.ofMillis(100)
-                            )
-                    ));
-                    Thread.sleep(frameDurationMillis);
+        new BukkitRunnable() {
+            int index = 0;
+
+            @Override
+            public void run() {
+                if (index >= frames.length) {
+                    cancel();
+                    return;
                 }
-            } catch (InterruptedException ignored) {
+
+                String frame = frames[index++];
+                player.showTitle(Title.title(
+                        LEGACY_SERIALIZER.deserialize(frame),
+                        Component.empty(),
+                        Title.Times.times(
+                                Duration.ofMillis(100),
+                                Duration.ofMillis(frameDurationMillis),
+                                Duration.ofMillis(100)
+                        )
+                ));
+
+                if (sound != null) {
+                    PlayerSoundUtil.playSound(player, sound, volume, pitch);
+                }
             }
-        }).start();
-    }
-
-    // ===================== ENUMS =====================
-
-    public enum Type {
-        CHAT, ACTION, TITLE
+        }.runTaskTimer(BasePlugin.getInstance(), 0L, frameDurationMillis / 50L);
     }
 }
