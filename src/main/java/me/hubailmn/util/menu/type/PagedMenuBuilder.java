@@ -32,9 +32,22 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
 
     @Override
     public void display(Player player) {
-        player.closeInventory();
+        MenuManager.clearActiveMenu(player);
         Inventory inventory = Bukkit.createInventory(player, getSize(), getTitle());
+        buttons.clear();
+
+        setupButtons(player);
+        setItems(inventory);
+
         loadPage(inventory);
+
+        for (Button button : buttons) {
+            int slot = button.getSlot();
+            if (slot >= 0 && slot < inventory.getSize()) {
+                inventory.setItem(slot, button.getItem());
+            }
+        }
+
         MenuManager.setActiveMenu(player, this);
         player.openInventory(inventory);
     }
