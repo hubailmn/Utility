@@ -23,9 +23,6 @@ public class TabComplete {
         this.args = args;
     }
 
-    /**
-     * Adds tab completion suggestions at a specific argument index with a condition.
-     */
     public TabComplete add(int atIndex, String[] entry, Predicate<String[]> condition) {
         if (condition.test(this.args)) {
             return add(atIndex, entry);
@@ -33,18 +30,12 @@ public class TabComplete {
         return this;
     }
 
-    /**
-     * Adds tab completion suggestions at a specific argument index.
-     */
     public TabComplete add(int atIndex, String[] entry) {
         atIndex = Math.max(1, atIndex);
         entries.put(atIndex, Arrays.asList(entry));
         return this;
     }
 
-    /**
-     * Builds the final list of tab completion options.
-     */
     public List<String> build() {
         List<String> suggestions = entries.getOrDefault(args.length, Collections.emptyList());
 

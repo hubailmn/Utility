@@ -62,13 +62,7 @@ public abstract class MenuBuilder {
         }
     }
 
-    /**
-     * Called before inventory creation to register buttons.
-     */
     public abstract void setupButtons(Player player);
 
-    /**
-     * Called after buttons are added to place decorative or functional items.
-     */
     public abstract void setItems(Inventory inventory);
 }

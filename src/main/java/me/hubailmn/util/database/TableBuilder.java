@@ -37,20 +37,11 @@ public abstract class TableBuilder {
         }
     }
 
-    /**
-     * Called during table construction. Must be implemented by subclasses to create the table schema.
-     */
     protected abstract void createTable() throws SQLException;
 
-    /**
-     * Optional hook for subclasses to override to initialize data after table creation.
-     */
     protected void init() throws SQLException {
     }
 
-    /**
-     * Utility method for executing a raw SQL update/DDL query.
-     */
     protected void executeUpdate(String sql) throws SQLException {
         try (Statement stmt = connection.createStatement()) {
             stmt.executeUpdate(sql);

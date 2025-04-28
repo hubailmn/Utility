@@ -15,14 +15,6 @@ public class ItemsUtil {
         throw new UnsupportedOperationException("This is a utility class.");
     }
 
-    /**
-     * Checks if the inventory has enough of a target item to meet the required amount.
-     *
-     * @param inventory      the player's inventory
-     * @param target         the target ItemStack to check
-     * @param requiredAmount the amount required
-     * @return true if inventory contains the required amount of the target item
-     */
     public static boolean hasEnough(PlayerInventory inventory, ItemStack target, int requiredAmount) {
         if (target == null || requiredAmount <= 0) return false;
 
@@ -33,15 +25,6 @@ public class ItemsUtil {
                 .sum() >= requiredAmount;
     }
 
-
-    /**
-     * Removes the specified amount of a target item from the inventory.
-     *
-     * @param inventory the player's inventory
-     * @param target    the target ItemStack to remove
-     * @param amount    the amount to remove
-     * @return true if the items are successfully removed
-     */
     public static boolean removeItem(PlayerInventory inventory, ItemStack target, int amount) {
         if (target == null || amount <= 0) return false;
 
@@ -74,15 +57,6 @@ public class ItemsUtil {
         return remaining <= 0;
     }
 
-
-    /**
-     * Adds an item to the inventory. If there isn't enough space, any leftover items
-     * will be dropped at the player's location.
-     *
-     * @param inventory the player's inventory
-     * @param itemToAdd the item to add
-     * @param amount    the amount to add
-     */
     public static void addItem(PlayerInventory inventory, ItemStack itemToAdd, int amount) {
         if (itemToAdd == null || amount <= 0) return;
 
@@ -106,13 +80,6 @@ public class ItemsUtil {
                 .sum();
     }
 
-
-    /**
-     * Gets the name of an ItemStack based on its display name, or its material name if no display name is set.
-     *
-     * @param item the ItemStack to get the name of
-     * @return the name of the item
-     */
     public static String getItemName(ItemStack item) {
         if (item == null || item.getType().isAir()) {
             return "Unknown Item";
