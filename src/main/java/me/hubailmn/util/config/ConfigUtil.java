@@ -4,9 +4,7 @@ import lombok.Getter;
 import me.hubailmn.util.Registry.Register;
 import me.hubailmn.util.interaction.CSend;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ConfigUtil {
 
@@ -23,26 +21,50 @@ public class ConfigUtil {
     }
 
     public static void reloadAll() {
-        CONFIG_INSTANCE.clear();
-        Register.config();
+        if (CONFIG_INSTANCE.isEmpty()) {
+            Register.config();
+        }
+        CONFIG_INSTANCE.values().forEach(ConfigBuilder::reload);
+        CSend.info("Reloaded all configs (" + CONFIG_INSTANCE.size() + ")");
+    }
+
+    public static void reloadAllExcept(Class<?>... exclude) {
+        Set<Class<?>> exclusions = exclude.length > 0 ? new HashSet<>(Set.of(exclude)) : Collections.emptySet();
+
+        CONFIG_INSTANCE.forEach((clazz, builder) -> {
+            if (!exclusions.contains(clazz)) {
+                builder.reload();
+                CSend.info("Reloaded config: " + clazz.getSimpleName());
+            }
+        });
+    }
+
+    public static void reloadSelected(Class<?>... classes) {
+        for (Class<?> clazz : classes) {
+            reload(clazz);
+        }
     }
 
     @SuppressWarnings("unchecked")
     public static <T> void reload(Class<T> clazz) {
-        try {
-            ConfigBuilder instance = ((Class<? extends ConfigBuilder>) clazz).getDeclaredConstructor().newInstance();
-            CONFIG_INSTANCE.put(clazz, instance);
+        ConfigBuilder builder = CONFIG_INSTANCE.get(clazz);
+        if (builder != null) {
+            builder.reload();
             CSend.info("Reloaded config: " + clazz.getSimpleName());
-        } catch (Exception e) {
-            CSend.error("Failed to reload config: " + clazz.getSimpleName());
-            throw new RuntimeException(e);
+        } else {
+            try {
+                ConfigBuilder instance = ((Class<? extends ConfigBuilder>) clazz).getDeclaredConstructor().newInstance();
+                CONFIG_INSTANCE.put(clazz, instance);
+                CSend.info("Loaded and registered config: " + clazz.getSimpleName());
+            } catch (Exception e) {
+                CSend.error("Failed to reload or register config: " + clazz.getSimpleName());
+                throw new RuntimeException(e);
+            }
         }
     }
 
     public static void saveAll() {
-        for (ConfigBuilder builder : CONFIG_INSTANCE.values()) {
-            builder.save();
-        }
+        CONFIG_INSTANCE.values().forEach(ConfigBuilder::save);
     }
 
     public static void save(Class<?> clazz) {
@@ -61,17 +83,6 @@ public class ConfigUtil {
     }
 
     public static Set<Class<?>> listRegistered() {
-        return CONFIG_INSTANCE.keySet();
+        return Collections.unmodifiableSet(CONFIG_INSTANCE.keySet());
     }
-
-    public static void reloadAllExcept(Class<?>... exclude) {
-        Set<Class<?>> exclusions = Set.of(exclude);
-        for (Class<?> clazz : new HashMap<>(CONFIG_INSTANCE).keySet()) {
-            if (!exclusions.contains(clazz)) {
-                reload(clazz);
-            }
-        }
-    }
-
-
 }
