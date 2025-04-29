@@ -18,6 +18,12 @@ public abstract class SubCommandBuilder {
 
     public SubCommandBuilder() {
         SubCommand annotation = this.getClass().getAnnotation(SubCommand.class);
+
+        if (annotation == null) {
+            this.name = this.getClass().getSimpleName().replaceAll("Command$", "").toLowerCase();
+            return;
+        }
+
         this.name = annotation.name();
         this.permission = annotation.permission();
         this.requiresPlayer = annotation.requiresPlayer();

@@ -29,6 +29,11 @@ public abstract class CommandBuilder implements TabExecutor {
     public CommandBuilder() {
         Command annotation = this.getClass().getAnnotation(Command.class);
 
+        if (annotation == null) {
+            this.name = this.getClass().getSimpleName().replaceAll("Command$", "").toLowerCase();
+            return;
+        }
+
         this.name = annotation.name();
         this.description = annotation.description();
         this.usageMessage = annotation.usage();
