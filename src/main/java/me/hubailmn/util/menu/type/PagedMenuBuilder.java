@@ -2,6 +2,7 @@ package me.hubailmn.util.menu.type;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.hubailmn.util.menu.MenuLayout;
 import me.hubailmn.util.menu.MenuManager;
 import me.hubailmn.util.menu.interactive.Button;
 import org.bukkit.Bukkit;
@@ -18,16 +19,31 @@ import java.util.List;
 @Setter
 public abstract class PagedMenuBuilder extends MenuBuilder {
 
+    protected List<Integer> contentSlots = new ArrayList<>();
     protected final List<ItemStack> items = new ArrayList<>();
     protected Button nextPageButton;
     protected Button previousPageButton;
-    protected int startSlot = 0;
-    protected int endSlot = getSize() - 1;
     protected int page = 0;
     protected boolean itemClickedCancel = true;
 
+    public PagedMenuBuilder() {
+        super();
+    }
+
     public void addItems(ItemStack... items) {
-        Collections.addAll(this.items, items);
+        if (items != null) Collections.addAll(this.items, items);
+    }
+
+    public void setPageArea(int startRow, int startCol, int endRow, int endCol) {
+        contentSlots.clear();
+        for (int row = startRow; row <= endRow; row++) {
+            for (int col = startCol; col <= endCol; col++) {
+                int slot = MenuLayout.getSlot(col, row);
+                if (slot >= 0 && slot < size) {
+                    contentSlots.add(slot);
+                }
+            }
+        }
     }
 
     @Override
@@ -37,16 +53,7 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
         buttons.clear();
 
         setupButtons(player);
-        setItems(inventory);
-
         loadPage(inventory);
-
-        for (Button button : buttons) {
-            int slot = button.getSlot();
-            if (slot >= 0 && slot < inventory.getSize()) {
-                inventory.setItem(slot, button.getItem());
-            }
-        }
 
         MenuManager.setActiveMenu(player, this);
         player.openInventory(inventory);
@@ -54,23 +61,34 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
 
     protected void loadPage(Inventory inventory) {
         inventory.clear();
-        int itemsPerPage = endSlot - startSlot + 1;
+        if (contentSlots.isEmpty()) return;
+
+        int itemsPerPage = contentSlots.size();
         int startIndex = page * itemsPerPage;
         int endIndex = Math.min(startIndex + itemsPerPage, items.size());
 
         for (int i = startIndex; i < endIndex; i++) {
-            inventory.setItem(startSlot + (i - startIndex), items.get(i));
+            int slot = contentSlots.get(i - startIndex);
+            inventory.setItem(slot, items.get(i));
         }
 
         setItems(inventory);
-        buttons.forEach(button -> inventory.setItem(button.getSlot(), button.getItem()));
 
-        if (page > 0 && previousPageButton != null) {
+        if (previousPageButton != null && page > 0) {
             inventory.setItem(previousPageButton.getSlot(), previousPageButton.getItem());
+            addButtons(previousPageButton);
         }
 
-        if (endIndex < items.size() && nextPageButton != null) {
+        if (nextPageButton != null && (page + 1) * itemsPerPage < items.size()) {
             inventory.setItem(nextPageButton.getSlot(), nextPageButton.getItem());
+            addButtons(nextPageButton);
+        }
+
+        for (Button button : buttons) {
+            int slot = button.getSlot();
+            if (slot >= 0 && slot < inventory.getSize()) {
+                inventory.setItem(slot, button.getItem());
+            }
         }
 
         onPageChange(page);
@@ -80,17 +98,27 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
         int slot = e.getSlot();
         e.setCancelled(itemClickedCancel);
 
+        int itemsPerPage = contentSlots.size();
+        if (itemsPerPage == 0) return;
+
         if (previousPageButton != null && slot == previousPageButton.getSlot() && page > 0) {
-            e.setCancelled(true);
             page--;
             loadPage(e.getInventory());
-        } else if (nextPageButton != null && slot == nextPageButton.getSlot() && (page + 1) * (endSlot - startSlot + 1) < items.size()) {
             e.setCancelled(true);
+        } else if (nextPageButton != null && slot == nextPageButton.getSlot() && (page + 1) * itemsPerPage < items.size()) {
             page++;
             loadPage(e.getInventory());
+            e.setCancelled(true);
         }
     }
 
     protected void onPageChange(int newPage) {
+        // Optional override
     }
+
+    @Override
+    public abstract void setupButtons(Player player);
+
+    @Override
+    public abstract void setItems(Inventory inventory);
 }
