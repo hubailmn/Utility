@@ -22,15 +22,20 @@ public abstract class CommandBuilder implements TabExecutor {
     String description;
     String usageMessage;
     String permission;
+    List<String> aliases = new ArrayList<>();
 
     private Map<String, SubCommandBuilder> subCommands = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     public CommandBuilder() {
         Command annotation = this.getClass().getAnnotation(Command.class);
+
         this.name = annotation.name();
         this.description = annotation.description();
         this.usageMessage = annotation.usage();
         this.permission = annotation.permission();
+
+        this.aliases.addAll(Arrays.asList(annotation.aliases()));
+        this.aliases.removeIf(String::isEmpty);
 
         addSubCommand();
     }

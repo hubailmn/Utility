@@ -25,14 +25,14 @@ public class CommandRegistry {
         }
     }
 
-    public static void registerCommand(String commandName, TabExecutor executor) {
+    public static void registerCommand(String commandName, TabExecutor executor, List<String> aliases) {
         try {
             if (registeredCommands.contains(commandName)) {
                 CSend.debug("Command '" + commandName + "' already registered. Skipping.");
                 return;
             }
 
-            DynamicCommand dynamicCommand = new DynamicCommand(commandName, executor);
+            DynamicCommand dynamicCommand = new DynamicCommand(commandName, executor, aliases);
             commandMap.register(BasePlugin.getPluginName(), dynamicCommand);
             registeredCommands.add(commandName);
         } catch (Exception e) {
@@ -40,6 +40,7 @@ public class CommandRegistry {
             CSend.error(e);
         }
     }
+
 
     public static void unRegisterCommands() {
         CSend.debug("Unregistering all registered commands...");
@@ -96,9 +97,10 @@ public class CommandRegistry {
     private static class DynamicCommand extends Command {
         private final TabExecutor executor;
 
-        public DynamicCommand(String name, TabExecutor executor) {
+        public DynamicCommand(String name, TabExecutor executor, List<String> aliases) {
             super(name);
             this.executor = executor;
+            this.setAliases(aliases);
         }
 
         @Override

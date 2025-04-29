@@ -55,7 +55,7 @@ public final class Register {
 
             CommandBuilder executor = (CommandBuilder) clazz.getDeclaredConstructor().newInstance();
             String commandName = clazz.getAnnotation(Command.class).name();
-            CommandRegistry.registerCommand(commandName, executor);
+            CommandRegistry.registerCommand(commandName, executor, executor.getAliases());
             CSend.debug("Registered command: " + commandName);
         });
     }
