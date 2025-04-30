@@ -1,6 +1,7 @@
 package me.hubailmn.util.plugin;
 
 import lombok.Getter;
+import lombok.Setter;
 import me.hubailmn.util.BasePlugin;
 import me.hubailmn.util.config.ConfigUtil;
 import me.hubailmn.util.config.file.LicenseConfig;
@@ -17,7 +18,8 @@ import java.util.Scanner;
 public class License {
 
     @Getter
-    private static final String LICENSE_URL = "https://<IP>:<PORT>/";
+    @Setter
+    private static String LICENSE_URL = "https://<IP>:<PORT>/";
 
     @Getter
     private static final String licenseKey = ConfigUtil.getConfig(LicenseConfig.class).getKey();
