@@ -123,7 +123,7 @@ public abstract class BasePlugin extends JavaPlugin {
 
         if (isSmirks()) {
             CSend.info("Smirking...");
-            // TODO: Smirk
+            // TODO: not implemented yet!
         }
 
         CSend.debug("Plugin has been initialized.");
