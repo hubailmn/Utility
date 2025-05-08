@@ -11,7 +11,6 @@ import me.hubailmn.util.interaction.CSend;
 import me.hubailmn.util.menu.MenuManager;
 import me.hubailmn.util.plugin.CheckUpdates;
 import me.hubailmn.util.plugin.License;
-import me.hubailmn.util.plugin.Smirks;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
