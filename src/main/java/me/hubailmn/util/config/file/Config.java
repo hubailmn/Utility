@@ -19,11 +19,11 @@ public class Config extends ConfigBuilder {
         return getConfig().getString(PREFIX + "prefix");
     }
 
-    public boolean isDebug() {
-        return getConfig().getBoolean(PREFIX + "debug");
-    }
-
     public String getConfigVersion() {
         return getConfig().getString(PREFIX + "version");
+    }
+
+    public boolean isDebug() {
+        return getConfig().getBoolean(PREFIX + "debug");
     }
 }

@@ -28,13 +28,15 @@ public final class Register {
 
     public static void eventsListener() {
         scanAndRegister(new Reflections(
-                BASE_PACKAGE + ".listener",
-                BASE_PACKAGE + ".menu",
+                UTIL_PACKAGE + ".listener",
                 UTIL_PACKAGE + ".menu.listener",
-                UTIL_PACKAGE + ".interaction"
+                UTIL_PACKAGE + ".interaction",
+
+                BASE_PACKAGE + ".listener",
+                BASE_PACKAGE + ".menu"
         ).getTypesAnnotatedWith(RegisterListener.class), "Event Listener", clazz -> {
             if (!Listener.class.isAssignableFrom(clazz)) {
-                CSend.error("Class " + clazz.getName() + " is annotated with @EventListener but does not implement Listener.");
+                CSend.error("Class " + clazz.getName() + " is annotated with @RegisterListener but does not implement Listener.");
                 return;
             }
 

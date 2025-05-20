@@ -11,6 +11,8 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.TypeAnnotationsScanner;
 
 import java.util.*;
 
@@ -46,7 +48,11 @@ public abstract class CommandBuilder implements TabExecutor {
     }
 
     public void addSubCommand() {
-        Reflections reflections = new Reflections("me.hubailmn." + BasePlugin.getPluginName().toLowerCase() + ".command");
+        Reflections reflections = new Reflections(
+                "me.hubailmn." + BasePlugin.getPluginName().toLowerCase() + ".command",
+                new SubTypesScanner(false),
+                new TypeAnnotationsScanner()
+        );
 
         Set<Class<?>> subCommandClasses = reflections.getTypesAnnotatedWith(SubCommand.class);
 
@@ -64,12 +70,14 @@ public abstract class CommandBuilder implements TabExecutor {
         }
     }
 
+
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length < 1) {
-            if (sender.hasPermission(getPermission()) || getPermission().isEmpty()) {
-                return preform(sender);
+            if (sender.hasPermission(Objects.toString(getPermission(), "")) || getPermission().isEmpty()) {
+                return perform(sender);
             }
+
             return sendHelp(sender);
         }
 
@@ -121,7 +129,16 @@ public abstract class CommandBuilder implements TabExecutor {
         return tabComplBuilder.build();
     }
 
-    public abstract boolean sendHelp(CommandSender sender);
+    public boolean sendHelp(CommandSender sender) {
+        sender.sendMessage("§e§lCommand Information:");
+        sender.sendMessage("§7 - §fName: §b" + name);
+        sender.sendMessage("§7 - §fDescription: §a" + description);
+        sender.sendMessage("§7 - §fUsage: §6" + usageMessage);
+        sender.sendMessage("§7 - §fPermission: §c" + (permission != null ? permission : "None"));
+        sender.sendMessage("§7 - §fAliases: §d" + (aliases != null && !aliases.isEmpty() ? aliases : "None"));
+        sender.sendMessage("§7 - §fSubcommands: §9" + (subCommands != null && !subCommands.isEmpty() ? subCommands.keySet() : "None"));
+        return true;
+    }
 
-    public abstract boolean preform(CommandSender sender);
+    public abstract boolean perform(CommandSender sender);
 }

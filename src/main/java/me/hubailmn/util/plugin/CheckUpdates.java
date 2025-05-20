@@ -17,9 +17,14 @@ public class CheckUpdates {
 
     private static final String API_URL_TEMPLATE = "https://api.github.com/repos/hubailmn/%s/releases/latest";
     private static final String RELEASE_PAGE_TEMPLATE = "https://github.com/hubailmn/%s/releases";
+
     @Getter
     @Setter
     private static boolean needUpdate = false;
+
+    @Getter
+    @Setter
+    private static String latestVersion = null;
 
     public static void checkForUpdates() {
         final String pluginName = BasePlugin.getPluginName();
@@ -45,7 +50,7 @@ public class CheckUpdates {
                         String latestVersion = (String) json.get("tag_name");
 
                         if (latestVersion == null || latestVersion.isEmpty()) {
-                            CSend.warn("Latest version tag not found in GitHub response.");
+                            CSend.warn("Latest version tag not found in response.");
                             return;
                         }
 
@@ -53,13 +58,11 @@ public class CheckUpdates {
                             CSend.info(BasePlugin.getPrefix() + "§eA new version is available: §6" + latestVersion);
                             CSend.info("§aDownload it here: §9" + releasesPage);
                             setNeedUpdate(true);
-                        } else {
-                            CSend.debug("Checked version from GitHub: " + latestVersion);
-                            CSend.info(BasePlugin.getPrefix() + "§aYou are using the latest version (" + pluginVersion + ").");
+                            setLatestVersion(latestVersion);
                         }
                     }
                 } else {
-                    CSend.error("GitHub API request failed. HTTP " + responseCode + " - " + connection.getResponseMessage());
+                    CSend.error("Request failed. HTTP " + responseCode + " - " + connection.getResponseMessage());
                 }
 
             } catch (Exception e) {
