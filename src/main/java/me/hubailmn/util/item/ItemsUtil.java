@@ -70,7 +70,6 @@ public class ItemsUtil {
         }
     }
 
-
     public static int getAmount(PlayerInventory inventory, ItemStack target) {
         if (target == null) {
             return 0;

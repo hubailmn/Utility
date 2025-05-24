@@ -12,7 +12,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class ItemBuilder {
     private final ItemStack stack;
     private final ItemMeta meta;

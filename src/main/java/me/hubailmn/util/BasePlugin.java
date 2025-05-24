@@ -21,7 +21,6 @@ import java.util.Date;
 
 public abstract class BasePlugin extends JavaPlugin {
 
-
     @Getter
     @Setter
     private static BasePlugin instance;
@@ -37,7 +36,6 @@ public abstract class BasePlugin extends JavaPlugin {
     @Getter
     @Setter
     private static String prefix;
-
 
     @Getter
     @Setter
@@ -145,7 +143,6 @@ public abstract class BasePlugin extends JavaPlugin {
             errorLog.renameTo(new File(dataFolder, "error_" + timestamp + ".log"));
         }
     }
-
 
     protected void preEnable() {
     }

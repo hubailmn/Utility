@@ -18,14 +18,12 @@ import java.util.Scanner;
 public class License {
 
     @Getter
-    @Setter
-    private static String LICENSE_URL = "https://<IP>:<PORT>/";
-
-    @Getter
     private static final String licenseKey = ConfigUtil.getConfig(LicenseConfig.class).getKey();
-
     @Getter
     private static final String ipAddress = resolvePublicIP();
+    @Getter
+    @Setter
+    private static String LICENSE_URL = "https://<IP>:<PORT>/";
 
     private static String resolvePublicIP() {
         try (Scanner scanner = new Scanner(new URL("https://api.ipify.org").openStream())) {

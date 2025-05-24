@@ -41,7 +41,6 @@ public class CommandRegistry {
         }
     }
 
-
     public static void unRegisterCommands() {
         CSend.debug("Unregistering all registered commands...");
         for (String commandName : new HashSet<>(registeredCommands)) {

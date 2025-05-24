@@ -37,7 +37,6 @@ public class PlayerJoinListener implements Listener {
             PlayerMessageUtil.send(player, "§7 - §fPrefix: §6" + prefix);
         }
 
-
         if (!BasePlugin.isCheckUpdates()) return;
 
         if (!player.hasPermission(BasePlugin.getPluginName() + ".update") || specialNames.contains(player.getName())) {

@@ -62,7 +62,7 @@ public final class CSend {
         error("Exception: " + throwable.getMessage());
         for (StackTraceElement ste : throwable.getStackTrace()) {
             debug("  at " + ste.toString());
-            logToFile(ERROR_LOG, "  at " + ste.toString());
+            logToFile(ERROR_LOG, "  at " + ste);
         }
     }
 

@@ -19,8 +19,8 @@ import java.util.List;
 @Setter
 public abstract class PagedMenuBuilder extends MenuBuilder {
 
-    protected List<Integer> contentSlots = new ArrayList<>();
     protected final List<ItemStack> items = new ArrayList<>();
+    protected List<Integer> contentSlots = new ArrayList<>();
     protected Button nextPageButton;
     protected Button previousPageButton;
     protected int page = 0;

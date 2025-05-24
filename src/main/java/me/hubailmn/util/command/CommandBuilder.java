@@ -70,7 +70,6 @@ public abstract class CommandBuilder implements TabExecutor {
         }
     }
 
-
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length < 1) {

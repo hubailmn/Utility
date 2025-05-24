@@ -19,7 +19,6 @@ public final class SoundPreset {
 
     @Getter
     public enum SoundType {
-        // Interaction-Based Sounds
         CONFIRM(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1F, 1F),
         SUCCESS(Sound.UI_TOAST_CHALLENGE_COMPLETE, 1F, 1.2F),
         DENY(Sound.BLOCK_NOTE_BLOCK_BASS, 1F, 0.5F),
@@ -35,11 +34,9 @@ public final class SoundPreset {
         OPEN_ENDER_CHEST(Sound.BLOCK_ENDER_CHEST_OPEN, 1F, 1F),
         CLOSE_ENDER_CHEST(Sound.BLOCK_ENDER_CHEST_CLOSE, 1F, 1F),
 
-        // Item Pickups
         PICKUP_ITEM(Sound.ENTITY_ITEM_PICKUP, 1F, 1F),
         PICKUP_BARREL(Sound.BLOCK_BARREL_OPEN, 1F, 1F),
 
-        // Combat Sounds
         PLAYER_HURT(Sound.ENTITY_PLAYER_HURT, 1F, 1F),
         CRITICAL_HIT(Sound.ENTITY_PLAYER_ATTACK_CRIT, 1F, 1.5F),
         ARROW_HIT(Sound.ENTITY_ARROW_HIT_PLAYER, 1F, 1F),
@@ -47,7 +44,6 @@ public final class SoundPreset {
         THREAT_PASSING(Sound.ENTITY_PHANTOM_SWOOP, 1F, 1.2F),
         VICTORY(Sound.UI_TOAST_CHALLENGE_COMPLETE, 1F, 1.5F),
 
-        // Environmental Sounds
         PORTAL_ENTER(Sound.BLOCK_PORTAL_TRAVEL, 1F, 1F),
         PORTAL_TRIGGER(Sound.BLOCK_PORTAL_TRIGGER, 1F, 1F),
         TELEPORT(Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 1.2F),
@@ -57,13 +53,11 @@ public final class SoundPreset {
         CAVE(Sound.AMBIENT_CAVE, 1F, 1F),
         ENDER_DRAGON_GROWL(Sound.ENTITY_ENDER_DRAGON_GROWL, 1F, 1.5F),
 
-        // Minigames and Features
         COUNTDOWN(Sound.BLOCK_NOTE_BLOCK_PLING, 1F, 2F),
         GAME_TRIGGER(Sound.BLOCK_BEEHIVE_ENTER, 1F, 1F),
         SLIME_JUMP(Sound.ENTITY_SLIME_JUMP, 1F, 1F),
         TIMER_START(Sound.ENTITY_TNT_PRIMED, 1F, 1F),
 
-        // Utility Sounds
         INVENTORY_CLOSE(Sound.BLOCK_BARREL_CLOSE, 1F, 1F),
         ARMOR_EQUIP_GENERIC(Sound.ITEM_ARMOR_EQUIP_GENERIC, 1F, 1F),
         ARMOR_EQUIP_RARE(Sound.ITEM_ARMOR_EQUIP_DIAMOND, 1F, 1.5F),
@@ -74,15 +68,12 @@ public final class SoundPreset {
         PAGE_FLIP(Sound.ITEM_BOOK_PAGE_TURN, 1F, 1F),
         CRAFTING_USE(Sound.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, 1F, 1F),
 
-        // Trade Sounds
         TRADE_SUCCESS(Sound.ENTITY_VILLAGER_YES, 1F, 1.2F),
         TRADE_AMBIENCE(Sound.ENTITY_WANDERING_TRADER_AMBIENT, 1F, 1.2F),
 
-        // Exploration Sounds
         MUSIC_DISC(Sound.MUSIC_DISC_PIGSTEP, 1F, 1F),
         ANIMAL_AURA(Sound.ENTITY_PARROT_AMBIENT, 1F, 1.5F),
 
-        // Storytelling Features
         DRAMATIC_DEATH(Sound.ENTITY_ELDER_GUARDIAN_DEATH, 1F, 1F),
         EVENT_HORN(Sound.EVENT_RAID_HORN, 1F, 1.2F);
 

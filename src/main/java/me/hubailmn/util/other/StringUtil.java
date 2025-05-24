@@ -8,7 +8,6 @@ public final class StringUtil {
         throw new UnsupportedOperationException("This is a utility class.");
     }
 
-
     public static String capitalizeWords(String input) {
         if (input == null || input.isBlank()) return "";
 
