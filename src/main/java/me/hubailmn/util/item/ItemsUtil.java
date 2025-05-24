@@ -27,8 +27,10 @@ public class ItemsUtil {
     public static boolean removeItem(PlayerInventory inventory, ItemStack target, int amount) {
         if (target == null || amount <= 0) return false;
 
-        Map<Integer, ? extends ItemStack> matchingItems = inventory.all(target);
+        Map<Integer, ? extends ItemStack> matchingItems = inventory.all(target.getType());
+
         int availableAmount = matchingItems.values().stream()
+                .filter(item -> item.isSimilar(target))
                 .mapToInt(ItemStack::getAmount)
                 .sum();
 
@@ -37,10 +39,13 @@ public class ItemsUtil {
         int remaining = amount;
 
         for (Map.Entry<Integer, ? extends ItemStack> entry : matchingItems.entrySet()) {
-            int slot = entry.getKey();
             ItemStack item = entry.getValue();
 
+            if (!item.isSimilar(target)) continue;
+
+            int slot = entry.getKey();
             int stackAmount = item.getAmount();
+
             if (stackAmount <= remaining) {
                 inventory.clear(slot);
                 remaining -= stackAmount;
@@ -53,7 +58,7 @@ public class ItemsUtil {
             if (remaining <= 0) return true;
         }
 
-        return remaining <= 0;
+        return false;
     }
 
     public static void addItem(PlayerInventory inventory, ItemStack itemToAdd, int amount) {
