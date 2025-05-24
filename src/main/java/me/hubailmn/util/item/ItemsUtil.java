@@ -18,9 +18,8 @@ public class ItemsUtil {
     public static boolean hasEnough(PlayerInventory inventory, ItemStack target, int requiredAmount) {
         if (target == null || requiredAmount <= 0) return false;
 
-        return inventory.all(target)
-                .values()
-                .stream()
+        return inventory.all(target.getType()).values().stream()
+                .filter(item -> item.isSimilar(target))
                 .mapToInt(ItemStack::getAmount)
                 .sum() >= requiredAmount;
     }
