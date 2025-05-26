@@ -91,33 +91,32 @@ public final class Register {
     }
 
     public static void config() {
-        Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
-            Set<Class<?>> classes = new Reflections(
-                    UTIL_PACKAGE + ".config.file",
-                    BASE_PACKAGE + ".config"
-            ).getTypesAnnotatedWith(LoadConfig.class);
+        Set<Class<?>> classes = new Reflections(
+                UTIL_PACKAGE + ".config.file",
+                BASE_PACKAGE + ".config"
+        ).getTypesAnnotatedWith(LoadConfig.class);
 
-            scanAndRegister(classes, "Config", clazz -> {
-                if (!ConfigBuilder.class.isAssignableFrom(clazz)) {
-                    CSend.warn(clazz.getName() + " is annotated with @LoadConfig but does not extend ConfigBuilder.");
+        scanAndRegister(classes, "Config", clazz -> {
+            if (!ConfigBuilder.class.isAssignableFrom(clazz)) {
+                CSend.warn(clazz.getName() + " is annotated with @LoadConfig but does not extend ConfigBuilder.");
+                return;
+            }
+
+            @SuppressWarnings("unchecked") Class<? extends ConfigBuilder> typedClass = (Class<? extends ConfigBuilder>) clazz;
+
+            if (clazz.isAnnotationPresent(IgnoreFile.class)) {
+                IgnoreFile ignore = clazz.getAnnotation(IgnoreFile.class);
+                if ((ignore.ifNoDatabase() && !BasePlugin.isDatabase()) || (ignore.ifNoLicense() && !BasePlugin.isLicense())) {
+                    CSend.debug("Skipping config " + clazz.getSimpleName() + " due to @IgnoreFile conditions.");
                     return;
                 }
+            }
 
-                @SuppressWarnings("unchecked") Class<? extends ConfigBuilder> typedClass = (Class<? extends ConfigBuilder>) clazz;
-
-                if (clazz.isAnnotationPresent(IgnoreFile.class)) {
-                    IgnoreFile ignore = clazz.getAnnotation(IgnoreFile.class);
-                    if ((ignore.ifNoDatabase() && !BasePlugin.isDatabase()) || (ignore.ifNoLicense() && !BasePlugin.isLicense())) {
-                        CSend.debug("Skipping config " + clazz.getSimpleName() + " due to @IgnoreFile conditions.");
-                        return;
-                    }
-                }
-
-                ConfigBuilder config = typedClass.getDeclaredConstructor().newInstance();
-                ConfigUtil.getCONFIG_INSTANCE().put(typedClass, config);
-                CSend.debug("Registered config: " + clazz.getSimpleName());
-            });
+            ConfigBuilder config = typedClass.getDeclaredConstructor().newInstance();
+            ConfigUtil.getCONFIG_INSTANCE().put(typedClass, config);
+            CSend.debug("Registered config: " + clazz.getSimpleName());
         });
+
     }
 
     private static <T> void scanAndRegister(Set<Class<? extends T>> classes, String label, RegistryAction action) {
