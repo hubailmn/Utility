@@ -55,8 +55,11 @@
                             <relocations>
                                 <relocation>
                                     <pattern>org.reflections</pattern>
-                                    <shadedPattern>me.hubailmn.shaded.reflections
-                                    </shadedPattern>
+                                    <shadedPattern>me.hubailmn.shaded.reflections</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.slf4j</pattern>
+                                    <shadedPattern>me.hubailmn.shaded.slf4j</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>javassist</pattern>
