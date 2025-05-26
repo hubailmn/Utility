@@ -12,6 +12,7 @@ import me.hubailmn.util.database.DataBaseConnection;
 import me.hubailmn.util.database.TableBuilder;
 import me.hubailmn.util.database.annotation.DataBaseTable;
 import me.hubailmn.util.interaction.CSend;
+import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.reflections.Reflections;
 
@@ -27,38 +28,60 @@ public final class Register {
     }
 
     public static void eventsListener() {
-        scanAndRegister(new Reflections(
-                UTIL_PACKAGE + ".listener",
-                UTIL_PACKAGE + ".menu.listener",
-                UTIL_PACKAGE + ".interaction",
+        Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
+            Set<Class<?>> classes = new Reflections(
+                    UTIL_PACKAGE + ".listener",
+                    UTIL_PACKAGE + ".menu.listener",
+                    UTIL_PACKAGE + ".interaction",
 
-                BASE_PACKAGE + ".listener",
-                BASE_PACKAGE + ".menu"
-        ).getTypesAnnotatedWith(RegisterListener.class), "Event Listener", clazz -> {
-            if (!Listener.class.isAssignableFrom(clazz)) {
-                CSend.error("Class " + clazz.getName() + " is annotated with @RegisterListener but does not implement Listener.");
-                return;
-            }
+                    BASE_PACKAGE + ".listener",
+                    BASE_PACKAGE + ".menu"
+            ).getTypesAnnotatedWith(RegisterListener.class);
 
-            Listener listener = (Listener) clazz.getDeclaredConstructor().newInstance();
-            BasePlugin.getPluginManager().registerEvents(listener, BasePlugin.getInstance());
-            CSend.debug("Registered listener: " + clazz.getSimpleName());
+            Bukkit.getScheduler().runTask(BasePlugin.getInstance(), () -> {
+                for (Class<?> clazz : classes) {
+                    try {
+                        if (!Listener.class.isAssignableFrom(clazz)) {
+                            CSend.error("Class " + clazz.getName() + " is annotated with @RegisterListener but does not implement Listener.");
+                            continue;
+                        }
+
+                        Listener listener = (Listener) clazz.getDeclaredConstructor().newInstance();
+                        BasePlugin.getPluginManager().registerEvents(listener, BasePlugin.getInstance());
+                        CSend.debug("Registered listener: " + clazz.getSimpleName());
+                    } catch (Exception e) {
+                        CSend.error("Failed to register Event Listener: " + clazz.getSimpleName() + " - " + e.getMessage());
+                        CSend.error(e);
+                    }
+                }
+            });
         });
     }
 
     public static void commands() {
-        scanAndRegister(new Reflections(
-                BASE_PACKAGE + ".command"
-        ).getTypesAnnotatedWith(Command.class), "Command", clazz -> {
-            if (!CommandBuilder.class.isAssignableFrom(clazz)) {
-                CSend.warn(clazz.getName() + " is annotated with @Command but does not extend BaseCommand.");
-                return;
-            }
+        Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
+            Set<Class<?>> classes = new Reflections(
+                    BASE_PACKAGE + ".command"
+            ).getTypesAnnotatedWith(Command.class);
 
-            CommandBuilder executor = (CommandBuilder) clazz.getDeclaredConstructor().newInstance();
-            String commandName = clazz.getAnnotation(Command.class).name();
-            CommandRegistry.registerCommand(commandName, executor, executor.getAliases());
-            CSend.debug("Registered command: " + commandName);
+            Bukkit.getScheduler().runTask(BasePlugin.getInstance(), () -> {
+                for (Class<?> clazz : classes) {
+                    try {
+                        if (!CommandBuilder.class.isAssignableFrom(clazz)) {
+                            CSend.warn(clazz.getName() + " is annotated with @Command but does not extend CommandBuilder.");
+                            continue;
+                        }
+
+                        CommandBuilder executor = (CommandBuilder) clazz.getDeclaredConstructor().newInstance();
+                        String commandName = clazz.getAnnotation(Command.class).name();
+                        CommandRegistry.registerCommand(commandName, executor, executor.getAliases());
+                        CSend.debug("Registered command: " + commandName);
+                    } catch (Exception e) {
+                        CSend.error("Failed to register Command: " + clazz.getSimpleName() + " - " + e.getMessage());
+                        CSend.error(e);
+                    }
+                }
+            });
         });
     }
 
@@ -69,7 +92,7 @@ public final class Register {
                 BASE_PACKAGE + ".database"
         ).getSubTypesOf(TableBuilder.class), "Database Table", tableClass -> {
             if (!tableClass.isAnnotationPresent(DataBaseTable.class)) {
-                CSend.error(tableClass.getName() + " extends DBTable but is missing @DataBaseTable.");
+                CSend.error(tableClass.getName() + " extends TableBuilder but is missing @DataBaseTable.");
                 return;
             }
 
