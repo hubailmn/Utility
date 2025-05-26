@@ -33,27 +33,19 @@ public final class Register {
                     UTIL_PACKAGE + ".listener",
                     UTIL_PACKAGE + ".menu.listener",
                     UTIL_PACKAGE + ".interaction",
-
                     BASE_PACKAGE + ".listener",
                     BASE_PACKAGE + ".menu"
             ).getTypesAnnotatedWith(RegisterListener.class);
 
-            Bukkit.getScheduler().runTask(BasePlugin.getInstance(), () -> {
-                for (Class<?> clazz : classes) {
-                    try {
-                        if (!Listener.class.isAssignableFrom(clazz)) {
-                            CSend.error("Class " + clazz.getName() + " is annotated with @RegisterListener but does not implement Listener.");
-                            continue;
-                        }
-
-                        Listener listener = (Listener) clazz.getDeclaredConstructor().newInstance();
-                        BasePlugin.getPluginManager().registerEvents(listener, BasePlugin.getInstance());
-                        CSend.debug("Registered listener: " + clazz.getSimpleName());
-                    } catch (Exception e) {
-                        CSend.error("Failed to register Event Listener: " + clazz.getSimpleName() + " - " + e.getMessage());
-                        CSend.error(e);
-                    }
+            scanAndRegister(classes, "Event Listener", clazz -> {
+                if (!Listener.class.isAssignableFrom(clazz)) {
+                    CSend.error("Class " + clazz.getName() + " is annotated with @RegisterListener but does not implement Listener.");
+                    return;
                 }
+
+                Listener listener = (Listener) clazz.getDeclaredConstructor().newInstance();
+                BasePlugin.getPluginManager().registerEvents(listener, BasePlugin.getInstance());
+                CSend.debug("Registered listener: " + clazz.getSimpleName());
             });
         });
     }
@@ -64,78 +56,81 @@ public final class Register {
                     BASE_PACKAGE + ".command"
             ).getTypesAnnotatedWith(Command.class);
 
-            Bukkit.getScheduler().runTask(BasePlugin.getInstance(), () -> {
-                for (Class<?> clazz : classes) {
-                    try {
-                        if (!CommandBuilder.class.isAssignableFrom(clazz)) {
-                            CSend.warn(clazz.getName() + " is annotated with @Command but does not extend CommandBuilder.");
-                            continue;
-                        }
-
-                        CommandBuilder executor = (CommandBuilder) clazz.getDeclaredConstructor().newInstance();
-                        String commandName = clazz.getAnnotation(Command.class).name();
-                        CommandRegistry.registerCommand(commandName, executor, executor.getAliases());
-                        CSend.debug("Registered command: " + commandName);
-                    } catch (Exception e) {
-                        CSend.error("Failed to register Command: " + clazz.getSimpleName() + " - " + e.getMessage());
-                        CSend.error(e);
-                    }
+            scanAndRegister(classes, "Command", clazz -> {
+                if (!CommandBuilder.class.isAssignableFrom(clazz)) {
+                    CSend.warn(clazz.getName() + " is annotated with @Command but does not extend CommandBuilder.");
+                    return;
                 }
+
+                CommandBuilder executor = (CommandBuilder) clazz.getDeclaredConstructor().newInstance();
+                String commandName = clazz.getAnnotation(Command.class).name();
+                CommandRegistry.registerCommand(commandName, executor, executor.getAliases());
+                CSend.debug("Registered command: " + commandName);
             });
         });
     }
 
     public static void database() {
-        DataBaseConnection.initialize();
+        Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
+            DataBaseConnection.initialize();
 
-        scanAndRegister(new Reflections(
-                BASE_PACKAGE + ".database"
-        ).getSubTypesOf(TableBuilder.class), "Database Table", tableClass -> {
-            if (!tableClass.isAnnotationPresent(DataBaseTable.class)) {
-                CSend.error(tableClass.getName() + " extends TableBuilder but is missing @DataBaseTable.");
-                return;
-            }
+            Set<Class<? extends TableBuilder>> classes = new Reflections(
+                    BASE_PACKAGE + ".database"
+            ).getSubTypesOf(TableBuilder.class);
 
-            tableClass.getDeclaredConstructor().newInstance();
-            CSend.debug("Registered database table: " + tableClass.getSimpleName());
+            scanAndRegister(classes, "Database Table", clazz -> {
+                if (!clazz.isAnnotationPresent(DataBaseTable.class)) {
+                    CSend.error(clazz.getName() + " extends TableBuilder but is missing @DataBaseTable.");
+                    return;
+                }
+
+                clazz.getDeclaredConstructor().newInstance();
+                CSend.debug("Registered database table: " + clazz.getSimpleName());
+            });
         });
     }
 
     public static void config() {
-        scanAndRegister(new Reflections(
-                UTIL_PACKAGE + ".config.file",
-                BASE_PACKAGE + ".config"
-        ).getTypesAnnotatedWith(LoadConfig.class), "Config", clazz -> {
-            if (!ConfigBuilder.class.isAssignableFrom(clazz)) {
-                CSend.warn(clazz.getName() + " is annotated with @LoadConfig but does not extend ConfigBuilder.");
-                return;
-            }
+        Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
+            Set<Class<?>> classes = new Reflections(
+                    UTIL_PACKAGE + ".config.file",
+                    BASE_PACKAGE + ".config"
+            ).getTypesAnnotatedWith(LoadConfig.class);
 
-            @SuppressWarnings("unchecked") Class<? extends ConfigBuilder> typedClass = (Class<? extends ConfigBuilder>) clazz;
-
-            if (clazz.isAnnotationPresent(IgnoreFile.class)) {
-                IgnoreFile ignore = clazz.getAnnotation(IgnoreFile.class);
-                if ((ignore.ifNoDatabase() && !BasePlugin.isDatabase()) || (ignore.ifNoLicense() && !BasePlugin.isLicense())) {
-                    CSend.debug("Skipping config " + clazz.getSimpleName() + " due to @IgnoreFile conditions.");
+            scanAndRegister(classes, "Config", clazz -> {
+                if (!ConfigBuilder.class.isAssignableFrom(clazz)) {
+                    CSend.warn(clazz.getName() + " is annotated with @LoadConfig but does not extend ConfigBuilder.");
                     return;
                 }
-            }
 
-            ConfigBuilder config = typedClass.getDeclaredConstructor().newInstance();
-            ConfigUtil.getCONFIG_INSTANCE().put(typedClass, config);
-            CSend.debug("Registered config: " + clazz.getSimpleName());
+                @SuppressWarnings("unchecked") Class<? extends ConfigBuilder> typedClass = (Class<? extends ConfigBuilder>) clazz;
+
+                if (clazz.isAnnotationPresent(IgnoreFile.class)) {
+                    IgnoreFile ignore = clazz.getAnnotation(IgnoreFile.class);
+                    if ((ignore.ifNoDatabase() && !BasePlugin.isDatabase()) || (ignore.ifNoLicense() && !BasePlugin.isLicense())) {
+                        CSend.debug("Skipping config " + clazz.getSimpleName() + " due to @IgnoreFile conditions.");
+                        return;
+                    }
+                }
+
+                ConfigBuilder config = typedClass.getDeclaredConstructor().newInstance();
+                ConfigUtil.getCONFIG_INSTANCE().put(typedClass, config);
+                CSend.debug("Registered config: " + clazz.getSimpleName());
+            });
         });
     }
 
     private static <T> void scanAndRegister(Set<Class<? extends T>> classes, String label, RegistryAction action) {
-        for (Class<?> clazz : classes) {
-            try {
-                action.execute(clazz);
-            } catch (Exception e) {
-                CSend.error("Failed to register " + label + ": " + clazz.getSimpleName() + " - " + e.getMessage());
-                CSend.error(e);
+        Bukkit.getScheduler().runTask(BasePlugin.getInstance(), () -> {
+            for (Class<?> clazz : classes) {
+                try {
+                    action.execute(clazz);
+                } catch (Exception e) {
+                    CSend.error("Failed to register " + label + ": " + clazz.getSimpleName() + " - " + e.getMessage());
+                    CSend.error(e);
+                }
             }
-        }
+        });
     }
 
     @FunctionalInterface
