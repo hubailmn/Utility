@@ -28,7 +28,9 @@ public final class CSend {
     }
 
     public static void prefixed(String message) {
-        plain(getPrefix() + " " + message);
+        String prefix = getPrefix();
+        prefix = (prefix == null || prefix.isEmpty()) ? "§7[§a" + BasePlugin.getPluginName() + "§7] §b>>§r" : prefix;
+        plain(prefix + " " + message);
     }
 
     public static void info(String message) {
