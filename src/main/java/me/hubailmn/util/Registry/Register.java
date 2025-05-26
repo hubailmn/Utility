@@ -103,9 +103,12 @@ public final class Register {
 
         Set<Class<?>> classes = reflections.getTypesAnnotatedWith(LoadConfig.class);
 
-        scanAndRegister(classes, "Config", clazz -> {
+        scanConfigAndRegister(classes, "Config", clazz -> {
+
             if (!ConfigBuilder.class.isAssignableFrom(clazz)) {
-                CSend.warn(clazz.getName() + " is annotated with @LoadConfig but does not extend ConfigBuilder.");
+                CSend.warn(clazz.getName() + " is annotated with @LoadConfig but does not extend ConfigBuilder");
+                CSend.warn("clazz classloader: " + clazz.getClassLoader());
+                CSend.warn("ConfigBuilder classloader: " + ConfigBuilder.class.getClassLoader());
                 return;
             }
 
@@ -123,7 +126,6 @@ public final class Register {
             ConfigUtil.getCONFIG_INSTANCE().put(typedClass, config);
             CSend.debug("Registered config: " + clazz.getSimpleName());
         });
-
     }
 
     private static <T> void scanAndRegister(Set<Class<? extends T>> classes, String label, RegistryAction action) {
@@ -137,6 +139,17 @@ public final class Register {
                 }
             }
         });
+    }
+
+    private static <T> void scanConfigAndRegister(Set<Class<? extends T>> classes, String label, RegistryAction action) {
+        for (Class<?> clazz : classes) {
+            try {
+                action.execute(clazz);
+            } catch (Exception e) {
+                CSend.error("Failed to register " + label + ": " + clazz.getSimpleName() + " - " + e.getMessage());
+                CSend.error(e);
+            }
+        }
     }
 
     @FunctionalInterface

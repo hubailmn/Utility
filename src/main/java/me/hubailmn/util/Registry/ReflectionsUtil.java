@@ -1,5 +1,6 @@
 package me.hubailmn.util.Registry;
 
+import me.hubailmn.util.BasePlugin;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -15,6 +16,7 @@ public final class ReflectionsUtil {
     public static Reflections build(String... packages) {
         return new Reflections(new ConfigurationBuilder()
                 .forPackages(packages)
+                .addClassLoaders(BasePlugin.getInstance().getClass().getClassLoader())
                 .addScanners(new TypeAnnotationsScanner(), new SubTypesScanner(false)));
     }
 }
