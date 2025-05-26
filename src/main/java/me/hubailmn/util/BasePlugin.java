@@ -59,6 +59,7 @@ public abstract class BasePlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         Configurator.setLevel("me.hubailmn.shaded.reflections", org.apache.logging.log4j.Level.OFF);
+        Configurator.setLevel("SpigotLibraryLoader", org.apache.logging.log4j.Level.OFF);
 
         rotateLogs();
 
