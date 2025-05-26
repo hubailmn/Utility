@@ -9,11 +9,10 @@ import me.hubailmn.util.config.ConfigBuilder;
 import me.hubailmn.util.config.ConfigUtil;
 import me.hubailmn.util.config.annotation.LoadConfig;
 import me.hubailmn.util.database.DataBaseConnection;
+import me.hubailmn.util.database.TableBuilder;
 import me.hubailmn.util.database.annotation.DataBaseTable;
 import me.hubailmn.util.interaction.CSend;
-import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
-import org.reflections.Reflections;
 
 import java.util.Set;
 
@@ -27,88 +26,63 @@ public final class Register {
     }
 
     public static void eventsListener() {
-        Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
-            Reflections reflections = ReflectionsUtil.build(
-                    UTIL_PACKAGE + ".listener",
-                    UTIL_PACKAGE + ".menu.listener",
-                    UTIL_PACKAGE + ".interaction",
-                    BASE_PACKAGE + ".listener",
-                    BASE_PACKAGE + ".menu"
-            );
+        scanAndRegister(ReflectionsUtil.build(
+                UTIL_PACKAGE + ".listener",
+                UTIL_PACKAGE + ".menu.listener",
+                UTIL_PACKAGE + ".interaction",
+                BASE_PACKAGE + ".listener",
+                BASE_PACKAGE + ".menu"
+        ).getTypesAnnotatedWith(RegisterListener.class), "Event Listener", clazz -> {
+            if (!Listener.class.isAssignableFrom(clazz)) {
+                CSend.error("Class " + clazz.getName() + " is annotated with @RegisterListener but does not implement Listener.");
+                return;
+            }
 
-            Set<Class<?>> classes = reflections.getTypesAnnotatedWith(RegisterListener.class);
-
-            scanAndRegister(classes, "Event Listener", clazz -> {
-                if (!Listener.class.isAssignableFrom(clazz)) {
-                    CSend.error("Class " + clazz.getName() + " is annotated with @RegisterListener but does not implement Listener.");
-                    return;
-                }
-
-                Listener listener = (Listener) clazz.getDeclaredConstructor().newInstance();
-                BasePlugin.getPluginManager().registerEvents(listener, BasePlugin.getInstance());
-                CSend.debug("Registered listener: " + clazz.getSimpleName());
-            });
+            Listener listener = (Listener) clazz.getDeclaredConstructor().newInstance();
+            BasePlugin.getPluginManager().registerEvents(listener, BasePlugin.getInstance());
+            CSend.debug("Registered listener: " + clazz.getSimpleName());
         });
     }
 
     public static void commands() {
-        Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
-            Reflections reflections = ReflectionsUtil.build(
-                    BASE_PACKAGE + ".command"
-            );
+        scanAndRegister(ReflectionsUtil.build(
+                BASE_PACKAGE + ".command"
+        ).getTypesAnnotatedWith(Command.class), "Command", clazz -> {
+            if (!CommandBuilder.class.isAssignableFrom(clazz)) {
+                CSend.warn(clazz.getName() + " is annotated with @Command but does not extend BaseCommand.");
+                return;
+            }
 
-            Set<Class<?>> classes = reflections.getTypesAnnotatedWith(Command.class);
-
-            scanAndRegister(classes, "Command", clazz -> {
-                if (!CommandBuilder.class.isAssignableFrom(clazz)) {
-                    CSend.warn(clazz.getName() + " is annotated with @Command but does not extend CommandBuilder.");
-                    return;
-                }
-
-                CommandBuilder executor = (CommandBuilder) clazz.getDeclaredConstructor().newInstance();
-                String commandName = clazz.getAnnotation(Command.class).name();
-                CommandRegistry.registerCommand(commandName, executor, executor.getAliases());
-                CSend.debug("Registered command: " + commandName);
-            });
+            CommandBuilder executor = (CommandBuilder) clazz.getDeclaredConstructor().newInstance();
+            String commandName = clazz.getAnnotation(Command.class).name();
+            CommandRegistry.registerCommand(commandName, executor, executor.getAliases());
+            CSend.debug("Registered command: " + commandName);
         });
     }
 
     public static void database() {
-        Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
-            DataBaseConnection.initialize();
+        DataBaseConnection.initialize();
 
-            Reflections reflections = ReflectionsUtil.build(
-                    BASE_PACKAGE + ".database"
-            );
+        scanAndRegister(ReflectionsUtil.build(
+                BASE_PACKAGE + ".database"
+        ).getSubTypesOf(TableBuilder.class), "Database Table", tableClass -> {
+            if (!tableClass.isAnnotationPresent(DataBaseTable.class)) {
+                CSend.error(tableClass.getName() + " extends TableBuilder but is missing @DataBaseTable.");
+                return;
+            }
 
-            Set<Class<?>> classes = reflections.getTypesAnnotatedWith(DataBaseTable.class);
-
-            scanAndRegister(classes, "Database Table", clazz -> {
-                if (!clazz.isAnnotationPresent(DataBaseTable.class)) {
-                    CSend.error(clazz.getName() + " extends TableBuilder but is missing @DataBaseTable.");
-                    return;
-                }
-
-                clazz.getDeclaredConstructor().newInstance();
-                CSend.debug("Registered database table: " + clazz.getSimpleName());
-            });
+            tableClass.getDeclaredConstructor().newInstance();
+            CSend.debug("Registered database table: " + tableClass.getSimpleName());
         });
     }
 
     public static void config() {
-        Reflections reflections = ReflectionsUtil.build(
+        scanAndRegister(ReflectionsUtil.build(
                 UTIL_PACKAGE + ".config.file",
                 BASE_PACKAGE + ".config"
-        );
-
-        Set<Class<?>> classes = reflections.getTypesAnnotatedWith(LoadConfig.class);
-
-        scanConfigAndRegister(classes, "Config", clazz -> {
-
+        ).getTypesAnnotatedWith(LoadConfig.class), "Config", clazz -> {
             if (!ConfigBuilder.class.isAssignableFrom(clazz)) {
-                CSend.warn(clazz.getName() + " is annotated with @LoadConfig but does not extend ConfigBuilder");
-                CSend.warn("clazz classloader: " + clazz.getClassLoader());
-                CSend.warn("ConfigBuilder classloader: " + ConfigBuilder.class.getClassLoader());
+                CSend.warn(clazz.getName() + " is annotated with @LoadConfig but does not extend ConfigBuilder.");
                 return;
             }
 
@@ -129,19 +103,6 @@ public final class Register {
     }
 
     private static <T> void scanAndRegister(Set<Class<? extends T>> classes, String label, RegistryAction action) {
-        Bukkit.getScheduler().runTask(BasePlugin.getInstance(), () -> {
-            for (Class<?> clazz : classes) {
-                try {
-                    action.execute(clazz);
-                } catch (Exception e) {
-                    CSend.error("Failed to register " + label + ": " + clazz.getSimpleName() + " - " + e.getMessage());
-                    CSend.error(e);
-                }
-            }
-        });
-    }
-
-    private static <T> void scanConfigAndRegister(Set<Class<? extends T>> classes, String label, RegistryAction action) {
         for (Class<?> clazz : classes) {
             try {
                 action.execute(clazz);
