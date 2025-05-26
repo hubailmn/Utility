@@ -69,6 +69,9 @@ public abstract class BasePlugin extends JavaPlugin {
         setPluginVersion(getInstance().getDescription().getVersion());
 
         preEnable();
+
+        setDebug(forceDebug);
+
         initialize();
 
         CSend.debug("Plugin has been enabled.");
