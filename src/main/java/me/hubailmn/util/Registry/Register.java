@@ -9,7 +9,6 @@ import me.hubailmn.util.config.ConfigBuilder;
 import me.hubailmn.util.config.ConfigUtil;
 import me.hubailmn.util.config.annotation.LoadConfig;
 import me.hubailmn.util.database.DataBaseConnection;
-import me.hubailmn.util.database.TableBuilder;
 import me.hubailmn.util.database.annotation.DataBaseTable;
 import me.hubailmn.util.interaction.CSend;
 import org.bukkit.Bukkit;
@@ -29,13 +28,15 @@ public final class Register {
 
     public static void eventsListener() {
         Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
-            Set<Class<?>> classes = new Reflections(
+            Reflections reflections = ReflectionsUtil.build(
                     UTIL_PACKAGE + ".listener",
                     UTIL_PACKAGE + ".menu.listener",
                     UTIL_PACKAGE + ".interaction",
                     BASE_PACKAGE + ".listener",
                     BASE_PACKAGE + ".menu"
-            ).getTypesAnnotatedWith(RegisterListener.class);
+            );
+
+            Set<Class<?>> classes = reflections.getTypesAnnotatedWith(RegisterListener.class);
 
             scanAndRegister(classes, "Event Listener", clazz -> {
                 if (!Listener.class.isAssignableFrom(clazz)) {
@@ -52,9 +53,11 @@ public final class Register {
 
     public static void commands() {
         Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
-            Set<Class<?>> classes = new Reflections(
+            Reflections reflections = ReflectionsUtil.build(
                     BASE_PACKAGE + ".command"
-            ).getTypesAnnotatedWith(Command.class);
+            );
+
+            Set<Class<?>> classes = reflections.getTypesAnnotatedWith(Command.class);
 
             scanAndRegister(classes, "Command", clazz -> {
                 if (!CommandBuilder.class.isAssignableFrom(clazz)) {
@@ -74,9 +77,11 @@ public final class Register {
         Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
             DataBaseConnection.initialize();
 
-            Set<Class<? extends TableBuilder>> classes = new Reflections(
+            Reflections reflections = ReflectionsUtil.build(
                     BASE_PACKAGE + ".database"
-            ).getSubTypesOf(TableBuilder.class);
+            );
+
+            Set<Class<?>> classes = reflections.getTypesAnnotatedWith(DataBaseTable.class);
 
             scanAndRegister(classes, "Database Table", clazz -> {
                 if (!clazz.isAnnotationPresent(DataBaseTable.class)) {
@@ -91,10 +96,12 @@ public final class Register {
     }
 
     public static void config() {
-        Set<Class<?>> classes = new Reflections(
+        Reflections reflections = ReflectionsUtil.build(
                 UTIL_PACKAGE + ".config.file",
                 BASE_PACKAGE + ".config"
-        ).getTypesAnnotatedWith(LoadConfig.class);
+        );
+
+        Set<Class<?>> classes = reflections.getTypesAnnotatedWith(LoadConfig.class);
 
         scanAndRegister(classes, "Config", clazz -> {
             if (!ConfigBuilder.class.isAssignableFrom(clazz)) {
