@@ -8,7 +8,7 @@ import me.hubailmn.util.config.annotation.LoadConfig;
 import org.bukkit.configuration.file.FileConfiguration;
 
 @LoadConfig(path = "DBConfig.yml")
-@IgnoreFile(ifNoDatabase = true)
+@IgnoreFile(database = true)
 public class DBConfig extends ConfigBuilder {
 
     public DBConfig() {

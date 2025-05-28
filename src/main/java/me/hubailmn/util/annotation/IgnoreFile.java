@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface IgnoreFile {
-    boolean ifNoDatabase() default false;
+    boolean database() default false;
 
-    boolean ifNoLicense() default false;
+    boolean license() default false;
 }

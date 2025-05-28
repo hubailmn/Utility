@@ -90,7 +90,7 @@ public final class Register {
 
             if (clazz.isAnnotationPresent(IgnoreFile.class)) {
                 IgnoreFile ignore = clazz.getAnnotation(IgnoreFile.class);
-                if ((ignore.ifNoDatabase() && !BasePlugin.isDatabase()) || (ignore.ifNoLicense() && !BasePlugin.isLicense())) {
+                if ((ignore.database() && !BasePlugin.isDatabase()) || (ignore.license() && !BasePlugin.isLicense())) {
                     CSend.debug("Skipping config " + clazz.getSimpleName() + " due to @IgnoreFile conditions.");
                     return;
                 }
