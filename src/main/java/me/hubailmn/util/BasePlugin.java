@@ -59,7 +59,6 @@ public abstract class BasePlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         Configurator.setLevel("me.hubailmn.shaded.reflections", org.apache.logging.log4j.Level.OFF);
-        Configurator.setLevel("SpigotLibraryLoader", org.apache.logging.log4j.Level.OFF);
 
         rotateLogs();
 
@@ -88,6 +87,10 @@ public abstract class BasePlugin extends JavaPlugin {
         if (isDatabase()) {
             CSend.debug("Closing Database Connection...");
             DataBaseConnection.close();
+        }
+
+        if (isLicense()) {
+            License.endLicenseSession();
         }
 
         CSend.debug("Plugin has been disabled.");
