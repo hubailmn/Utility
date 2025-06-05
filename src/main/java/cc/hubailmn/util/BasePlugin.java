@@ -1,7 +1,5 @@
 package cc.hubailmn.util;
 
-import lombok.Getter;
-import lombok.Setter;
 import cc.hubailmn.util.Registry.CommandRegistry;
 import cc.hubailmn.util.Registry.Register;
 import cc.hubailmn.util.config.ConfigUtil;
@@ -11,13 +9,11 @@ import cc.hubailmn.util.interaction.CSend;
 import cc.hubailmn.util.menu.MenuManager;
 import cc.hubailmn.util.plugin.CheckUpdates;
 import cc.hubailmn.util.plugin.License;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public abstract class BasePlugin extends JavaPlugin {
 
@@ -61,12 +57,12 @@ public abstract class BasePlugin extends JavaPlugin {
         Configurator.setLevel("cc.hubailmn.shaded.reflections", org.apache.logging.log4j.Level.OFF);
         Configurator.setLevel("org.reflections", org.apache.logging.log4j.Level.OFF);
 
-        rotateLogs();
-
         setInstance(this);
         setPluginManager(getServer().getPluginManager());
         setPluginName(getInstance().getName());
         setPluginVersion(getInstance().getDescription().getVersion());
+
+        CSend.init(getDataFolder());
 
         preEnable();
 
@@ -133,23 +129,6 @@ public abstract class BasePlugin extends JavaPlugin {
         }
 
         CSend.debug("Plugin has been initialized.");
-    }
-
-    private void rotateLogs() {
-        File dataFolder = getDataFolder();
-        File debugLog = new File(dataFolder, "debug.log");
-        File errorLog = new File(dataFolder, "error.log");
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-        String timestamp = sdf.format(new Date());
-
-        if (debugLog.exists()) {
-            debugLog.renameTo(new File(dataFolder, "debug_" + timestamp + ".log"));
-        }
-
-        if (errorLog.exists()) {
-            errorLog.renameTo(new File(dataFolder, "error_" + timestamp + ".log"));
-        }
     }
 
     protected void preEnable() {
