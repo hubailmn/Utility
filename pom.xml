@@ -55,15 +55,15 @@
                             <relocations>
                                 <relocation>
                                     <pattern>org.reflections</pattern>
-                                    <shadedPattern>me.hubailmn.shaded.reflections</shadedPattern>
+                                    <shadedPattern>cc.hubailmn.shaded.reflections</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>javassist</pattern>
-                                    <shadedPattern>me.hubailmn.shaded.javassist</shadedPattern>
+                                    <shadedPattern>cc.hubailmn.shaded.javassist</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>javax.annotation</pattern>
-                                    <shadedPattern>me.hubailmn.shaded.javax.annotation</shadedPattern>
+                                    <shadedPattern>cc.hubailmn.shaded.javax.annotation</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
