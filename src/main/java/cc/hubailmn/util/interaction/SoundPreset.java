@@ -1,7 +1,7 @@
 package cc.hubailmn.util.interaction;
 
-import lombok.Getter;
 import cc.hubailmn.util.interaction.player.PlayerSoundUtil;
+import lombok.Getter;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 

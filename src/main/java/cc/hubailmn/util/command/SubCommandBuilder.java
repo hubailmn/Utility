@@ -1,8 +1,8 @@
 package cc.hubailmn.util.command;
 
+import cc.hubailmn.util.command.annotation.SubCommand;
 import lombok.Getter;
 import lombok.Setter;
-import cc.hubailmn.util.command.annotation.SubCommand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 

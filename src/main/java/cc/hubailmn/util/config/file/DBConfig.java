@@ -1,10 +1,10 @@
 package cc.hubailmn.util.config.file;
 
-import lombok.Getter;
 import cc.hubailmn.util.BasePlugin;
 import cc.hubailmn.util.annotation.IgnoreFile;
 import cc.hubailmn.util.config.ConfigBuilder;
 import cc.hubailmn.util.config.annotation.LoadConfig;
+import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;
 
 @LoadConfig(path = "DBConfig.yml")

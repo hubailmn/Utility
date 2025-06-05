@@ -1,8 +1,8 @@
 package cc.hubailmn.util.interaction;
 
-import io.papermc.paper.event.player.AsyncChatEvent;
 import cc.hubailmn.util.BasePlugin;
 import cc.hubailmn.util.annotation.RegisterListener;
+import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

@@ -1,10 +1,10 @@
 package cc.hubailmn.util.menu.type;
 
-import lombok.Getter;
-import lombok.Setter;
 import cc.hubailmn.util.menu.MenuManager;
 import cc.hubailmn.util.menu.annotation.Menu;
 import cc.hubailmn.util.menu.interactive.Button;
+import lombok.Getter;
+import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

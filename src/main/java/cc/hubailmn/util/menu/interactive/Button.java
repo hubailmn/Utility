@@ -1,7 +1,7 @@
 package cc.hubailmn.util.menu.interactive;
 
-import lombok.Data;
 import cc.hubailmn.util.interaction.SoundPreset;
+import lombok.Data;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 

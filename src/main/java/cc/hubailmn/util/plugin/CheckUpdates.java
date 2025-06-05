@@ -1,9 +1,9 @@
 package cc.hubailmn.util.plugin;
 
-import lombok.Getter;
-import lombok.Setter;
 import cc.hubailmn.util.BasePlugin;
 import cc.hubailmn.util.interaction.CSend;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

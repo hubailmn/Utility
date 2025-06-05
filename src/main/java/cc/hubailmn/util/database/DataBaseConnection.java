@@ -1,13 +1,13 @@
 package cc.hubailmn.util.database;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-import lombok.Getter;
-import lombok.Setter;
 import cc.hubailmn.util.BasePlugin;
 import cc.hubailmn.util.config.ConfigUtil;
 import cc.hubailmn.util.config.file.DBConfig;
 import cc.hubailmn.util.interaction.CSend;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.File;
 import java.io.IOException;

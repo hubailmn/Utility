@@ -1,11 +1,11 @@
 package cc.hubailmn.util.plugin;
 
-import lombok.Getter;
-import lombok.Setter;
 import cc.hubailmn.util.BasePlugin;
 import cc.hubailmn.util.config.ConfigUtil;
 import cc.hubailmn.util.config.file.LicenseConfig;
 import cc.hubailmn.util.interaction.CSend;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 
 import java.io.InputStreamReader;

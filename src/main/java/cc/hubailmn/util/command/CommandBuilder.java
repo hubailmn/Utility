@@ -1,10 +1,10 @@
 package cc.hubailmn.util.command;
 
-import lombok.Getter;
-import lombok.Setter;
 import cc.hubailmn.util.BasePlugin;
 import cc.hubailmn.util.command.annotation.Command;
 import cc.hubailmn.util.command.annotation.SubCommand;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
