@@ -12,6 +12,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 public class DBConfig extends ConfigBuilder {
 
     public DBConfig() {
+        super();
         String key = "database.SQLite.path";
         String rawPath = getConfig().getString(key);
 
