@@ -1,11 +1,14 @@
 package cc.hubailmn.util.menu.type;
 
+import cc.hubailmn.util.interaction.SoundPreset;
+import cc.hubailmn.util.item.ItemBuilder;
 import cc.hubailmn.util.menu.MenuLayout;
 import cc.hubailmn.util.menu.MenuManager;
 import cc.hubailmn.util.menu.interactive.Button;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -28,6 +31,30 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
 
     public PagedMenuBuilder() {
         super();
+
+        nextPageButton = new Button(MenuLayout.getSlot(6, getSize() / 9), new ItemBuilder()
+                .material(Material.ARROW)
+                .name("§eNext Page")
+                .build()) {
+            @Override
+            public void onClick(Player player) {
+                SoundPreset.play(player, SoundPreset.SoundType.PAGE_FLIP);
+                setPage(getPage() + 1);
+                display(player);
+            }
+        };
+
+        previousPageButton = new Button(MenuLayout.getSlot(4, getSize() / 9), new ItemBuilder()
+                .material(Material.ARROW)
+                .name("§ePrevious Page")
+                .build()) {
+            @Override
+            public void onClick(Player player) {
+                SoundPreset.play(player, SoundPreset.SoundType.PAGE_FLIP);
+                setPage(getPage() - 1);
+                display(player);
+            }
+        };
     }
 
     public void addItems(ItemStack... items) {
@@ -61,6 +88,9 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
 
     protected void loadPage(Inventory inventory) {
         inventory.clear();
+
+        setItems(inventory);
+
         if (contentSlots.isEmpty()) return;
 
         int itemsPerPage = contentSlots.size();
@@ -71,8 +101,6 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
             int slot = contentSlots.get(i - startIndex);
             inventory.setItem(slot, items.get(i));
         }
-
-        setItems(inventory);
 
         if (previousPageButton != null && page > 0) {
             inventory.setItem(previousPageButton.getSlot(), previousPageButton.getItem());
@@ -121,4 +149,5 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
 
     @Override
     public abstract void setItems(Inventory inventory);
+
 }

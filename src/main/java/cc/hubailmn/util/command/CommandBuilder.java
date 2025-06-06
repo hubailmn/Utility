@@ -49,7 +49,7 @@ public abstract class CommandBuilder implements TabExecutor {
 
     public void addSubCommand() {
         Reflections reflections = new Reflections(
-                "me.hubailmn." + BasePlugin.getPluginName().toLowerCase() + ".command",
+                "cc.hubailmn." + BasePlugin.getPluginName().toLowerCase() + ".command",
                 new SubTypesScanner(false),
                 new TypeAnnotationsScanner()
         );
