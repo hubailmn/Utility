@@ -3,7 +3,9 @@ package cc.hubailmn.util.menu.listener;
 import cc.hubailmn.util.annotation.RegisterListener;
 import cc.hubailmn.util.menu.MenuManager;
 import cc.hubailmn.util.menu.interactive.Button;
+import cc.hubailmn.util.menu.interactive.InteractiveItem;
 import cc.hubailmn.util.menu.type.MenuBuilder;
+import cc.hubailmn.util.menu.type.PagedMenuBuilder;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -38,6 +40,14 @@ public class ButtonClickListener implements Listener {
 
         int slot = e.getRawSlot();
         if (slot < 0 || slot >= e.getInventory().getSize()) return;
+
+        if (menu instanceof PagedMenuBuilder pagedMenu) {
+            InteractiveItem item = pagedMenu.getInteractiveItemBySlot(slot);
+            if (item != null) {
+                item.handleClick(player);
+                return;
+            }
+        }
 
         List<Button> buttons = menu.getButtons();
         if (buttons == null) return;

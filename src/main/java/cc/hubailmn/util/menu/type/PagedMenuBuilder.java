@@ -5,6 +5,7 @@ import cc.hubailmn.util.item.ItemBuilder;
 import cc.hubailmn.util.menu.MenuLayout;
 import cc.hubailmn.util.menu.MenuManager;
 import cc.hubailmn.util.menu.interactive.Button;
+import cc.hubailmn.util.menu.interactive.InteractiveItem;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -12,7 +13,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,7 +22,7 @@ import java.util.List;
 @Setter
 public abstract class PagedMenuBuilder extends MenuBuilder {
 
-    protected final List<ItemStack> items = new ArrayList<>();
+    protected final List<InteractiveItem> items = new ArrayList<>();
     protected List<Integer> contentSlots = new ArrayList<>();
     protected Button nextPageButton;
     protected Button previousPageButton;
@@ -57,7 +57,7 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
         };
     }
 
-    public void addItems(ItemStack... items) {
+    public void addItems(InteractiveItem... items) {
         if (items != null) Collections.addAll(this.items, items);
     }
 
@@ -71,6 +71,16 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
                 }
             }
         }
+    }
+
+    public InteractiveItem getInteractiveItemBySlot(int clickedSlot) {
+        int index = contentSlots.indexOf(clickedSlot);
+        if (index == -1) return null;
+
+        int globalIndex = page * contentSlots.size() + index;
+        if (globalIndex >= items.size()) return null;
+
+        return items.get(globalIndex);
     }
 
     @Override
@@ -99,7 +109,7 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
 
         for (int i = startIndex; i < endIndex; i++) {
             int slot = contentSlots.get(i - startIndex);
-            inventory.setItem(slot, items.get(i));
+            inventory.setItem(slot, items.get(i).getItem());
         }
 
         if (previousPageButton != null && page > 0) {

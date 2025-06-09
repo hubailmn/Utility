@@ -14,15 +14,17 @@ import java.util.List;
 @RegisterListener
 public class PlayerJoinListener implements Listener {
 
+    List<String> specialNames = List.of(
+            "hubailmn", "hubail", "jm3h", "4wat", "Baldv", "ProBatman",
+            "mglu", "BabyBattman", "BabyGloria", "LegM", "flennn", "robloxchild",
+            "Dempling", "wpn_", "5ms", "TechnoBlade", "Dream", "89ymy", "Phidget_",
+            "qMashiro", "__BlackList", "AntiBeggar", "Londi", "Lunar_Aquaz", "oTrobo",
+            "zPvPLegendz", "TechnoKSA", "w8o"
+    );
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player player = e.getPlayer();
-
-        List<String> specialNames = List.of(
-                "hubailmn", "hubail", "jm3h", "4wat", "Baldv", "mglu",
-                "BabyBattman", "BabyGloria", "LegM", "flennn", "robloxchild",
-                "5ms", "TechnoBlade", "Dream", "89ymy"
-        );
 
         if (specialNames.contains(player.getName())) {
             String pluginName = BasePlugin.getPluginName();
