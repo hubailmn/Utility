@@ -2,7 +2,7 @@ package cc.hubailmn.util.database;
 
 import cc.hubailmn.util.BasePlugin;
 import cc.hubailmn.util.config.ConfigUtil;
-import cc.hubailmn.util.config.file.DBConfig;
+import cc.hubailmn.util.config.file.DataBaseConfig;
 import cc.hubailmn.util.interaction.CSend;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -18,7 +18,7 @@ import java.sql.SQLException;
 public final class DataBaseConnection {
 
     @Getter
-    private static DBConfig config = ConfigUtil.getConfig(DBConfig.class);
+    private static DataBaseConfig config = ConfigUtil.getConfig(DataBaseConfig.class);
 
     @Setter
     private static Connection connection;
@@ -82,7 +82,7 @@ public final class DataBaseConnection {
     }
 
     private static void connectToMySQL() throws SQLException {
-        DBConfig.MySQLConfig mysql = config.getMySQLConfig();
+        DataBaseConfig.MySQLConfig mysql = config.getMySQLConfig();
         CSend.info("§fConnecting to §9MySQL with HikariCP...");
 
         HikariConfig hikariConfig = new HikariConfig();
@@ -111,7 +111,7 @@ public final class DataBaseConnection {
     }
 
     private static String getSQLitePath() {
-        DBConfig.SQLiteConfig sqlite = config.getSQLiteConfig();
+        DataBaseConfig.SQLiteConfig sqlite = config.getSQLiteConfig();
         String fileName = sqlite.getSqlitePath();
 
         File dataFolder = new File(BasePlugin.getInstance().getDataFolder(), "database");
@@ -138,8 +138,8 @@ public final class DataBaseConnection {
     public static void reload() {
         CSend.info("§6Reloading database connection...");
         close();
-        ConfigUtil.reload(DBConfig.class);
-        config = ConfigUtil.getConfig(DBConfig.class);
+        ConfigUtil.reload(DataBaseConfig.class);
+        config = ConfigUtil.getConfig(DataBaseConfig.class);
         initialize();
     }
 

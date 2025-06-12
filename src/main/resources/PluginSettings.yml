@@ -1,7 +1,4 @@
 plugin:
-
   prefix: '§7[§a%plugin_name%§7] §b§l>>§r'
-
   version: '%plugin_version%'
-
   debug: false

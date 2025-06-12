@@ -4,7 +4,7 @@ import cc.hubailmn.util.BasePlugin;
 import cc.hubailmn.util.config.ConfigBuilder;
 import cc.hubailmn.util.config.annotation.LoadConfig;
 
-@LoadConfig(path = "PluginConfig.yml")
+@LoadConfig(path = "PluginSettings.yml")
 public class Config extends ConfigBuilder {
 
     private static final String PREFIX = "plugin.";

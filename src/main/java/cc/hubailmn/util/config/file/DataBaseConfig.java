@@ -7,11 +7,11 @@ import cc.hubailmn.util.config.annotation.LoadConfig;
 import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;
 
-@LoadConfig(path = "DBConfig.yml")
+@LoadConfig(path = "database/DataBaseConfig.yml")
 @IgnoreFile(database = true)
-public class DBConfig extends ConfigBuilder {
+public class DataBaseConfig extends ConfigBuilder {
 
-    public DBConfig() {
+    public DataBaseConfig() {
         super();
         String key = "database.SQLite.path";
         String rawPath = getConfig().getString(key);
