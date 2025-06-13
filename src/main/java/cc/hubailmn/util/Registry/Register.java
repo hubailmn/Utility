@@ -18,7 +18,7 @@ import java.util.Set;
 
 public final class Register {
 
-    private static final String BASE_PACKAGE = "cc.hubailmn." + BasePlugin.getPluginName().toLowerCase();
+    private static final String BASE_PACKAGE = BasePlugin.getPluginName();
     private static final String UTIL_PACKAGE = "cc.hubailmn.util";
 
     private Register() {

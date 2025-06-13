@@ -3,6 +3,7 @@ package cc.hubailmn.util.command;
 import cc.hubailmn.util.BasePlugin;
 import cc.hubailmn.util.command.annotation.Command;
 import cc.hubailmn.util.command.annotation.SubCommand;
+import cc.hubailmn.util.interaction.SoundPreset;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.command.CommandSender;
@@ -129,13 +130,25 @@ public abstract class CommandBuilder implements TabExecutor {
     }
 
     public boolean sendHelp(CommandSender sender) {
-        sender.sendMessage("§e§lCommand Information:");
+        sender.sendMessage("§eCommand Info:");
         sender.sendMessage("§7 - §fName: §b" + name);
-        sender.sendMessage("§7 - §fDescription: §a" + description);
-        sender.sendMessage("§7 - §fUsage: §6" + usageMessage);
+
+        if (!description.isEmpty()) {
+            sender.sendMessage("§7 - §fDescription: §a" + description);
+        }
+
+        if (!usageMessage.isEmpty()) {
+            sender.sendMessage("§7 - §fUsage: §6" + usageMessage);
+        }
+
         sender.sendMessage("§7 - §fPermission: §c" + (permission != null ? permission : "None"));
         sender.sendMessage("§7 - §fAliases: §d" + (aliases != null && !aliases.isEmpty() ? aliases : "None"));
         sender.sendMessage("§7 - §fSubcommands: §9" + (subCommands != null && !subCommands.isEmpty() ? subCommands.keySet() : "None"));
+
+        if (sender instanceof Player player) {
+            SoundPreset.play(player, SoundPreset.SoundType.CONFIRM);
+        }
+
         return true;
     }
 

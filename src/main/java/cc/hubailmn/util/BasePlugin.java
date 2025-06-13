@@ -22,6 +22,9 @@ public abstract class BasePlugin extends JavaPlugin {
     private static BasePlugin instance;
     @Getter
     @Setter
+    private static String packageName;
+    @Getter
+    @Setter
     private static PluginManager pluginManager;
     @Getter
     @Setter
@@ -129,6 +132,14 @@ public abstract class BasePlugin extends JavaPlugin {
         }
 
         CSend.debug("Plugin has been initialized.");
+    }
+
+    protected void setBasePackage(Class<? extends BasePlugin> pluginClass) {
+        setPackageName(pluginClass.getPackage().getName());
+    }
+
+    protected void setBasePackage(String packageName) {
+        setPackageName(packageName);
     }
 
     protected void preEnable() {
