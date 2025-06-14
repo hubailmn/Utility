@@ -18,8 +18,8 @@ import java.util.Set;
 
 public final class Register {
 
-    private static final String UTIL_PACKAGE = "cc.hubailmn.util";
     private static final String BASE_PACKAGE = BasePlugin.getPackageName();
+    private static final String UTIL_PACKAGE = "cc.hubailmn.util";
 
     private Register() {
         throw new UnsupportedOperationException("Utility class");
