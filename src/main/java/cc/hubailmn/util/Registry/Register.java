@@ -19,13 +19,13 @@ import java.util.Set;
 public final class Register {
 
     private static final String UTIL_PACKAGE = "cc.hubailmn.util";
+    private static final String BASE_PACKAGE = BasePlugin.getPackageName();
 
     private Register() {
         throw new UnsupportedOperationException("Utility class");
     }
 
     public static void eventsListener() {
-        String BASE_PACKAGE = BasePlugin.getPluginName();
         scanAndRegister(ReflectionsUtil.build(
                 UTIL_PACKAGE + ".listener",
                 UTIL_PACKAGE + ".menu.listener",
@@ -45,7 +45,7 @@ public final class Register {
     }
 
     public static void commands() {
-        String BASE_PACKAGE = BasePlugin.getPluginName();
+        System.out.println(BASE_PACKAGE);
         scanAndRegister(ReflectionsUtil.build(
                 BASE_PACKAGE + ".command"
         ).getTypesAnnotatedWith(Command.class), "Command", clazz -> {
@@ -62,7 +62,6 @@ public final class Register {
     }
 
     public static void database() {
-        String BASE_PACKAGE = BasePlugin.getPluginName();
         DataBaseConnection.initialize();
 
         scanAndRegister(ReflectionsUtil.build(
@@ -79,7 +78,6 @@ public final class Register {
     }
 
     public static void config() {
-        String BASE_PACKAGE = BasePlugin.getPluginName();
         scanAndRegister(ReflectionsUtil.build(
                 UTIL_PACKAGE + ".config.file",
                 BASE_PACKAGE + ".config"
