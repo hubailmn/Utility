@@ -143,8 +143,10 @@ public abstract class BasePlugin extends JavaPlugin {
     }
 
     protected void preEnable() {
+
     }
 
     protected void preDisable() {
+
     }
 }
