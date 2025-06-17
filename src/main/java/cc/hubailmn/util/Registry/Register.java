@@ -26,13 +26,14 @@ public final class Register {
     }
 
     public static void eventsListener() {
-        scanAndRegister(ReflectionsUtil.build(
+        scanAndRegister(ReflectionsUtil.getClassesWithAnnotation(
+                RegisterListener.class,
                 UTIL_PACKAGE + ".listener",
                 UTIL_PACKAGE + ".menu.listener",
                 UTIL_PACKAGE + ".interaction",
                 BASE_PACKAGE + ".listener",
                 BASE_PACKAGE + ".menu"
-        ).getTypesAnnotatedWith(RegisterListener.class), "Event Listener", clazz -> {
+        ), "Event Listener", clazz -> {
             if (!Listener.class.isAssignableFrom(clazz)) {
                 CSend.error("Class " + clazz.getName() + " is annotated with @RegisterListener but does not implement Listener.");
                 return;
@@ -45,9 +46,10 @@ public final class Register {
     }
 
     public static void commands() {
-        scanAndRegister(ReflectionsUtil.build(
+        scanAndRegister(ReflectionsUtil.getClassesWithAnnotation(
+                Command.class,
                 BASE_PACKAGE + ".command"
-        ).getTypesAnnotatedWith(Command.class), "Command", clazz -> {
+        ), "Command", clazz -> {
             if (!CommandBuilder.class.isAssignableFrom(clazz)) {
                 CSend.warn(clazz.getName() + " is annotated with @Command but does not extend BaseCommand.");
                 return;
@@ -63,9 +65,10 @@ public final class Register {
     public static void database() {
         DataBaseConnection.initialize();
 
-        scanAndRegister(ReflectionsUtil.build(
+        scanAndRegister(ReflectionsUtil.getClassesWithAnnotation(
+                DataBaseTable.class,
                 BASE_PACKAGE + ".database"
-        ).getTypesAnnotatedWith(DataBaseTable.class), "Database Table", tableClass -> {
+        ), "Database Table", tableClass -> {
             if (!TableBuilder.class.isAssignableFrom(tableClass)) {
                 CSend.warn(tableClass.getName() + " is annotated with @DataBaseTable but does not extend TableBuilder.");
                 return;
@@ -77,10 +80,11 @@ public final class Register {
     }
 
     public static void config() {
-        scanAndRegister(ReflectionsUtil.build(
+        scanAndRegister(ReflectionsUtil.getClassesWithAnnotation(
+                LoadConfig.class,
                 UTIL_PACKAGE + ".config.file",
                 BASE_PACKAGE + ".config"
-        ).getTypesAnnotatedWith(LoadConfig.class), "Config", clazz -> {
+        ), "Config", clazz -> {
             if (!ConfigBuilder.class.isAssignableFrom(clazz)) {
                 CSend.warn(clazz.getName() + " is annotated with @LoadConfig but does not extend ConfigBuilder.");
                 return;
