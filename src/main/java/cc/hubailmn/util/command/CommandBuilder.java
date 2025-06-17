@@ -1,6 +1,7 @@
 package cc.hubailmn.util.command;
 
 import cc.hubailmn.util.BasePlugin;
+import cc.hubailmn.util.Registry.ReflectionsUtil;
 import cc.hubailmn.util.command.annotation.Command;
 import cc.hubailmn.util.command.annotation.SubCommand;
 import cc.hubailmn.util.interaction.SoundPreset;
@@ -11,9 +12,6 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.scanners.TypeAnnotationsScanner;
 
 import java.util.*;
 
@@ -49,13 +47,9 @@ public abstract class CommandBuilder implements TabExecutor {
     }
 
     public void addSubCommand() {
-        Reflections reflections = new Reflections(
-                "cc.hubailmn." + BasePlugin.getPluginName().toLowerCase() + ".command",
-                new SubTypesScanner(false),
-                new TypeAnnotationsScanner()
-        );
-
-        Set<Class<?>> subCommandClasses = reflections.getTypesAnnotatedWith(SubCommand.class);
+        Set<Class<?>> subCommandClasses = ReflectionsUtil.build(
+                BasePlugin.getPackageName() + ".command"
+        ).getTypesAnnotatedWith(SubCommand.class);
 
         for (Class<?> clazz : subCommandClasses) {
             SubCommand subAnnotation = clazz.getAnnotation(SubCommand.class);
