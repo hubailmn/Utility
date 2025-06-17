@@ -45,7 +45,6 @@ public final class Register {
     }
 
     public static void commands() {
-        System.out.println(BASE_PACKAGE);
         scanAndRegister(ReflectionsUtil.build(
                 BASE_PACKAGE + ".command"
         ).getTypesAnnotatedWith(Command.class), "Command", clazz -> {
@@ -66,9 +65,9 @@ public final class Register {
 
         scanAndRegister(ReflectionsUtil.build(
                 BASE_PACKAGE + ".database"
-        ).getSubTypesOf(TableBuilder.class), "Database Table", tableClass -> {
-            if (!tableClass.isAnnotationPresent(DataBaseTable.class)) {
-                CSend.error(tableClass.getName() + " extends TableBuilder but is missing @DataBaseTable.");
+        ).getTypesAnnotatedWith(DataBaseTable.class), "Database Table", tableClass -> {
+            if (!TableBuilder.class.isAssignableFrom(tableClass)) {
+                CSend.warn(tableClass.getName() + " is annotated with @DataBaseTable but does not extend TableBuilder.");
                 return;
             }
 
