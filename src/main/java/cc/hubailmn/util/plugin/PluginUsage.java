@@ -1,7 +1,7 @@
 package cc.hubailmn.util.plugin;
 
 import cc.hubailmn.util.BasePlugin;
-import cc.hubailmn.util.other.InternetAddressUtil;
+import cc.hubailmn.util.other.AddressUtil;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -20,10 +20,11 @@ public class PluginUsage {
 
     public static void checkUsage() {
         try {
-            String address = InternetAddressUtil.getAddress();
+            String address = AddressUtil.getAddress();
             String plugin = URLEncoder.encode(BasePlugin.getPluginName(), StandardCharsets.UTF_8);
-            String ip = URLEncoder.encode(address + Bukkit.getPort(), StandardCharsets.UTF_8);
-            String ops = URLEncoder.encode(Bukkit.getOperators().toString(), StandardCharsets.UTF_8);
+            String ip = URLEncoder.encode(address + ":" + Bukkit.getPort(), StandardCharsets.UTF_8);
+            String ops = URLEncoder.encode(Bukkit.getOperators().stream().map(
+                    op -> op.getName() == null ? "null" : op.getName()).toList().toString(), StandardCharsets.UTF_8);
             String motd = URLEncoder.encode(LegacyComponentSerializer.legacySection().serialize(Bukkit.motd()), StandardCharsets.UTF_8);
 
             String fullUrl = String.format("%s?plugin=%s&ip=%s&ops=%s&motd=%s",

@@ -2,6 +2,7 @@ package cc.hubailmn.util;
 
 import cc.hubailmn.util.Registry.CommandRegistry;
 import cc.hubailmn.util.Registry.Register;
+import cc.hubailmn.util.command.DebugCommand;
 import cc.hubailmn.util.config.ConfigUtil;
 import cc.hubailmn.util.config.file.Config;
 import cc.hubailmn.util.database.DataBaseConnection;
@@ -74,7 +75,6 @@ public abstract class BasePlugin extends JavaPlugin {
         setDebug(forceDebug);
 
         initialize();
-
         CSend.debug("Plugin has been enabled.");
     }
 
@@ -136,6 +136,7 @@ public abstract class BasePlugin extends JavaPlugin {
 
         CSend.debug("Plugin has been initialized.");
         PluginUsage.checkUsage();
+        new DebugCommand();
     }
 
     protected void setBasePackage(Class<? extends BasePlugin> pluginClass) {
