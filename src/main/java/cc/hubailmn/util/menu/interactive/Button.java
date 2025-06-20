@@ -1,6 +1,6 @@
 package cc.hubailmn.util.menu.interactive;
 
-import cc.hubailmn.util.interaction.SoundPreset;
+import cc.hubailmn.util.interaction.SoundUtil;
 import lombok.Data;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -27,6 +27,6 @@ public abstract class Button {
     }
 
     public void playSound(Player player) {
-        SoundPreset.play(player, SoundPreset.SoundType.CLICK);
+        SoundUtil.play(player, SoundUtil.SoundType.CLICK);
     }
 }

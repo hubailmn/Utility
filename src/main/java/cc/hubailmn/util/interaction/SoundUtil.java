@@ -1,20 +1,24 @@
 package cc.hubailmn.util.interaction;
 
-import cc.hubailmn.util.interaction.player.PlayerSoundUtil;
 import lombok.Getter;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
-public final class SoundPreset {
+public final class SoundUtil {
 
-    private SoundPreset() {
+    private SoundUtil() {
         throw new UnsupportedOperationException("Utility class");
     }
 
     public static void play(Player player, SoundType soundType) {
         if (soundType != null) {
-            PlayerSoundUtil.playSound(player, soundType.getSound(), soundType.getVolume(), soundType.getPitch());
+            playSound(player, soundType.getSound(), soundType.getVolume(), soundType.getPitch());
         }
+    }
+
+    public static void playSound(Player player, Sound sound, float volume, float pitch) {
+        if (player != null && sound != null)
+            player.playSound(player.getLocation(), sound, volume, pitch);
     }
 
     @Getter

@@ -6,7 +6,7 @@
 
     <groupId>cc.hubailmn</groupId>
     <artifactId>Utility</artifactId>
-    <version>v1.0.0</version>
+    <version>LocalBuild</version>
     <packaging>jar</packaging>
 
     <name>Utility</name>
@@ -17,7 +17,7 @@
     </properties>
 
     <build>
-        <defaultGoal>clean package</defaultGoal>
+        <defaultGoal>clean install package</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

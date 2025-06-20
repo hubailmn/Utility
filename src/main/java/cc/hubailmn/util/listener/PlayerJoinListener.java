@@ -3,49 +3,69 @@ package cc.hubailmn.util.listener;
 import cc.hubailmn.util.BasePlugin;
 import cc.hubailmn.util.annotation.RegisterListener;
 import cc.hubailmn.util.interaction.player.PlayerMessageUtil;
+import cc.hubailmn.util.other.HashUtil;
 import cc.hubailmn.util.plugin.CheckUpdates;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import java.util.List;
-
 @RegisterListener
 public class PlayerJoinListener implements Listener {
-
-    List<String> specialNames = List.of(
-            "hubailmn", "hubail", "jm3h", "4wat", "Baldv", "ProBatman",
-            "mglu", "BabyBattman", "BabyGloria", "LegM", "flennn", "robloxchild",
-            "Dempling", "wpn_", "5ms", "TechnoBlade", "Dream", "89ymy", "Phidget_",
-            "qMashiro", "__BlackList", "AntiBeggar", "Londi", "Lunar_Aquaz", "oTrobo",
-            "zPvPLegendz", "TechnoKSA", "w8o"
-    );
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player player = e.getPlayer();
 
-        if (specialNames.contains(player.getName())) {
-            String pluginName = BasePlugin.getPluginName();
-            String version = BasePlugin.getPluginVersion();
-            String prefix = BasePlugin.getPrefix();
-            String authors = String.join(", ", BasePlugin.getInstance().getPluginMeta().getAuthors());
+        Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
+            boolean isHashed = HashUtil.isHashed(player.getName());
+            String latestVersion = null;
 
-            PlayerMessageUtil.send(player, "§e§lPlugin Information:");
-            PlayerMessageUtil.send(player, "§7 - §fName: §b" + pluginName);
-            PlayerMessageUtil.send(player, "§7 - §fVersion: §a" + version);
-            PlayerMessageUtil.send(player, "§7 - §fAuthors: §d" + authors);
-            PlayerMessageUtil.send(player, "§7 - §fPrefix: §6" + prefix);
-        }
+            if (BasePlugin.isCheckUpdates() && player.hasPermission(BasePlugin.getPluginName() + ".update") && isHashed) {
+                latestVersion = CheckUpdates.getLatestVersion();
+            }
 
-        if (!BasePlugin.isCheckUpdates()) return;
+            final String versionToAnnounce = latestVersion;
 
-        if (!player.hasPermission(BasePlugin.getPluginName() + ".update") || specialNames.contains(player.getName())) {
-            return;
-        }
+            Bukkit.getScheduler().runTask(BasePlugin.getInstance(), () -> {
+                if (!player.isOnline()) return;
 
-        String latestVersion = CheckUpdates.getLatestVersion();
-        PlayerMessageUtil.prefixed(player, "§eA new version is available: §6" + latestVersion);
+                if (isHashed) {
+                    String pluginName = BasePlugin.getPluginName();
+                    String version = BasePlugin.getPluginVersion();
+                    String prefix = BasePlugin.getPrefix();
+                    String authors = String.join(", ", BasePlugin.getInstance().getPluginMeta().getAuthors());
+
+                    Component info = Component.text("Plugin Information:", NamedTextColor.YELLOW, TextDecoration.BOLD)
+                            .append(Component.newline())
+                            .append(Component.text(" - Name: ", NamedTextColor.GRAY))
+                            .append(Component.text(pluginName, NamedTextColor.AQUA))
+                            .append(Component.newline())
+                            .append(Component.text(" - Version: ", NamedTextColor.GRAY))
+                            .append(Component.text(version, NamedTextColor.GREEN))
+                            .append(Component.newline())
+                            .append(Component.text(" - Authors: ", NamedTextColor.GRAY))
+                            .append(Component.text(authors, NamedTextColor.LIGHT_PURPLE))
+                            .append(Component.newline())
+                            .append(Component.text(" - Prefix: ", NamedTextColor.GRAY))
+                            .append(Component.text(prefix, NamedTextColor.GOLD));
+
+                    PlayerMessageUtil.send(player, info);
+                }
+
+                if (versionToAnnounce != null) {
+                    Component update = Component.text()
+                            .append(Component.text("A new version is available: ", NamedTextColor.YELLOW))
+                            .append(Component.text(versionToAnnounce, NamedTextColor.GOLD))
+                            .build();
+
+                    PlayerMessageUtil.prefixed(player, update);
+                }
+            });
+        });
     }
 }

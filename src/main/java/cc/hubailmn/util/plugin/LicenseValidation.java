@@ -4,6 +4,7 @@ import cc.hubailmn.util.BasePlugin;
 import cc.hubailmn.util.config.ConfigUtil;
 import cc.hubailmn.util.config.file.LicenseConfig;
 import cc.hubailmn.util.interaction.CSend;
+import cc.hubailmn.util.other.InternetAddressUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -15,31 +16,19 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
-public class License {
+public class LicenseValidation {
 
     @Getter
     private static final String licenseKey = ConfigUtil.getConfig(LicenseConfig.class).getKey();
 
     @Getter
-    private static final String ipAddress = resolvePublicIP();
-
-    @Getter
     @Setter
-    private static String LICENSE_URL = "https://<IP>:<PORT>/api/v1/license/";
-
-    private static String resolvePublicIP() {
-        try (Scanner scanner = new Scanner(new URL("https://api.ipify.org").openStream())) {
-            return scanner.nextLine();
-        } catch (Exception e) {
-            CSend.error("§cFailed to resolve public IP address.");
-            return "error";
-        }
-    }
+    private static String LICENSE_URL = "http://ivoryhost.hubailmn.cc:10015/api/v1/license/";
 
     public static void sendFirstRequest() {
         Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
             if (isLicenseInvalid()) {
-                CSend.info("§cLicense validation failed. Plugin will be disabled.");
+                CSend.info("§cvalidation failed. Plugin will be disabled.");
                 Bukkit.getPluginManager().disablePlugin(BasePlugin.getInstance());
             }
         });
@@ -47,28 +36,28 @@ public class License {
 
     public static void checkLicense() {
         if (isLicenseInvalid()) {
-            CSend.error("§cLicense check failed. Plugin will be disabled.");
+            CSend.info("§cvalidation failed. Plugin will be disabled.");
             Bukkit.getPluginManager().disablePlugin(BasePlugin.getInstance());
         }
     }
 
     public static void endLicenseSession() {
         try {
-            String url = String.format("%send-session?key=%s&ip=%s:%d&plugin=%s", LICENSE_URL, encode(licenseKey), encode(ipAddress), Bukkit.getServer().getPort(), encode(BasePlugin.getPluginName()));
+            String url = String.format("%send-session?key=%s&ip=%s:%d&plugin=%s", LICENSE_URL, encode(licenseKey), encode(InternetAddressUtil.getAddress()), Bukkit.getServer().getPort(), encode(BasePlugin.getPluginName()));
 
             HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
             connection.setRequestMethod("GET");
             connection.connect();
             connection.getInputStream().close();
         } catch (Exception e) {
-            CSend.warn("§7Failed to end license session.");
+            CSend.warn("§7Failed to end session.");
             CSend.error(e);
         }
     }
 
     private static boolean isLicenseInvalid() {
         try {
-            String url = String.format("%svalidate-license?key=%s&ip=%s:%d&plugin=%s", LICENSE_URL, encode(licenseKey), encode(ipAddress), Bukkit.getServer().getPort(), encode(BasePlugin.getPluginName()));
+            String url = String.format("%svalidate?key=%s&ip=%s:%d&plugin=%s", LICENSE_URL, encode(licenseKey), encode(InternetAddressUtil.getAddress()), Bukkit.getServer().getPort(), encode(BasePlugin.getPluginName()));
 
             HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
             connection.setRequestMethod("GET");
@@ -76,12 +65,12 @@ public class License {
 
             try (Scanner scanner = new Scanner(new InputStreamReader(connection.getInputStream()))) {
                 String response = scanner.hasNextLine() ? scanner.nextLine() : "";
-                boolean valid = "Valid License!".equals(response);
+                boolean valid = "Valid.".equals(response);
                 if (!valid) CSend.info("§c" + response);
                 return !valid;
             }
         } catch (Exception e) {
-            CSend.error("§cError occurred during license validation: " + e.getMessage());
+            CSend.error("§cError occurred during validation: " + e.getMessage());
             CSend.error(e);
             return true;
         }

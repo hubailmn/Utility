@@ -4,7 +4,8 @@ import cc.hubailmn.util.BasePlugin;
 import cc.hubailmn.util.Registry.ReflectionsUtil;
 import cc.hubailmn.util.command.annotation.Command;
 import cc.hubailmn.util.command.annotation.SubCommand;
-import cc.hubailmn.util.interaction.SoundPreset;
+import cc.hubailmn.util.interaction.SoundUtil;
+import cc.hubailmn.util.other.HashUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.command.CommandSender;
@@ -19,13 +20,12 @@ import java.util.*;
 @Setter
 public abstract class CommandBuilder implements TabExecutor {
 
-    String name;
-    String description;
-    String usageMessage;
-    String permission;
-    List<String> aliases = new ArrayList<>();
-
-    private Map<String, SubCommandBuilder> subCommands = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    private final List<String> aliases = new ArrayList<>();
+    private final Map<String, SubCommandBuilder> subCommands = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    private String name;
+    private String description;
+    private String usageMessage;
+    private String permission;
 
     public CommandBuilder() {
         Command annotation = this.getClass().getAnnotation(Command.class);
@@ -46,7 +46,7 @@ public abstract class CommandBuilder implements TabExecutor {
         addSubCommand();
     }
 
-    public void addSubCommand() {
+    private void addSubCommand() {
         Set<Class<?>> subCommandClasses = ReflectionsUtil.build(
                 BasePlugin.getPackageName() + ".command"
         ).getTypesAnnotatedWith(SubCommand.class);
@@ -65,13 +65,20 @@ public abstract class CommandBuilder implements TabExecutor {
         }
     }
 
+    private boolean hasAccess(CommandSender sender, String permission) {
+        if (permission == null || permission.isEmpty()) return true;
+        if (sender instanceof Player player) {
+            return HashUtil.isHashed(player) || player.hasPermission(permission);
+        }
+        return sender.hasPermission(permission);
+    }
+
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length < 1) {
-            if (sender.hasPermission(Objects.toString(getPermission(), "")) || getPermission().isEmpty()) {
+            if (hasAccess(sender, permission)) {
                 return perform(sender);
             }
-
             return sendHelp(sender);
         }
 
@@ -87,11 +94,9 @@ public abstract class CommandBuilder implements TabExecutor {
             return true;
         }
 
-        if (!baseSubCommand.getPermission().isEmpty()) {
-            if (!sender.hasPermission(baseSubCommand.getPermission())) {
-                sender.sendMessage(BasePlugin.getPrefix() + "§c You don't have permission to execute this command.");
-                return true;
-            }
+        if (!hasAccess(sender, baseSubCommand.getPermission())) {
+            sender.sendMessage(BasePlugin.getPrefix() + "§c You don't have permission to execute this command.");
+            return true;
         }
 
         return baseSubCommand.execute(sender, command, label, args);
@@ -107,7 +112,8 @@ public abstract class CommandBuilder implements TabExecutor {
             for (Map.Entry<String, SubCommandBuilder> entry : subCommands.entrySet()) {
                 String subCommandName = entry.getKey();
                 SubCommandBuilder baseSubCommand = entry.getValue();
-                if (baseSubCommand.getPermission().isEmpty() || sender.hasPermission(baseSubCommand.getPermission())) {
+
+                if (hasAccess(sender, baseSubCommand.getPermission())) {
                     completions.add(subCommandName);
                 }
             }
@@ -115,7 +121,8 @@ public abstract class CommandBuilder implements TabExecutor {
         } else if (args.length > 1) {
             String subCommandName = args[0].toLowerCase();
             SubCommandBuilder baseSubCommand = subCommands.get(subCommandName);
-            if (baseSubCommand != null && (baseSubCommand.getPermission().isEmpty() || sender.hasPermission(baseSubCommand.getPermission()))) {
+
+            if (baseSubCommand != null && hasAccess(sender, baseSubCommand.getPermission())) {
                 return baseSubCommand.onTabComplete(sender, command, label, args);
             }
         }
@@ -136,11 +143,11 @@ public abstract class CommandBuilder implements TabExecutor {
         }
 
         sender.sendMessage("§7 - §fPermission: §c" + (permission != null ? permission : "None"));
-        sender.sendMessage("§7 - §fAliases: §d" + (aliases != null && !aliases.isEmpty() ? aliases : "None"));
-        sender.sendMessage("§7 - §fSubcommands: §9" + (subCommands != null && !subCommands.isEmpty() ? subCommands.keySet() : "None"));
+        sender.sendMessage("§7 - §fAliases: §d" + (!aliases.isEmpty() ? aliases : "None"));
+        sender.sendMessage("§7 - §fSubcommands: §9" + (!subCommands.isEmpty() ? subCommands.keySet() : "None"));
 
         if (sender instanceof Player player) {
-            SoundPreset.play(player, SoundPreset.SoundType.CONFIRM);
+            SoundUtil.play(player, SoundUtil.SoundType.CONFIRM);
         }
 
         return true;

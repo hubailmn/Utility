@@ -1,6 +1,7 @@
 package cc.hubailmn.util.interaction.player;
 
 import cc.hubailmn.util.BasePlugin;
+import cc.hubailmn.util.interaction.SoundUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentBuilder;
 import net.kyori.adventure.text.TextComponent;
@@ -222,7 +223,7 @@ public final class PlayerMessageUtil {
                 ));
 
                 if (sound != null) {
-                    PlayerSoundUtil.playSound(player, sound, volume, pitch);
+                    SoundUtil.playSound(player, sound, volume, pitch);
                 }
             }
         }.runTaskTimer(BasePlugin.getInstance(), 0L, frameDurationMillis / 50L);
@@ -253,7 +254,7 @@ public final class PlayerMessageUtil {
                 ));
 
                 if (sound != null) {
-                    PlayerSoundUtil.playSound(player, sound, volume, pitch);
+                    SoundUtil.playSound(player, sound, volume, pitch);
                 }
             }
         }.runTaskTimer(BasePlugin.getInstance(), 0L, frameDurationMillis / 50L);

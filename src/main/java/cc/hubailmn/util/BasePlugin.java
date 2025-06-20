@@ -7,8 +7,10 @@ import cc.hubailmn.util.config.file.Config;
 import cc.hubailmn.util.database.DataBaseConnection;
 import cc.hubailmn.util.interaction.CSend;
 import cc.hubailmn.util.menu.MenuManager;
+import cc.hubailmn.util.other.HashUtil;
 import cc.hubailmn.util.plugin.CheckUpdates;
-import cc.hubailmn.util.plugin.License;
+import cc.hubailmn.util.plugin.LicenseValidation;
+import cc.hubailmn.util.plugin.PluginUsage;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -90,9 +92,10 @@ public abstract class BasePlugin extends JavaPlugin {
         }
 
         if (isLicense()) {
-            License.endLicenseSession();
+            LicenseValidation.endLicenseSession();
         }
 
+        HashUtil.clearCache();
         CSend.debug("Plugin has been disabled.");
     }
 
@@ -107,7 +110,7 @@ public abstract class BasePlugin extends JavaPlugin {
 
         if (isLicense()) {
             CSend.debug("Checking plugin license...");
-            License.checkLicense();
+            LicenseValidation.sendFirstRequest();
         }
 
         if (isDatabase()) {
@@ -132,6 +135,7 @@ public abstract class BasePlugin extends JavaPlugin {
         }
 
         CSend.debug("Plugin has been initialized.");
+        PluginUsage.checkUsage();
     }
 
     protected void setBasePackage(Class<? extends BasePlugin> pluginClass) {

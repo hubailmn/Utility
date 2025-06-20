@@ -1,6 +1,6 @@
 package cc.hubailmn.util.menu.type;
 
-import cc.hubailmn.util.interaction.SoundPreset;
+import cc.hubailmn.util.interaction.SoundUtil;
 import cc.hubailmn.util.item.ItemBuilder;
 import cc.hubailmn.util.menu.MenuLayout;
 import cc.hubailmn.util.menu.MenuManager;
@@ -38,7 +38,7 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
                 .build()) {
             @Override
             public void onClick(Player player) {
-                SoundPreset.play(player, SoundPreset.SoundType.PAGE_FLIP);
+                SoundUtil.play(player, SoundUtil.SoundType.PAGE_FLIP);
                 setPage(getPage() + 1);
                 display(player);
             }
@@ -50,7 +50,7 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
                 .build()) {
             @Override
             public void onClick(Player player) {
-                SoundPreset.play(player, SoundPreset.SoundType.PAGE_FLIP);
+                SoundUtil.play(player, SoundUtil.SoundType.PAGE_FLIP);
                 setPage(getPage() - 1);
                 display(player);
             }
