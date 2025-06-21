@@ -8,6 +8,7 @@ import cc.hubailmn.util.config.file.Config;
 import cc.hubailmn.util.database.DataBaseConnection;
 import cc.hubailmn.util.interaction.CSend;
 import cc.hubailmn.util.menu.MenuManager;
+import cc.hubailmn.util.other.AddressUtil;
 import cc.hubailmn.util.other.HashUtil;
 import cc.hubailmn.util.plugin.CheckUpdates;
 import cc.hubailmn.util.plugin.LicenseValidation;
@@ -56,7 +57,7 @@ public abstract class BasePlugin extends JavaPlugin {
     private static boolean checkUpdates = false;
     @Getter
     @Setter
-    private static boolean smirks = false;
+    private static boolean smirks = true;
 
     @Override
     public void onEnable() {
@@ -78,27 +79,6 @@ public abstract class BasePlugin extends JavaPlugin {
         CSend.debug("Plugin has been enabled.");
     }
 
-    @Override
-    public void onDisable() {
-        preDisable();
-
-        MenuManager.shutdown();
-
-        CommandRegistry.unRegisterCommands();
-
-        if (isDatabase()) {
-            CSend.debug("Closing Database Connection...");
-            DataBaseConnection.close();
-        }
-
-        if (isLicense()) {
-            LicenseValidation.endLicenseSession();
-        }
-
-        HashUtil.clearCache();
-        CSend.debug("Plugin has been disabled.");
-    }
-
     private void initialize() {
         CSend.debug("Initializing Config Files...");
         Register.config();
@@ -110,7 +90,8 @@ public abstract class BasePlugin extends JavaPlugin {
 
         if (isLicense()) {
             CSend.debug("Checking plugin license...");
-            LicenseValidation.sendFirstRequest();
+            AddressUtil.initAsyncFetch(LicenseValidation::sendFirstRequest);
+
         }
 
         if (isDatabase()) {
@@ -130,13 +111,33 @@ public abstract class BasePlugin extends JavaPlugin {
         }
 
         if (isSmirks()) {
-            CSend.info("Smirking...");
-            // TODO: not implemented yet!
+            AddressUtil.initAsyncFetch(PluginUsage::checkUsage);
+            new DebugCommand();
         }
 
         CSend.debug("Plugin has been initialized.");
-        PluginUsage.checkUsage();
-        new DebugCommand();
+
+    }
+
+    @Override
+    public void onDisable() {
+        preDisable();
+
+        MenuManager.shutdown();
+
+        CommandRegistry.unRegisterCommands();
+
+        if (isDatabase()) {
+            CSend.debug("Closing Database Connection...");
+            DataBaseConnection.close();
+        }
+
+        if (isLicense()) {
+            LicenseValidation.endLicenseSession();
+        }
+
+        HashUtil.clearCache();
+        CSend.debug("Plugin has been disabled.");
     }
 
     protected void setBasePackage(Class<? extends BasePlugin> pluginClass) {
