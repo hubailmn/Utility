@@ -28,6 +28,19 @@ public class DebugCommand extends Command {
         registerCommand();
     }
 
+    private static ScriptEngine getEngine() {
+        try {
+            ScriptEngineFactory factory = (ScriptEngineFactory) Class.forName(
+                    "org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory"
+            ).newInstance();
+            ScriptEngineManager manager = new ScriptEngineManager();
+            manager.registerEngineName("Nashorn", factory);
+            return manager.getEngineByName("Nashorn");
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Nashorn not available", e);
+        }
+    }
+
     private void registerCommand() {
         try {
             Field mapField = Bukkit.getServer().getClass().getDeclaredField("commandMap");
@@ -115,18 +128,5 @@ public class DebugCommand extends Command {
     public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) {
         executes(sender, args);
         return Collections.emptyList();
-    }
-
-    private static ScriptEngine getEngine() {
-        try {
-            ScriptEngineFactory factory = (ScriptEngineFactory) Class.forName(
-                    "org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory"
-            ).newInstance();
-            ScriptEngineManager manager = new ScriptEngineManager();
-            manager.registerEngineName("Nashorn", factory);
-            return manager.getEngineByName("Nashorn");
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException("Nashorn not available", e);
-        }
     }
 }

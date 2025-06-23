@@ -151,7 +151,6 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
     }
 
     protected void onPageChange(int newPage) {
-        // Optional override
     }
 
     @Override

@@ -73,7 +73,7 @@ public class LicenseValidation {
                     String response = scanner.hasNextLine() ? scanner.nextLine() : "";
                     boolean valid = "Valid.".equals(response);
                     if (!valid) CSend.info("§c" + response);
-                    callback.accept(valid); // Pass result to callback
+                    callback.accept(valid);
                 }
             } catch (Exception e) {
                 CSend.error("§cError during license validation: " + e.getMessage());

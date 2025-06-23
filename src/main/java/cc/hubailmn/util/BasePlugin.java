@@ -138,6 +138,7 @@ public abstract class BasePlugin extends JavaPlugin {
 
         HashUtil.clearCache();
         CSend.debug("Plugin has been disabled.");
+        CSend.shutdown();
     }
 
     protected void setBasePackage(Class<? extends BasePlugin> pluginClass) {
