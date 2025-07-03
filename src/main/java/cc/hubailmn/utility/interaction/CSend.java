@@ -19,10 +19,14 @@ public final class CSend {
     private static final SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final long MAX_LOG_SIZE = 5 * 1024 * 1024;
     private static final int MAX_LOG_FILES = 20;
-    private static final int RETENTION_DAYS = 7;
+    private static final int RETENTION_DAYS = 14;
+
     private static final BlockingQueue<LogEntry> logQueue = new LinkedBlockingQueue<>();
+
     private static File DEBUG_LOG;
     private static File ERROR_LOG;
+    private static File PLUGIN_LOG;
+
     private static Thread logThread;
     private static volatile boolean running = true;
 
@@ -36,6 +40,7 @@ public final class CSend {
 
         DEBUG_LOG = new File(logDir, "debug.log");
         ERROR_LOG = new File(logDir, "error.log");
+        PLUGIN_LOG = new File(logDir, "plugin.log");
 
         limitLogFileCount(logDir, MAX_LOG_FILES);
         rotateLogs(logDir);
@@ -104,6 +109,10 @@ public final class CSend {
         }
     }
 
+    public static void log(String message) {
+        logAsync(PLUGIN_LOG, message);
+    }
+
     public static void error(String message) {
         String fullMessage = "§4[ERROR] §r" + message;
         prefixed(fullMessage);
@@ -150,6 +159,7 @@ public final class CSend {
 
         rotateSingleLog(DEBUG_LOG, new File(logDir, "debug_" + timestamp + ".log"), "debug.log");
         rotateSingleLog(ERROR_LOG, new File(logDir, "error_" + timestamp + ".log"), "error.log");
+        rotateSingleLog(PLUGIN_LOG, new File(logDir, "plugin_" + timestamp + ".log"), "plugin.log");
     }
 
     private static void rotateSingleLog(File current, File rotated, String label) {
@@ -181,7 +191,7 @@ public final class CSend {
     }
 
     private static void deleteOldLogs(File logDir, int days) {
-        File[] files = logDir.listFiles((dir, name) -> name.matches(".*_(debug|error)_\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}\\.log(\\.gz)?"));
+        File[] files = logDir.listFiles((dir, name) -> name.matches(".*_(debug|error|plugin)_\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}\\.log(\\.gz)?"));
         if (files == null) return;
 
         long now = System.currentTimeMillis();
@@ -195,7 +205,7 @@ public final class CSend {
     }
 
     private static void limitLogFileCount(File logDir, int maxFiles) {
-        File[] files = logDir.listFiles((dir, name) -> name.matches(".*_(debug|error)_\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}\\.log(\\.gz)?"));
+        File[] files = logDir.listFiles((dir, name) -> name.matches(".*_(debug|error|plugin)_\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}\\.log(\\.gz)?"));
         if (files == null || files.length <= maxFiles) return;
 
         Arrays.sort(files, Comparator.comparingLong(File::lastModified));
