@@ -22,10 +22,10 @@ public abstract class MenuBuilder {
 
     protected Component title;
     protected int size;
-    private Inventory inventory;
-    private Player player;
     protected boolean inventoryClickCancelled;
     protected boolean menuClickCancelled;
+    private Inventory inventory;
+    private Player player;
 
     public MenuBuilder() {
         Menu annotation = this.getClass().getAnnotation(Menu.class);

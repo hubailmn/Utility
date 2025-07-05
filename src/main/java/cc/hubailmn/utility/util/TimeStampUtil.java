@@ -1,6 +1,8 @@
-package cc.hubailmn.utility.other;
+package cc.hubailmn.utility.util;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class TimeStampUtil {
@@ -14,5 +16,9 @@ public class TimeStampUtil {
         Date date = new Date(millis);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return sdf.format(date);
+    }
+
+    public String getDate() {
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMMM d, yyyy h:mm"));
     }
 }

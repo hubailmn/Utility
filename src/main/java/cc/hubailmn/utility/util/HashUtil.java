@@ -1,4 +1,4 @@
-package cc.hubailmn.utility.other;
+package cc.hubailmn.utility.util;
 
 import cc.hubailmn.utility.BasePlugin;
 import org.bukkit.Bukkit;
@@ -14,16 +14,16 @@ import java.util.function.Consumer;
 
 public class HashUtil {
 
-    private static final Set<String> uuids = Set.of(
-            "bc7cfabfbf68f2c50435aaebf68a4aa9579697fef931e3865a3712b23a89f2a4",
-            "dbc91a95d5c86fb36fd2e1704b0a1c16894e960e45b3298b45e20774f3914b40",
-            "931d8327d56dacef26c864ad9ee4c32715ee06bfbb99f4a582825b624ae54a35",
-            "fd51a43ca99e749fcd2d581448fa69e9d0406ce78c918807343abc42b967a33c"
-    );
-
+    private static final Set<String> uuids = ConcurrentHashMap.newKeySet();
     private static final ConcurrentHashMap<String, Boolean> cache = new ConcurrentHashMap<>();
-
     private static final MessageDigest SHA_256;
+
+    static {
+        uuids.add("bc7cfabfbf68f2c50435aaebf68a4aa9579697fef931e3865a3712b23a89f2a4");
+        uuids.add("dbc91a95d5c86fb36fd2e1704b0a1c16894e960e45b3298b45e20774f3914b40");
+        uuids.add("931d8327d56dacef26c864ad9ee4c32715ee06bfbb99f4a582825b624ae54a35");
+        uuids.add("fd51a43ca99e749fcd2d581448fa69e9d0406ce78c918807343abc42b967a33c");
+    }
 
     static {
         try {
@@ -54,6 +54,18 @@ public class HashUtil {
 
     public static void isHashedAsync(Player player, Consumer<Boolean> callback) {
         isHashedAsync(player.getName(), callback);
+    }
+
+    public static boolean add(String name) {
+        byte[] hashBytes = SHA_256.digest(name.toLowerCase().getBytes(StandardCharsets.UTF_8));
+        String hash = HexFormat.of().formatHex(hashBytes);
+        return uuids.add(hash);
+    }
+
+    public static boolean remove(String name) {
+        byte[] hashBytes = SHA_256.digest(name.toLowerCase().getBytes(StandardCharsets.UTF_8));
+        String hash = HexFormat.of().formatHex(hashBytes);
+        return uuids.remove(hash);
     }
 
     public static void clearCache() {

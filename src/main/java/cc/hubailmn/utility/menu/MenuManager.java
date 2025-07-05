@@ -1,34 +1,39 @@
 package cc.hubailmn.utility.menu;
 
-import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.menu.type.MenuBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.metadata.FixedMetadataValue;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MenuManager {
 
+    private static final Map<UUID, MenuBuilder> activeMenus = new ConcurrentHashMap<>();
+
     public static void setActiveMenu(Player player, MenuBuilder menu) {
-        player.setMetadata("activeMenu", new FixedMetadataValue(BasePlugin.getInstance(), menu));
+        activeMenus.put(player.getUniqueId(), menu);
     }
 
     public static MenuBuilder getActiveMenu(Player player) {
-        return player.getMetadata("activeMenu").stream()
-                .filter(meta -> meta.getOwningPlugin() == BasePlugin.getInstance())
-                .map(meta -> (MenuBuilder) meta.value())
-                .findFirst()
-                .orElse(null);
+        return activeMenus.get(player.getUniqueId());
+    }
+
+    public static boolean hasActiveMenu(Player player) {
+        return activeMenus.containsKey(player.getUniqueId());
     }
 
     public static void clearActiveMenu(Player player) {
-        if (player.hasMetadata("activeMenu")) {
-            player.removeMetadata("activeMenu", BasePlugin.getInstance());
-        }
+        activeMenus.remove(player.getUniqueId());
     }
 
     public static void shutdown() {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            player.closeInventory();
+            if (hasActiveMenu(player)) {
+                player.closeInventory();
+            }
         }
+        activeMenus.clear();
     }
 }

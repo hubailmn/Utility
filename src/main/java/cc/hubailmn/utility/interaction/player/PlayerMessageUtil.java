@@ -82,11 +82,6 @@ public final class PlayerMessageUtil {
         sendCenteredMessage(player, legacyMessage);
     }
 
-    public static void silentSend(Player player, Component message) {
-        if (player == null || message == null) return;
-        player.sendMessage(message);
-    }
-
     public static void title(Player p, String main, String sub) {
         title(p,
                 LEGACY_SERIALIZER.deserialize(main != null ? main : ""),

@@ -1,4 +1,4 @@
-package cc.hubailmn.utility.other;
+package cc.hubailmn.utility.util;
 
 import java.util.Locale;
 

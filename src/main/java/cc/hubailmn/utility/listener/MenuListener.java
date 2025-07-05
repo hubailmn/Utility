@@ -63,7 +63,6 @@ public class MenuListener implements Listener {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
-        e.getPlayer().closeInventory();
         MenuManager.clearActiveMenu(e.getPlayer());
     }
 }

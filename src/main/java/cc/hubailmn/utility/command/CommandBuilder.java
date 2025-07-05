@@ -1,13 +1,12 @@
 package cc.hubailmn.utility.command;
 
 import cc.hubailmn.utility.BasePlugin;
-import cc.hubailmn.utility.registry.ReflectionsUtil;
 import cc.hubailmn.utility.command.annotation.Command;
 import cc.hubailmn.utility.command.annotation.SubCommand;
 import cc.hubailmn.utility.interaction.SoundUtil;
-import cc.hubailmn.utility.other.HashUtil;
-import lombok.Getter;
-import lombok.Setter;
+import cc.hubailmn.utility.registry.ReflectionsUtil;
+import cc.hubailmn.utility.util.HashUtil;
+import lombok.Data;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
@@ -16,8 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-@Getter
-@Setter
+@Data
 public abstract class CommandBuilder implements TabExecutor {
 
     private final List<String> aliases = new ArrayList<>();
@@ -63,6 +61,10 @@ public abstract class CommandBuilder implements TabExecutor {
                 }
             }
         }
+    }
+
+    public void addSubCommand(SubCommandBuilder subCommandBuilder) {
+        this.subCommands.put(subCommandBuilder.getName(), subCommandBuilder);
     }
 
     private boolean hasAccess(CommandSender sender, String permission) {

@@ -2,6 +2,7 @@ package cc.hubailmn.utility.listener;
 
 import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.annotation.RegisterListener;
+import cc.hubailmn.utility.interaction.player.PlayerMessageUtil;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
@@ -9,16 +10,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 @RegisterListener
 public class ChatInputManager implements Listener {
 
-    private static final Map<UUID, InputSession> sessions = new HashMap<>();
+    private static final Map<UUID, InputSession> sessions = new ConcurrentHashMap<>();
     private static final long DEFAULT_TIMEOUT_TICKS = 20 * 30;
 
     public static void ask(Player player, String prompt, Consumer<String> callback) {
@@ -29,15 +30,15 @@ public class ChatInputManager implements Listener {
         UUID uuid = player.getUniqueId();
 
         if (isAwaitingInput(player)) {
-            player.sendMessage(BasePlugin.getPrefix() + " §cYou're already being asked for input.");
+            PlayerMessageUtil.prefixed(player, "§cYou're already being asked for input.");
             return;
         }
 
-        player.sendMessage(BasePlugin.getPrefix() + " " + prompt);
+        PlayerMessageUtil.prefixed(player, prompt);
 
         int taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(BasePlugin.getInstance(), () -> {
             sessions.remove(uuid);
-            player.sendMessage(BasePlugin.getPrefix() + " §eInput timed out.");
+            PlayerMessageUtil.prefixed(player, "§eInput timed out.");
         }, timeoutTicks);
 
         sessions.put(uuid, new InputSession(callback, validator, taskId));
@@ -55,7 +56,7 @@ public class ChatInputManager implements Listener {
         Bukkit.getScheduler().cancelTask(session.taskId);
 
         if (!session.validator.test(message)) {
-            player.sendMessage(BasePlugin.getPrefix() + " §cInvalid input. Try again.");
+            PlayerMessageUtil.prefixed(player, "§cInvalid input. Try again.");
             return;
         }
 

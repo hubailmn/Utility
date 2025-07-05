@@ -1,18 +1,18 @@
 package cc.hubailmn.utility;
 
-import cc.hubailmn.utility.registry.CommandRegistry;
-import cc.hubailmn.utility.registry.Register;
 import cc.hubailmn.utility.command.DebugCommand;
 import cc.hubailmn.utility.config.ConfigUtil;
-import cc.hubailmn.utility.config.file.Config;
+import cc.hubailmn.utility.config.file.PluginSettingsConfig;
 import cc.hubailmn.utility.database.DataBaseConnection;
 import cc.hubailmn.utility.interaction.CSend;
 import cc.hubailmn.utility.menu.MenuManager;
-import cc.hubailmn.utility.other.AddressUtil;
-import cc.hubailmn.utility.other.HashUtil;
 import cc.hubailmn.utility.plugin.CheckUpdates;
 import cc.hubailmn.utility.plugin.LicenseValidation;
 import cc.hubailmn.utility.plugin.PluginUsage;
+import cc.hubailmn.utility.registry.CommandRegistry;
+import cc.hubailmn.utility.registry.Register;
+import cc.hubailmn.utility.util.AddressUtil;
+import cc.hubailmn.utility.util.HashUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -39,6 +39,9 @@ public abstract class BasePlugin extends JavaPlugin {
     @Getter
     @Setter
     private static String prefix;
+    @Getter
+    @Setter
+    private static PluginSettingsConfig pluginConfig;
 
     @Getter
     @Setter
@@ -84,10 +87,10 @@ public abstract class BasePlugin extends JavaPlugin {
         CSend.debug("Initializing Config Files...");
         Register.config();
 
-        Config mainConfig = ConfigUtil.getConfig(Config.class);
-        setPrefix(mainConfig.getPrefix());
+        setPluginConfig(ConfigUtil.getConfig(PluginSettingsConfig.class));
+        setPrefix(getPluginConfig().getPrefix());
 
-        setDebug(forceDebug || mainConfig.isDebug());
+        setDebug(forceDebug || getPluginConfig().isDebug());
 
         if (isLicense()) {
             CSend.debug("Checking plugin license...");
@@ -106,7 +109,7 @@ public abstract class BasePlugin extends JavaPlugin {
         CSend.debug("Registering Event Listeners...");
         Register.eventsListener();
 
-        if (isCheckUpdates()) {
+        if (isCheckUpdates() || getPluginConfig().isCheckForUpdates()) {
             CSend.info("Checking for updates...");
             CheckUpdates.checkForUpdates();
         }
@@ -122,9 +125,9 @@ public abstract class BasePlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        preDisable();
-
         MenuManager.shutdown();
+
+        preDisable();
 
         CommandRegistry.unRegisterCommands();
 

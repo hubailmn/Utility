@@ -1,7 +1,7 @@
 package cc.hubailmn.utility.config;
 
-import cc.hubailmn.utility.registry.Register;
 import cc.hubailmn.utility.interaction.CSend;
+import cc.hubailmn.utility.registry.Register;
 import lombok.Getter;
 
 import java.util.*;

@@ -1,7 +1,7 @@
 package cc.hubailmn.utility.plugin;
 
 import cc.hubailmn.utility.BasePlugin;
-import cc.hubailmn.utility.other.AddressUtil;
+import cc.hubailmn.utility.util.AddressUtil;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;

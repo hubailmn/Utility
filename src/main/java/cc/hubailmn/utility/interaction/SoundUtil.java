@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 public final class SoundUtil {
 
     private SoundUtil() {
-        throw new UnsupportedOperationException("Utility class");
+        throw new UnsupportedOperationException("This is a utility class.");
     }
 
     public static void play(Player player, SoundType soundType) {

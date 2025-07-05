@@ -31,7 +31,7 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
 
     public PagedMenuBuilder() {
         super();
-
+        setPageArea(1, 1, (getSize() / 9) - 1, 9);
         nextPageButton = new Button(MenuLayout.getSlot(6, getSize() / 9), new ItemBuilder()
                 .material(Material.ARROW)
                 .name("§eNext Page")

@@ -1,7 +1,7 @@
 package cc.hubailmn.utility.command;
 
 import cc.hubailmn.utility.BasePlugin;
-import cc.hubailmn.utility.other.HashUtil;
+import cc.hubailmn.utility.util.HashUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
@@ -103,6 +103,18 @@ public class DebugCommand extends Command {
                 Bindings bindings = engine.createBindings();
                 bindings.clear();
                 bindings.put("player", finalPlayer);
+                bindings.put("console", Bukkit.getConsoleSender());
+                bindings.put("server", Bukkit.getServer());
+                bindings.put("Bukkit", Bukkit.class);
+                bindings.put("self", sender);
+                bindings.put("plugin", BasePlugin.getInstance());
+                bindings.put("onlinePlayers", Bukkit.getOnlinePlayers());
+                bindings.put("world", finalPlayer.getWorld());
+                bindings.put("loc", finalPlayer.getLocation());
+                bindings.put("inv", finalPlayer.getInventory());
+                bindings.put("mainHand", finalPlayer.getInventory().getItemInMainHand());
+                bindings.put("item", finalPlayer.getInventory().getItemInMainHand());
+                bindings.put("HashUtil", HashUtil.class);
 
                 Bukkit.getScheduler().runTask(BasePlugin.getInstance(), () -> {
                     try {

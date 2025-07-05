@@ -4,7 +4,7 @@ import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.config.ConfigUtil;
 import cc.hubailmn.utility.config.file.LicenseConfig;
 import cc.hubailmn.utility.interaction.CSend;
-import cc.hubailmn.utility.other.AddressUtil;
+import cc.hubailmn.utility.util.AddressUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;

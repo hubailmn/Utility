@@ -1,4 +1,4 @@
-package cc.hubailmn.utility.other;
+package cc.hubailmn.utility.util;
 
 import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.interaction.CSend;

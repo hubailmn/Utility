@@ -1,6 +1,6 @@
 package cc.hubailmn.utility.item;
 
-import cc.hubailmn.utility.other.StringUtil;
+import cc.hubailmn.utility.util.StringUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.inventory.ItemStack;
@@ -9,9 +9,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Map;
 
-public class ItemsUtil {
+public class InventoryItemManager {
 
-    private ItemsUtil() {
+    private InventoryItemManager() {
         throw new UnsupportedOperationException("This is a utility class.");
     }
 

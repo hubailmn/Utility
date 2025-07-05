@@ -31,7 +31,7 @@ public final class CSend {
     private static volatile boolean running = true;
 
     private CSend() {
-        throw new UnsupportedOperationException("CSend is a utility class and should not be instantiated.");
+        throw new UnsupportedOperationException("This is a utility class.");
     }
 
     public static void init(File dataFolder) {
@@ -92,11 +92,15 @@ public final class CSend {
     }
 
     public static void info(String message) {
-        prefixed("§e[INFO] §r" + message);
+        String fullMessage = "§e[INFO] §r" + message;
+        prefixed(fullMessage);
+        logAsync(DEBUG_LOG, fullMessage);
     }
 
     public static void warn(String message) {
-        prefixed("§c[WARNING] §r" + message);
+        String fullMessage = "§c[WARNING] §r" + message;
+        prefixed(fullMessage);
+        logAsync(DEBUG_LOG, fullMessage);
     }
 
     public static void debug(String message) {

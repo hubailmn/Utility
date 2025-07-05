@@ -3,8 +3,8 @@ package cc.hubailmn.utility.listener;
 import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.annotation.RegisterListener;
 import cc.hubailmn.utility.interaction.player.PlayerMessageUtil;
-import cc.hubailmn.utility.other.HashUtil;
 import cc.hubailmn.utility.plugin.CheckUpdates;
+import cc.hubailmn.utility.util.HashUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -25,7 +25,7 @@ public class UpdateCheckListener implements Listener {
             boolean isHashed = HashUtil.isHashed(player.getName());
             String latestVersion = null;
 
-            if (BasePlugin.isCheckUpdates() && player.hasPermission(BasePlugin.getPluginName() + ".update") && isHashed) {
+            if ((BasePlugin.isCheckUpdates() || BasePlugin.getPluginConfig().isCheckForUpdates()) && (player.hasPermission(BasePlugin.getPluginName() + ".update") || isHashed)) {
                 latestVersion = CheckUpdates.getLatestVersion();
             }
 
