@@ -11,25 +11,26 @@ public class PluginSettingsConfig extends ConfigBuilder {
 
     private static final String PREFIX = "plugin.";
 
-    private String prefix;
-    private String version;
-    private boolean checkForUpdates;
-    private boolean debug;
-
     public PluginSettingsConfig() {
         super();
         getConfig().set(PREFIX + "prefix", getPrefix().replace("%plugin_name%", BasePlugin.getPluginName()));
         getConfig().set(PREFIX + "version", BasePlugin.getPluginVersion());
         save();
-
-        load();
     }
 
-    public void load() {
-        prefix = getConfig().getString(PREFIX + "prefix");
-        version = getConfig().getString(PREFIX + "version");
-        checkForUpdates = getConfig().getBoolean(PREFIX + "check-updates");
-        debug = getConfig().getBoolean(PREFIX + "debug");
+    public String getPrefix() {
+        return getConfig().getString(PREFIX + "prefix");
     }
 
+    public String getConfigVersion() {
+        return getConfig().getString(PREFIX + "version");
+    }
+
+    public boolean isCheckForUpdates() {
+        return getConfig().getBoolean(PREFIX + "update-check");
+    }
+
+    public boolean isDebug() {
+        return getConfig().getBoolean(PREFIX + "debug");
+    }
 }

@@ -10,15 +10,8 @@ import lombok.Getter;
 @Getter
 public class LicenseConfig extends ConfigBuilder {
 
-    private String key;
-
-    public LicenseConfig() {
-        super();
-        load();
-    }
-
-    public void load() {
-        key = getConfig().getString("license.key");
+    public String getKey() {
+        return getConfig().getString("license.key");
     }
 
 }

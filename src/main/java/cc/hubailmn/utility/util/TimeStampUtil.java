@@ -12,13 +12,17 @@ public class TimeStampUtil {
     }
 
     public static String formatTimestamp(long timestamp) {
+        return formatTimestamp(timestamp, "MMMM d, yyyy h:mm a");
+    }
+
+    public static String formatTimestamp(long timestamp, String pattern) {
         long millis = timestamp * 1000L;
         Date date = new Date(millis);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat(pattern);
         return sdf.format(date);
     }
 
     public String getDate() {
-        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMMM d, yyyy h:mm"));
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMMM d, yyyy h:mm a"));
     }
 }

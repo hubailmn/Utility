@@ -87,10 +87,10 @@ public abstract class BasePlugin extends JavaPlugin {
         CSend.debug("Initializing Config Files...");
         Register.config();
 
-        setPluginConfig(ConfigUtil.getConfig(PluginSettingsConfig.class));
-        setPrefix(getPluginConfig().getPrefix());
+        pluginConfig = ConfigUtil.getConfig(PluginSettingsConfig.class);
+        setPrefix(pluginConfig.getPrefix());
 
-        setDebug(forceDebug || getPluginConfig().isDebug());
+        setDebug(forceDebug || pluginConfig.isDebug());
 
         if (isLicense()) {
             CSend.debug("Checking plugin license...");
@@ -109,7 +109,7 @@ public abstract class BasePlugin extends JavaPlugin {
         CSend.debug("Registering Event Listeners...");
         Register.eventsListener();
 
-        if (isCheckUpdates() || getPluginConfig().isCheckForUpdates()) {
+        if (isCheckUpdates() || pluginConfig.isCheckForUpdates()) {
             CSend.info("Checking for updates...");
             CheckUpdates.checkForUpdates();
         }

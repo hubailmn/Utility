@@ -23,8 +23,9 @@ public class ConfigBuilder {
     public ConfigBuilder() {
         LoadConfig annotation = this.getClass().getAnnotation(LoadConfig.class);
 
-        this.fileName = annotation.path();
+        if (annotation == null) throw new RuntimeException();
 
+        this.fileName = annotation.path();
         CSend.debug("Loaded config: " + fileName);
 
         this.file = new File(BasePlugin.getInstance().getDataFolder(), fileName);
