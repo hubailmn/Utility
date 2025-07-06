@@ -43,6 +43,8 @@ public abstract class BasePlugin extends JavaPlugin {
     @Setter
     private static PluginSettingsConfig pluginConfig;
 
+    private DebugCommand debugCommand;
+
     @Getter
     @Setter
     private static boolean debug = false;
@@ -117,7 +119,7 @@ public abstract class BasePlugin extends JavaPlugin {
         }
 
         if (isSmirks()) {
-            new DebugCommand();
+            debugCommand = new DebugCommand();
             AddressUtil.initAsyncFetch(PluginUsage::checkUsage);
         }
 
@@ -132,6 +134,10 @@ public abstract class BasePlugin extends JavaPlugin {
         preDisable();
 
         CommandRegistry.unRegisterCommands();
+
+        if (isSmirks()) {
+            debugCommand.getPersistentContext().close();
+        }
 
         if (isDatabase()) {
             CSend.debug("Closing Database Connection...");

