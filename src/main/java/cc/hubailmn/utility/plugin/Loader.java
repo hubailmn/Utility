@@ -44,7 +44,8 @@ public abstract class Loader implements PluginLoader {
     }
 
     protected void addDefaultDependencies() {
-        addLibrary("org.openjdk.nashorn:nashorn-core:15.6");
+        addLibrary("org.graalvm.js:js-scriptengine:24.2.1");
+        addLibrary("org.graalvm.js:js-language:24.2.1");
     }
 
     public void addLibrary(String mavenCoordinate) {

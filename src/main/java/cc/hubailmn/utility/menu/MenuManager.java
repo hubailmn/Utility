@@ -30,7 +30,7 @@ public class MenuManager {
 
     public static void shutdown() {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (hasActiveMenu(player)) {
+            if (player != null && hasActiveMenu(player)) {
                 player.closeInventory();
             }
         }

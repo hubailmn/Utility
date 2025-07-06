@@ -62,12 +62,14 @@ public abstract class BasePlugin extends JavaPlugin {
     @Setter
     private static boolean smirks = true;
 
-    @Override
-    public void onEnable() {
+    static {
         Configurator.setLevel("SpigotLibraryLoader", org.apache.logging.log4j.Level.OFF);
         Configurator.setLevel("cc.hubailmn.shaded.reflections", org.apache.logging.log4j.Level.OFF);
         Configurator.setLevel("org.reflections", org.apache.logging.log4j.Level.OFF);
+    }
 
+    @Override
+    public void onEnable() {
         setInstance(this);
         setPluginManager(getServer().getPluginManager());
         setPluginName(getInstance().getName());

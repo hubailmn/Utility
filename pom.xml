@@ -48,7 +48,6 @@
     </build>
 
     <repositories>
-
         <repository>
             <id>papermc-repo</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
@@ -92,6 +91,13 @@
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
             <version>0.10.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js-scriptengine</artifactId>
+            <version>24.2.1</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Provided -->
