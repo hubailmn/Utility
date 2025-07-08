@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.MetadataValue;
 
 import java.util.UUID;
 
@@ -15,6 +16,18 @@ public final class PlayerUtil {
 
     public static boolean isOnline(UUID uuid) {
         return Bukkit.getPlayer(uuid) != null;
+    }
+
+    public static boolean isVanished(Player player) {
+        if (player == null || !player.hasMetadata("vanished")) {
+            return false;
+        }
+
+        for (MetadataValue meta : player.getMetadata("vanished")) {
+            if (meta.asBoolean()) return true;
+        }
+
+        return false;
     }
 
     public static boolean isBedrock(OfflinePlayer player) {
