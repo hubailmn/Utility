@@ -237,13 +237,6 @@ public final class CSend {
         return input.replaceAll("§[0-9a-fk-or]", "");
     }
 
-    private static class LogEntry {
-        final File file;
-        final String message;
-
-        LogEntry(File file, String message) {
-            this.file = file;
-            this.message = message;
-        }
+    private record LogEntry(File file, String message) {
     }
 }

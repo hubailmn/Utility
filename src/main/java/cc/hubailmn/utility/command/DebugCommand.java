@@ -34,6 +34,7 @@ public class DebugCommand extends Command {
 
     static {
         System.setProperty("polyglot.engine.WarnInterpreterOnly", "false");
+        System.setProperty("polyglotimpl.AttachLibraryFailureAction", "ignore");
     }
 
     public DebugCommand() {
@@ -51,7 +52,6 @@ public class DebugCommand extends Command {
             Value bindings = persistentContext.getBindings("js");
             bindings.putMember("plugin", PLUGIN);
             bindings.putMember("server", SERVER);
-            bindings.putMember("console", CONSOLE);
             bindings.putMember("Java", persistentContext.eval("js", "Java"));
         });
     }
@@ -116,7 +116,7 @@ public class DebugCommand extends Command {
             final String finalLine = line;
 
             Bukkit.getScheduler().runTask(BasePlugin.getInstance(), () -> {
-                sender.sendMessage("§6§l[Debug] §eRunning:");
+                sender.sendMessage("§6§l[Debug] §r§eRunning:");
                 sender.sendMessage(rawLine);
             });
 

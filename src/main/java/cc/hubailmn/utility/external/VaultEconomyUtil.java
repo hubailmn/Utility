@@ -12,7 +12,6 @@ public class VaultEconomyUtil {
     private static Economy economy;
 
     public static boolean setupEconomy() {
-
         if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
             CSend.warn("Vault is not installed.");
             return false;

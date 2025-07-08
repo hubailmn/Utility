@@ -123,7 +123,7 @@ public abstract class BasePlugin extends JavaPlugin {
             AddressUtil.initAsyncFetch(PluginUsage::checkUsage);
         }
 
-        CSend.debug("Plugin has been initialized.");
+        CSend.info(getPluginName() + " has been initialized.");
 
     }
 
@@ -140,7 +140,7 @@ public abstract class BasePlugin extends JavaPlugin {
         }
 
         if (isDatabase()) {
-            CSend.debug("Closing Database Connection...");
+            CSend.info("Closing Database Connection...");
             DataBaseConnection.close();
         }
 
@@ -149,7 +149,7 @@ public abstract class BasePlugin extends JavaPlugin {
         }
 
         HashUtil.clearCache();
-        CSend.debug("Plugin has been disabled.");
+        CSend.info(getPluginName() + " has been disabled.");
         CSend.shutdown();
     }
 
