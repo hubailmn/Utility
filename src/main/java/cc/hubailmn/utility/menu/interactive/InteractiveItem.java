@@ -7,7 +7,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.function.Consumer;
 
 @Data
-public abstract class InteractiveItem {
+public class InteractiveItem {
 
     private final ItemStack item;
     private final Consumer<Player> onClick;
@@ -15,6 +15,10 @@ public abstract class InteractiveItem {
     public InteractiveItem(ItemStack item, Consumer<Player> onClick) {
         this.item = item;
         this.onClick = onClick;
+    }
+
+    public InteractiveItem(ItemStack item) {
+        this(item, null);
     }
 
     public void handleClick(Player player) {

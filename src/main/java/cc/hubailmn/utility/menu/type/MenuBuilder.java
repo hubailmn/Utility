@@ -1,31 +1,27 @@
 package cc.hubailmn.utility.menu.type;
 
-import cc.hubailmn.utility.menu.MenuManager;
+import cc.hubailmn.utility.menu.MenuInventoryHolder;
 import cc.hubailmn.utility.menu.annotation.Menu;
 import cc.hubailmn.utility.menu.interactive.Button;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-@Getter
-@Setter
+@Data
 public abstract class MenuBuilder {
 
-    protected final List<Button> buttons = new ArrayList<>();
-
+    protected final Map<Integer, Button> buttons = new HashMap<>();
     protected Component title;
     protected int size;
     protected boolean inventoryClickCancelled;
     protected boolean menuClickCancelled;
-    private Inventory inventory;
-    private Player player;
+    protected Inventory inventory;
+    protected Player player;
 
     public MenuBuilder() {
         Menu annotation = this.getClass().getAnnotation(Menu.class);
@@ -40,33 +36,45 @@ public abstract class MenuBuilder {
     }
 
     public void display(Player player) {
-        MenuManager.clearActiveMenu(player);
-
         this.player = player;
-        this.inventory = Bukkit.createInventory(player, getSize(), getTitle());
+        if (this.inventory == null) {
+            this.inventory = Bukkit.createInventory(new MenuInventoryHolder(this), size, title);
+        }
+
         buttons.clear();
 
-        setupButtons(player);
+        setupButtons();
         setItems(inventory);
 
-        for (Button button : buttons) {
+        for (Button button : buttons.values()) {
             int slot = button.getSlot();
             if (slot >= 0 && slot < inventory.getSize()) {
                 inventory.setItem(slot, button.getItem());
             }
         }
 
-        MenuManager.setActiveMenu(player, this);
-        player.openInventory(inventory);
+        afterDisplay(inventory);
+
+        if (!player.getOpenInventory().getTopInventory().equals(inventory)) {
+            player.openInventory(inventory);
+        }
     }
 
     public void addButtons(Button... buttons) {
         if (buttons != null) {
-            Collections.addAll(this.buttons, buttons);
+            for (Button button : buttons) {
+                this.buttons.put(button.getSlot(), button);
+            }
         }
     }
 
-    public abstract void setupButtons(Player player);
+    protected void afterDisplay(Inventory inventory) {
+    }
+
+    public void onClose(Player player) {
+    }
+
+    public abstract void setupButtons();
 
     public abstract void setItems(Inventory inventory);
 }

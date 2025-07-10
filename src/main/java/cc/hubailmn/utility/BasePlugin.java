@@ -5,7 +5,6 @@ import cc.hubailmn.utility.config.ConfigUtil;
 import cc.hubailmn.utility.config.file.PluginSettingsConfig;
 import cc.hubailmn.utility.database.DataBaseConnection;
 import cc.hubailmn.utility.interaction.CSend;
-import cc.hubailmn.utility.menu.MenuManager;
 import cc.hubailmn.utility.plugin.CheckUpdates;
 import cc.hubailmn.utility.plugin.LicenseValidation;
 import cc.hubailmn.utility.plugin.PluginUsage;
@@ -42,9 +41,6 @@ public abstract class BasePlugin extends JavaPlugin {
     @Getter
     @Setter
     private static PluginSettingsConfig pluginConfig;
-
-    private DebugCommand debugCommand;
-
     @Getter
     @Setter
     private static boolean debug = false;
@@ -69,6 +65,8 @@ public abstract class BasePlugin extends JavaPlugin {
         Configurator.setLevel("cc.hubailmn.shaded.reflections", org.apache.logging.log4j.Level.OFF);
         Configurator.setLevel("org.reflections", org.apache.logging.log4j.Level.OFF);
     }
+
+    private DebugCommand debugCommand;
 
     @Override
     public void onEnable() {
@@ -129,8 +127,6 @@ public abstract class BasePlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        MenuManager.shutdown();
-
         preDisable();
 
         CommandRegistry.unRegisterCommands();

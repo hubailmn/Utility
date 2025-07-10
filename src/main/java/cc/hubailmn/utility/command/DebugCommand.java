@@ -26,16 +26,16 @@ libraries:
 public class DebugCommand extends Command {
 
     private static final String COMMAND_NAME = ";debug";
-    @Getter
-    private Context persistentContext;
     private static final Object PLUGIN = BasePlugin.getInstance();
     private static final Object SERVER = Bukkit.getServer();
-    private static final Object CONSOLE = Bukkit.getConsoleSender();
 
     static {
         System.setProperty("polyglot.engine.WarnInterpreterOnly", "false");
         System.setProperty("polyglotimpl.AttachLibraryFailureAction", "ignore");
     }
+
+    @Getter
+    private Context persistentContext;
 
     public DebugCommand() {
         super(COMMAND_NAME);
