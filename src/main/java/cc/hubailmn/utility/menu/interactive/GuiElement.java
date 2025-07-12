@@ -7,17 +7,17 @@ import org.bukkit.inventory.ItemStack;
 import java.util.function.Consumer;
 
 @Data
-public class InteractiveItem {
+public class GuiElement {
 
     private final ItemStack item;
     private final Consumer<Player> onClick;
 
-    public InteractiveItem(ItemStack item, Consumer<Player> onClick) {
+    public GuiElement(ItemStack item, Consumer<Player> onClick) {
         this.item = item;
         this.onClick = onClick;
     }
 
-    public InteractiveItem(ItemStack item) {
+    public GuiElement(ItemStack item) {
         this(item, null);
     }
 

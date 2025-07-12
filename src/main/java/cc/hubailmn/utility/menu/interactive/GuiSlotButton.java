@@ -7,24 +7,24 @@ import org.bukkit.inventory.ItemStack;
 import java.util.function.Consumer;
 
 @Getter
-public class Button extends InteractiveItem {
+public class GuiSlotButton extends GuiElement {
 
     private final int slot;
     private final ItemStack item;
     boolean clickCancel;
 
-    public Button(int slot, ItemStack item, Consumer<Player> onClick, boolean clickCancel) {
+    public GuiSlotButton(int slot, ItemStack item, Consumer<Player> onClick, boolean clickCancel) {
         super(item, onClick);
         this.slot = slot;
         this.item = item;
         this.clickCancel = clickCancel;
     }
 
-    public Button(int slot, ItemStack item, Consumer<Player> onClick) {
+    public GuiSlotButton(int slot, ItemStack item, Consumer<Player> onClick) {
         this(slot, item, onClick, true);
     }
 
-    public Button(int slot, ItemStack item) {
+    public GuiSlotButton(int slot, ItemStack item) {
         this(slot, item, null, true);
     }
 }

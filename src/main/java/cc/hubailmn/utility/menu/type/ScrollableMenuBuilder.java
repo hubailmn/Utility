@@ -3,8 +3,8 @@ package cc.hubailmn.utility.menu.type;
 import cc.hubailmn.utility.interaction.SoundUtil;
 import cc.hubailmn.utility.item.ItemBuilder;
 import cc.hubailmn.utility.menu.MenuLayout;
-import cc.hubailmn.utility.menu.interactive.Button;
-import cc.hubailmn.utility.menu.interactive.InteractiveItem;
+import cc.hubailmn.utility.menu.interactive.GuiSlotButton;
+import cc.hubailmn.utility.menu.interactive.GuiElement;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.bukkit.Material;
@@ -16,19 +16,19 @@ import java.util.*;
 @Getter
 public abstract class ScrollableMenuBuilder extends MenuBuilder {
 
-    protected final List<InteractiveItem> items = new ArrayList<>();
-    protected final Map<Integer, InteractiveItem> renderedItems = new HashMap<>();
+    protected final List<GuiElement> items = new ArrayList<>();
+    protected final Map<Integer, GuiElement> renderedItems = new HashMap<>();
     protected List<Integer> contentSlots = new ArrayList<>();
     protected int scrollOffset = 0;
 
-    protected Button scrollBackButton;
-    protected Button scrollNextButton;
+    protected GuiSlotButton scrollBackButton;
+    protected GuiSlotButton scrollNextButton;
 
     public ScrollableMenuBuilder() {
         super();
         setScrollArea(1, 1, (size / 9) - 1, 9);
 
-        scrollBackButton = new Button(MenuLayout.getSlot(4, size / 9), new ItemBuilder()
+        scrollBackButton = new GuiSlotButton(MenuLayout.getSlot(4, size / 9), new ItemBuilder()
                 .material(Material.ARROW)
                 .name("§eScroll Back")
                 .build(), player -> {
@@ -38,7 +38,7 @@ public abstract class ScrollableMenuBuilder extends MenuBuilder {
             }
         }, true);
 
-        scrollNextButton = new Button(MenuLayout.getSlot(6, size / 9), new ItemBuilder()
+        scrollNextButton = new GuiSlotButton(MenuLayout.getSlot(6, size / 9), new ItemBuilder()
                 .material(Material.ARROW)
                 .name("§eScroll Forward")
                 .build(), player -> {
@@ -62,7 +62,7 @@ public abstract class ScrollableMenuBuilder extends MenuBuilder {
         }
     }
 
-    public void addItems(InteractiveItem... items) {
+    public void addItems(GuiElement... items) {
         if (items != null) Collections.addAll(this.items, items);
     }
 
@@ -88,7 +88,7 @@ public abstract class ScrollableMenuBuilder extends MenuBuilder {
         int max = Math.min(scrollOffset + contentSlots.size(), items.size());
         for (int i = scrollOffset; i < max; i++) {
             int slot = contentSlots.get(i - scrollOffset);
-            InteractiveItem item = items.get(i);
+            GuiElement item = items.get(i);
             renderedItems.put(slot, item);
             inv.setItem(slot, item.getItem());
         }
@@ -103,14 +103,14 @@ public abstract class ScrollableMenuBuilder extends MenuBuilder {
             addButtons(scrollNextButton);
         }
 
-        for (Button button : buttons.values()) {
+        for (GuiSlotButton button : buttons.values()) {
             if (button.getSlot() >= 0 && button.getSlot() < inv.getSize()) {
                 inv.setItem(button.getSlot(), button.getItem());
             }
         }
     }
 
-    public InteractiveItem getInteractiveItemBySlot(int slot) {
+    public GuiElement getInteractiveItemBySlot(int slot) {
         return renderedItems.get(slot);
     }
 

@@ -2,7 +2,7 @@ package cc.hubailmn.utility.menu.type;
 
 import cc.hubailmn.utility.menu.MenuInventoryHolder;
 import cc.hubailmn.utility.menu.annotation.Menu;
-import cc.hubailmn.utility.menu.interactive.Button;
+import cc.hubailmn.utility.menu.interactive.GuiSlotButton;
 import lombok.Data;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -15,7 +15,7 @@ import java.util.Map;
 @Data
 public abstract class MenuBuilder {
 
-    protected final Map<Integer, Button> buttons = new HashMap<>();
+    protected final Map<Integer, GuiSlotButton> buttons = new HashMap<>();
     protected Component title;
     protected int size;
     protected boolean inventoryClickCancelled;
@@ -46,7 +46,7 @@ public abstract class MenuBuilder {
         setupButtons();
         setItems(inventory);
 
-        for (Button button : buttons.values()) {
+        for (GuiSlotButton button : buttons.values()) {
             int slot = button.getSlot();
             if (slot >= 0 && slot < inventory.getSize()) {
                 inventory.setItem(slot, button.getItem());
@@ -60,9 +60,9 @@ public abstract class MenuBuilder {
         }
     }
 
-    public void addButtons(Button... buttons) {
+    public void addButtons(GuiSlotButton... buttons) {
         if (buttons != null) {
-            for (Button button : buttons) {
+            for (GuiSlotButton button : buttons) {
                 this.buttons.put(button.getSlot(), button);
             }
         }

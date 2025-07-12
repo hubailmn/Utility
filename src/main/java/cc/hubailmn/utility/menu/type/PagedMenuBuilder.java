@@ -3,8 +3,8 @@ package cc.hubailmn.utility.menu.type;
 import cc.hubailmn.utility.interaction.SoundUtil;
 import cc.hubailmn.utility.item.ItemBuilder;
 import cc.hubailmn.utility.menu.MenuLayout;
-import cc.hubailmn.utility.menu.interactive.Button;
-import cc.hubailmn.utility.menu.interactive.InteractiveItem;
+import cc.hubailmn.utility.menu.interactive.GuiSlotButton;
+import cc.hubailmn.utility.menu.interactive.GuiElement;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.bukkit.Material;
@@ -19,10 +19,10 @@ import java.util.List;
 @Data
 public abstract class PagedMenuBuilder extends MenuBuilder {
 
-    protected final List<InteractiveItem> items = new ArrayList<>();
+    protected final List<GuiElement> items = new ArrayList<>();
     protected List<Integer> contentSlots = new ArrayList<>();
-    protected Button nextPageButton;
-    protected Button previousPageButton;
+    protected GuiSlotButton nextPageButton;
+    protected GuiSlotButton previousPageButton;
     protected int page = 0;
     protected boolean itemClickedCancel = true;
 
@@ -30,7 +30,7 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
         super();
         setPageArea(1, 1, (size / 9) - 1, 9);
 
-        previousPageButton = new Button(MenuLayout.getSlot(4, size / 9), new ItemBuilder()
+        previousPageButton = new GuiSlotButton(MenuLayout.getSlot(4, size / 9), new ItemBuilder()
                 .material(Material.ARROW)
                 .name("§ePrevious Page")
                 .build(), player -> {
@@ -40,7 +40,7 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
             onPageChange(page);
         }, true);
 
-        nextPageButton = new Button(MenuLayout.getSlot(6, size / 9), new ItemBuilder()
+        nextPageButton = new GuiSlotButton(MenuLayout.getSlot(6, size / 9), new ItemBuilder()
                 .material(Material.ARROW)
                 .name("§eNext Page")
                 .build(), player -> {
@@ -51,7 +51,7 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
         }, true);
     }
 
-    public void addItems(InteractiveItem... items) {
+    public void addItems(GuiElement... items) {
         if (items != null) Collections.addAll(this.items, items);
     }
 
@@ -67,7 +67,7 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
         }
     }
 
-    public InteractiveItem getInteractiveItemBySlot(int clickedSlot) {
+    public GuiElement getInteractiveItemBySlot(int clickedSlot) {
         int index = contentSlots.indexOf(clickedSlot);
         if (index == -1) return null;
 
@@ -109,7 +109,7 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
             addButtons(nextPageButton);
         }
 
-        for (Button button : buttons.values()) {
+        for (GuiSlotButton button : buttons.values()) {
             int slot = button.getSlot();
             if (slot >= 0 && slot < inventory.getSize()) {
                 inventory.setItem(slot, button.getItem());

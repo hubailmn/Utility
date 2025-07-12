@@ -3,8 +3,8 @@ package cc.hubailmn.utility.listener;
 import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.annotation.RegisterListener;
 import cc.hubailmn.utility.menu.MenuInventoryHolder;
-import cc.hubailmn.utility.menu.interactive.Button;
-import cc.hubailmn.utility.menu.interactive.InteractiveItem;
+import cc.hubailmn.utility.menu.interactive.GuiSlotButton;
+import cc.hubailmn.utility.menu.interactive.GuiElement;
 import cc.hubailmn.utility.menu.type.MenuBuilder;
 import cc.hubailmn.utility.menu.type.PagedMenuBuilder;
 import cc.hubailmn.utility.menu.type.ScrollableMenuBuilder;
@@ -49,14 +49,14 @@ public class MenuListener implements Listener {
         int slot = e.getRawSlot();
         if (slot < 0 || slot >= topInv.getSize()) return;
 
-        Button button = menu.getButtons().get(slot);
+        GuiSlotButton button = menu.getButtons().get(slot);
         if (button != null) {
             e.setCancelled(button.isClickCancel());
             button.handleClick(player);
             return;
         }
 
-        InteractiveItem item = null;
+        GuiElement item = null;
         boolean cancel = false;
 
         if (menu instanceof PagedMenuBuilder pagedMenu) {
