@@ -2,7 +2,7 @@ package cc.hubailmn.utility;
 
 import cc.hubailmn.utility.command.DebugCommand;
 import cc.hubailmn.utility.config.ConfigUtil;
-import cc.hubailmn.utility.config.file.PluginSettingsConfig;
+import cc.hubailmn.utility.config.file.PluginSettings;
 import cc.hubailmn.utility.database.DataBaseConnection;
 import cc.hubailmn.utility.interaction.CSend;
 import cc.hubailmn.utility.plugin.CheckUpdates;
@@ -40,7 +40,7 @@ public abstract class BasePlugin extends JavaPlugin {
     private static String prefix;
     @Getter
     @Setter
-    private static PluginSettingsConfig pluginConfig;
+    private static PluginSettings pluginConfig;
     @Getter
     @Setter
     private static boolean debug = false;
@@ -89,7 +89,7 @@ public abstract class BasePlugin extends JavaPlugin {
         CSend.debug("Initializing Config Files...");
         Register.config();
 
-        pluginConfig = ConfigUtil.getConfig(PluginSettingsConfig.class);
+        pluginConfig = ConfigUtil.getConfig(PluginSettings.class);
         setPrefix(pluginConfig.getPrefix());
 
         setDebug(forceDebug || pluginConfig.isDebug());

@@ -8,6 +8,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 import java.util.Map;
@@ -63,13 +64,14 @@ public class ChatInputManager implements Listener {
         session.callback.accept(message);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerChat(AsyncChatEvent event) {
         Player player = event.getPlayer();
         if (!isAwaitingInput(player)) return;
 
         event.setCancelled(true);
-        String message = PlainTextComponentSerializer.plainText().serialize(event.message());
+
+        String message = PlainTextComponentSerializer.plainText().serialize(event.originalMessage());
 
         Bukkit.getScheduler().runTask(BasePlugin.getInstance(), () -> handleInput(player, message));
     }

@@ -7,11 +7,11 @@ import lombok.Getter;
 
 @LoadConfig(path = "Settings.yml")
 @Getter
-public class PluginSettingsConfig extends ConfigBuilder {
+public class PluginSettings extends ConfigBuilder {
 
     private static final String PREFIX = "plugin.";
 
-    public PluginSettingsConfig() {
+    public PluginSettings() {
         super();
         getConfig().set(PREFIX + "prefix", getPrefix().replace("%plugin_name%", BasePlugin.getPluginName()));
         getConfig().set(PREFIX + "version", BasePlugin.getPluginVersion());

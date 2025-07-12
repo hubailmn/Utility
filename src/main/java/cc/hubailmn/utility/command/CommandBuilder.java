@@ -3,6 +3,7 @@ package cc.hubailmn.utility.command;
 import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.command.annotation.Command;
 import cc.hubailmn.utility.command.annotation.SubCommand;
+import cc.hubailmn.utility.interaction.CSend;
 import cc.hubailmn.utility.interaction.SoundUtil;
 import cc.hubailmn.utility.registry.ReflectionsUtil;
 import cc.hubailmn.utility.util.HashUtil;
@@ -52,6 +53,11 @@ public abstract class CommandBuilder implements TabExecutor {
         for (Class<?> clazz : subCommandClasses) {
             SubCommand subAnnotation = clazz.getAnnotation(SubCommand.class);
 
+            if (subAnnotation == null) {
+                CSend.warn("Failed to load subcommand: " + clazz.getName() + ". No @SubCommand annotation found.");
+                continue;
+            }
+
             if (subAnnotation.command().equals(this.getClass())) {
                 try {
                     SubCommandBuilder baseSubCommand = (SubCommandBuilder) clazz.getDeclaredConstructor().newInstance();
@@ -79,7 +85,7 @@ public abstract class CommandBuilder implements TabExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length < 1) {
             if (hasAccess(sender, permission)) {
-                return perform(sender);
+                return perform(sender, command, label, args);
             }
             return sendHelp(sender);
         }
@@ -88,6 +94,9 @@ public abstract class CommandBuilder implements TabExecutor {
         SubCommandBuilder baseSubCommand = subCommands.get(subCommandName);
 
         if (baseSubCommand == null) {
+            if (hasAccess(sender, permission)) {
+                return perform(sender, command, label, args);
+            }
             return sendHelp(sender);
         }
 
@@ -155,5 +164,5 @@ public abstract class CommandBuilder implements TabExecutor {
         return true;
     }
 
-    public abstract boolean perform(CommandSender sender);
+    public abstract boolean perform(CommandSender sender, org.bukkit.command.Command command, String label, String[] args);
 }
