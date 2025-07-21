@@ -11,19 +11,35 @@ public class VaultEconomyUtil {
 
     private static Economy economy;
 
+    private static String cachedCurrencyName = "money";
+    private static String cachedCurrencySymbol = "money";
+
     public static boolean setupEconomy() {
         if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
             CSend.warn("Vault is not installed.");
             return false;
         }
 
-        if (economy != null) return true;
-
         RegisteredServiceProvider<Economy> rsp = Bukkit.getServicesManager().getRegistration(Economy.class);
         if (rsp == null) return false;
 
         economy = rsp.getProvider();
+
+        refreshCache();
+        CSend.log("Economy provider found: " + economy.getName());
+
         return true;
+    }
+
+    public static void refreshCache() {
+        if (economy == null) return;
+
+        try {
+            cachedCurrencyName = economy.currencyNamePlural();
+            cachedCurrencySymbol = economy.getName();
+        } catch (Exception e) {
+            CSend.warn("Failed to refresh currency cache: " + e.getMessage());
+        }
     }
 
     public static boolean isEconomyAvailable() {
@@ -69,6 +85,10 @@ public class VaultEconomyUtil {
     }
 
     public static String getCurrencyName() {
-        return isEconomyAvailable() ? economy.currencyNamePlural() : "money";
+        return cachedCurrencyName;
+    }
+
+    public static String getCurrencySymbol() {
+        return cachedCurrencySymbol;
     }
 }

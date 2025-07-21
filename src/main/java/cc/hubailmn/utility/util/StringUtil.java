@@ -22,4 +22,25 @@ public final class StringUtil {
 
         return sb.toString().trim();
     }
+
+    public static String createProgressBar(int current, int max, int totalBars) {
+        if (max <= 0) max = 1;
+        double progress = (double) current / max;
+        int progressBars = (int) (progress * totalBars);
+
+        StringBuilder bar = new StringBuilder("§7[");
+        for (int i = 0; i < totalBars; i++) {
+            if (i < progressBars) {
+                bar.append("§a|");
+            } else {
+                bar.append("§8|");
+            }
+        }
+        bar.append("§7]");
+
+        int percent = (int) (progress * 100);
+        bar.append(" §e").append(percent).append("%");
+
+        return bar.toString();
+    }
 }

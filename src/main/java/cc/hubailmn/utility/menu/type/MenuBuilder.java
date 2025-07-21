@@ -43,8 +43,8 @@ public abstract class MenuBuilder {
 
         buttons.clear();
 
-        setupButtons();
         setItems(inventory);
+        setupButtons();
 
         for (GuiSlotButton button : buttons.values()) {
             int slot = button.getSlot();
