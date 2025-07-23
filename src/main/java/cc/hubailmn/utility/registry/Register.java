@@ -88,7 +88,7 @@ public final class Register {
 
             if (clazz.isAnnotationPresent(IgnoreFile.class)) {
                 IgnoreFile ignore = clazz.getAnnotation(IgnoreFile.class);
-                if ((ignore.database() && !BasePlugin.isDatabase()) || (ignore.license() && !BasePlugin.isLicense())) {
+                if ((ignore.database() && !BasePlugin.isDatabase()) || (ignore.license() && !BasePlugin.isLicense()) || (ignore.discord() && !BasePlugin.isDiscord())) {
                     CSend.debug("Skipping config " + clazz.getSimpleName() + " due to @IgnoreFile conditions.");
                     return;
                 }

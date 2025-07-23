@@ -1,0 +1,28 @@
+discord:
+  # Master toggle for all Discord integration features.
+  # Set to true to enable bot startup and related features.
+  enable: false
+
+  bot:
+    # The authentication token for your Discord bot.
+    # You can create one at https://discord.com/developers/applications
+    # Make sure to keep this **secret**
+    token: "XXXX.XXXX.XXXX"
+
+    # Sets the bot's visible status in Discord.
+    # Possible values: ONLINE, IDLE, DO_NOT_DISTURB, INVISIBLE, OFFLINE
+    # Example: 'DO_NOT_DISTURB' shows a red "Do Not Disturb" icon next to the bot.
+    status: ONLINE
+
+    activity:
+      # The type of presence activity the bot will display.
+      # Options: PLAYING, STREAMING, LISTENING, WATCHING, COMPETING
+      # For example, WATCHING "Over You!" results in: "Watching Over You!"
+      type: WATCHING
+
+      # The custom text that appears with the activity type.
+      # Used to make your bot feel more alive and personalized.
+      name: Over You!
+
+      # REQUIRED for STREAMING type
+      url: "https://twitch.tv/yourchannel"

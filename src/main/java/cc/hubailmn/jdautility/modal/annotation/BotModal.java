@@ -1,4 +1,4 @@
-package cc.hubailmn.utility.annotation;
+package cc.hubailmn.jdautility.modal.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,10 +7,8 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface IgnoreFile {
-    boolean database() default false;
+public @interface BotModal {
+    String id();
 
-    boolean license() default false;
-
-    boolean discord() default false;
+    String title();
 }

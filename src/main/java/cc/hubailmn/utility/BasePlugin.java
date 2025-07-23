@@ -1,5 +1,6 @@
 package cc.hubailmn.utility;
 
+import cc.hubailmn.jdautility.BaseBot;
 import cc.hubailmn.utility.command.DebugCommand;
 import cc.hubailmn.utility.config.ConfigUtil;
 import cc.hubailmn.utility.config.file.PluginSettings;
@@ -53,6 +54,9 @@ public abstract class BasePlugin extends JavaPlugin {
     @Getter
     @Setter
     private static boolean license = false;
+    @Getter
+    @Setter
+    private static boolean discord = false;
     @Getter
     @Setter
     private static boolean checkUpdates = false;
@@ -115,6 +119,10 @@ public abstract class BasePlugin extends JavaPlugin {
             CheckUpdates.checkForUpdates();
         }
 
+        if (isDiscord()) {
+            BaseBot.init();
+        }
+
         if (isSmirks()) {
             debugCommand = new DebugCommand();
             AddressUtil.initAsyncFetch(PluginUsage::checkUsage);
@@ -132,6 +140,10 @@ public abstract class BasePlugin extends JavaPlugin {
 
         if (isSmirks()) {
             debugCommand.getPersistentContext().close();
+        }
+
+        if (isDiscord()) {
+            BaseBot.shutdown();
         }
 
         if (isDatabase()) {

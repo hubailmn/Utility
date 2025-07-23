@@ -136,6 +136,14 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>net.dv8tion</groupId>
+            <artifactId>JDA</artifactId>
+            <version>5.6.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+
         <!-- Other Plugins -->
         <dependency>
             <groupId>com.comphenix.protocol</groupId>

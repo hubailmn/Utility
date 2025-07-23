@@ -1,4 +1,6 @@
-package cc.hubailmn.utility.annotation;
+package cc.hubailmn.jdautility.commands.annotation;
+
+import net.dv8tion.jda.api.Permission;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,10 +9,12 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface IgnoreFile {
-    boolean database() default false;
+public @interface BotCommand {
 
-    boolean license() default false;
+    String name();
 
-    boolean discord() default false;
+    String description();
+
+    Permission[] permission() default {};
+
 }
