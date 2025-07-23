@@ -36,7 +36,7 @@ public class BotCommandUtil {
             );
             count++;
         }
-        CSend.info("Updated commands for " + count + " guild(s).");
+        CSend.debug("Updated commands for " + count + " guild(s).");
     }
 
     public static CompletableFuture<Void> updateAllGuildCommandsAsync() {
@@ -58,7 +58,7 @@ public class BotCommandUtil {
         }
 
         return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                .thenRun(() -> CSend.info("Updated commands for all guilds."));
+                .thenRun(() -> CSend.debug("Updated commands for all guilds."));
     }
 
     public static void updateGuildCommands(Guild guild) {
@@ -75,7 +75,7 @@ public class BotCommandUtil {
                         failure -> CSend.error("Failed to update global commands on shard: " + failure.getMessage())
                 )
         );
-        CSend.info("Triggered global command update across all shards.");
+        CSend.debug("Triggered global command update across all shards.");
     }
 
     public static CompletableFuture<Void> updateGlobalCommandsAsync() {
@@ -97,7 +97,7 @@ public class BotCommandUtil {
         });
 
         return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                .thenRun(() -> CSend.info("Triggered global command update across all shards."));
+                .thenRun(() -> CSend.debug("Triggered global command update across all shards."));
     }
 
     public static void register(Guild guild) {
@@ -129,7 +129,7 @@ public class BotCommandUtil {
                     }
                 })
         );
-        CSend.info("Triggered global command clearing across all shards.");
+        CSend.debug("Triggered global command clearing across all shards.");
     }
 
     public static void clearGuildCommands() {
@@ -250,7 +250,7 @@ public class BotCommandUtil {
                 .thenCompose(v -> clearGuildCommandsAsync())
                 .thenCompose(v -> updateGlobalCommandsAsync())
                 .thenCompose(v -> updateAllGuildCommandsAsync())
-                .thenRun(() -> CSend.info("Reloaded all commands successfully."));
+                .thenRun(() -> CSend.debug("Reloaded all commands successfully."));
     }
 
     public static void registerAllGuild() {
