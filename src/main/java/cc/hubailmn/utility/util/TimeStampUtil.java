@@ -9,12 +9,15 @@ import java.util.TimeZone;
 
 public class TimeStampUtil {
 
+    private static final TimeZone DEFAULT_TIME_ZONE = TimeZone.getTimeZone("Asia/Riyadh");
+    private static final ZoneId DEFAULT_ZONE_ID = ZoneId.of("Asia/Riyadh");
+
     private TimeStampUtil() {
         throw new UnsupportedOperationException("This is a utility class.");
     }
 
     public static String formatTimestamp(long timestamp) {
-        return formatTimestamp(timestamp, "MMMM d, yyyy h:mm a", TimeZone.getDefault());
+        return formatTimestamp(timestamp, "MMMM d, yyyy h:mm a", DEFAULT_TIME_ZONE);
     }
 
     public static String formatTimestamp(long millisecond, String pattern, TimeZone timeZone) {
@@ -25,7 +28,7 @@ public class TimeStampUtil {
     }
 
     public static String formatTimestamp(long millisecond, String pattern) {
-        return formatTimestamp(millisecond, pattern, TimeZone.getDefault());
+        return formatTimestamp(millisecond, pattern, DEFAULT_TIME_ZONE);
     }
 
     public static String getDate(String pattern, ZoneId zoneId) {
@@ -33,6 +36,6 @@ public class TimeStampUtil {
     }
 
     public static String getDate() {
-        return getDate("MMMM d, yyyy h:mm a", ZoneId.systemDefault());
+        return getDate("MMMM d, yyyy h:mm a", DEFAULT_ZONE_ID);
     }
 }
