@@ -44,6 +44,7 @@ public abstract class BasePlugin extends JavaPlugin {
     private String pluginVersion;
 
     private HashUtil hashUtil;
+    private BaseBot baseBot;
     private PluginSettings pluginConfig;
     private DebugCommand debugCommand;
 
@@ -106,7 +107,7 @@ public abstract class BasePlugin extends JavaPlugin {
         }
 
         if (isDiscord()) {
-            BaseBot.init();
+            setBaseBot(new BaseBot());
         }
 
         if (isSendPluginUsage()) {
@@ -128,7 +129,10 @@ public abstract class BasePlugin extends JavaPlugin {
         }
 
         if (isDiscord()) {
-            BaseBot.shutdown();
+            BaseBot.getInstance().shutdownAsync().thenRun(() -> CSend.info("Discord bot has been disabled.")).exceptionally(throwable -> {
+                CSend.error("Failed to shutdown Discord bot: " + throwable.getMessage());
+                return null;
+            });
         }
 
         if (isDatabase()) {

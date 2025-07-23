@@ -41,8 +41,8 @@ public class BotRegister {
             Class<? extends BotCommandBuilder> typedClass = (Class<? extends BotCommandBuilder>) clazz;
 
             BotCommandBuilder commandBuilder = typedClass.getDeclaredConstructor().newInstance();
-            InstanceManager.addCommand(typedClass, commandBuilder);
-            BaseBot.getShardManager().addEventListener(commandBuilder);
+            BaseBot.getInstance().getInstanceManager().addCommand(typedClass, commandBuilder);
+            BaseBot.getInstance().getShardManager().addEventListener(commandBuilder);
             BotCommandUtil.addCommand(commandBuilder.getCommandData());
         });
     }
@@ -63,8 +63,8 @@ public class BotRegister {
             Class<? extends BotSubCommandBuilder> typedClass = (Class<? extends BotSubCommandBuilder>) clazz;
 
             BotSubCommandBuilder subCommandBuilder = typedClass.getDeclaredConstructor().newInstance();
-            InstanceManager.addSubCommand(typedClass, subCommandBuilder);
-            BaseBot.getShardManager().addEventListener(subCommandBuilder);
+            BaseBot.getInstance().getInstanceManager().addSubCommand(typedClass, subCommandBuilder);
+            BaseBot.getInstance().getShardManager().addEventListener(subCommandBuilder);
         });
     }
 
@@ -84,8 +84,8 @@ public class BotRegister {
             Class<? extends ListenerAdapter> typedClass = (Class<? extends ListenerAdapter>) clazz;
 
             ListenerAdapter listenerInstance = typedClass.getDeclaredConstructor().newInstance();
-            InstanceManager.addListener(typedClass, listenerInstance);
-            BaseBot.getShardManager().addEventListener(listenerInstance);
+            BaseBot.getInstance().getInstanceManager().addListener(typedClass, listenerInstance);
+            BaseBot.getInstance().getShardManager().addEventListener(listenerInstance);
         });
     }
 
@@ -105,8 +105,8 @@ public class BotRegister {
             Class<? extends ModalBuilder> typedClass = (Class<? extends ModalBuilder>) clazz;
 
             ModalBuilder modalInstance = typedClass.getDeclaredConstructor().newInstance();
-            InstanceManager.addModal(typedClass, modalInstance);
-            BaseBot.getShardManager().addEventListener(modalInstance);
+            BaseBot.getInstance().getInstanceManager().addModal(typedClass, modalInstance);
+            BaseBot.getInstance().getShardManager().addEventListener(modalInstance);
         });
     }
 

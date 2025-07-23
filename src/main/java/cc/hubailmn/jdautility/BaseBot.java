@@ -1,6 +1,8 @@
 package cc.hubailmn.jdautility;
 
+import cc.hubailmn.jdautility.commands.BotCommandUtil;
 import cc.hubailmn.jdautility.register.BotRegister;
+import cc.hubailmn.jdautility.register.InstanceManager;
 import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.config.ConfigUtil;
 import cc.hubailmn.utility.config.file.BotSettingsConfig;
@@ -13,15 +15,24 @@ import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import org.bukkit.Bukkit;
 
+import java.util.concurrent.CompletableFuture;
+
+@Getter
 public class BaseBot extends ListenerAdapter {
 
     @Getter
-    private static BotSettingsConfig config;
+    private static BaseBot instance;
+    private ShardManager shardManager;
+    private BotSettingsConfig config;
+    private final InstanceManager instanceManager;
 
-    @Getter
-    private static ShardManager shardManager;
+    public BaseBot() {
+        instance = this;
+        instanceManager = new InstanceManager();
+        init();
+    }
 
-    public static void init() {
+    public void init() {
         config = ConfigUtil.getConfig(BotSettingsConfig.class);
         if (!config.isDiscordEnabled()) return;
 
@@ -31,41 +42,75 @@ public class BaseBot extends ListenerAdapter {
             return;
         }
 
-        Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
-            try {
-                DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.createDefault(token);
-                builder.setStatus(config.getBotStatus());
-                Activity activity;
-                if (config.getBotActivityType() == Activity.ActivityType.STREAMING) {
-                    activity = Activity.of(config.getBotActivityType(), config.getBotActivityName(), config.getBotActivityUrl());
-                } else {
-                    activity = Activity.of(config.getBotActivityType(), config.getBotActivityName());
+        shutdownAsync().thenRun(() -> {
+            Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
+                try {
+                    DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.createDefault(token);
+                    builder.setStatus(config.getBotStatus());
+                    Activity activity;
+                    if (config.getBotActivityType() == Activity.ActivityType.STREAMING) {
+                        activity = Activity.of(config.getBotActivityType(), config.getBotActivityName(), config.getBotActivityUrl());
+                    } else {
+                        activity = Activity.of(config.getBotActivityType(), config.getBotActivityName());
+                    }
+
+                    builder.setActivity(activity);
+                    shardManager = builder.build();
+                    CSend.info("Discord bot initialized successfully.");
+
+                    BotCommandUtil.reloadAllCommandsAsync()
+                            .thenRun(() -> {
+                                BotRegister.listeners();
+                                BotRegister.modals();
+                                CSend.info("Commands reloaded and listeners/modals registered.");
+                            })
+                            .exceptionally(ex -> {
+                                CSend.error("Failed to reload commands or register listeners/modals: " + ex.getMessage());
+                                return null;
+                            });
+
+                } catch (InvalidTokenException e) {
+                    CSend.error("Invalid Discord bot token provided in config!");
+                    CSend.error(e);
+                } catch (Exception e) {
+                    CSend.error("Failed to initialize Discord bot!");
+                    CSend.error(e);
                 }
 
-                builder.setActivity(activity);
-                shardManager = builder.build();
-                CSend.info("Discord bot initialized successfully.");
-            } catch (InvalidTokenException e) {
-                CSend.error("Invalid Discord bot token provided in config!");
-                CSend.error(e);
-            } catch (Exception e) {
-                CSend.error("Failed to initialize Discord bot!");
-                CSend.error(e);
-            }
-
-            BotRegister.commands();
-            BotRegister.listeners();
-            BotRegister.modals();
+                BotRegister.commands();
+            });
         });
     }
 
-    public static void shutdown() {
-        if (shardManager != null) {
-            shardManager.shutdown();
-            CSend.info("Discord bot shutdown successfully.");
-        }
+    public CompletableFuture<Void> shutdownAsync() {
+        return CompletableFuture.runAsync(() -> {
+            if (shardManager != null) {
+                try {
+                    CompletableFuture<Void> clearGlobal = BotCommandUtil.clearGlobalCommandsAsync();
+                    CompletableFuture<Void> clearGuild = BotCommandUtil.clearGuildCommandsAsync();
 
-        shardManager = null;
+                    CompletableFuture.allOf(clearGlobal, clearGuild).join();
+
+                    shardManager.shutdown();
+                    shardManager = null;
+
+                    CSend.info("Discord bot shutdown successfully.");
+                } catch (Exception e) {
+                    CSend.error("Error while shutting down Discord bot");
+                    CSend.error(e);
+                }
+            }
+
+            BotCommandUtil.clearCommands();
+            getInstanceManager().reload();
+            CSend.debug("Discord bot instance manager cleared successfully.");
+        });
     }
 
+    public CompletableFuture<Void> reloadCommandsAsync() {
+        if (shardManager == null) {
+            return CompletableFuture.completedFuture(null);
+        }
+        return BotCommandUtil.reloadAllCommandsAsync();
+    }
 }

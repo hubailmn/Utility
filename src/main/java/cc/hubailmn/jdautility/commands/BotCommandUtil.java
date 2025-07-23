@@ -6,9 +6,8 @@ import lombok.Getter;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class BotCommandUtil {
@@ -30,15 +29,36 @@ public class BotCommandUtil {
 
     public static void updateAllGuildCommands() {
         int count = 0;
-        for (Guild guild : BaseBot.getShardManager().getGuilds()) {
+        for (Guild guild : BaseBot.getInstance().getShardManager().getGuilds()) {
             guild.updateCommands().addCommands(botCommandsList).queue(
                     success -> CSend.debug("Updated commands for guild: " + guild.getName()),
                     failure -> CSend.error("Failed to update commands for guild: " + guild.getName() + " - " + failure.getMessage())
             );
             count++;
         }
-
         CSend.info("Updated commands for " + count + " guild(s).");
+    }
+
+    public static CompletableFuture<Void> updateAllGuildCommandsAsync() {
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+
+        for (Guild guild : BaseBot.getInstance().getShardManager().getGuilds()) {
+            CompletableFuture<Void> future = new CompletableFuture<>();
+            guild.updateCommands().addCommands(botCommandsList).queue(
+                    success -> {
+                        CSend.debug("Updated commands for guild: " + guild.getName());
+                        future.complete(null);
+                    },
+                    failure -> {
+                        CSend.error("Failed to update commands for guild: " + guild.getName() + " - " + failure.getMessage());
+                        future.complete(null);
+                    }
+            );
+            futures.add(future);
+        }
+
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenRun(() -> CSend.info("Updated commands for all guilds."));
     }
 
     public static void updateGuildCommands(Guild guild) {
@@ -49,13 +69,35 @@ public class BotCommandUtil {
     }
 
     public static void updateGlobalCommands() {
-        BaseBot.getShardManager().getShards().forEach(jda ->
+        BaseBot.getInstance().getShardManager().getShards().forEach(jda ->
                 jda.updateCommands().addCommands().queue(
                         success -> CSend.debug("Updated global commands on shard: " + jda.getShardInfo().getShardId()),
                         failure -> CSend.error("Failed to update global commands on shard: " + failure.getMessage())
                 )
         );
         CSend.info("Triggered global command update across all shards.");
+    }
+
+    public static CompletableFuture<Void> updateGlobalCommandsAsync() {
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+
+        BaseBot.getInstance().getShardManager().getShards().forEach(jda -> {
+            CompletableFuture<Void> future = new CompletableFuture<>();
+            jda.updateCommands().addCommands(botCommandsList).queue(
+                    success -> {
+                        CSend.debug("Updated global commands on shard: " + jda.getShardInfo().getShardId());
+                        future.complete(null);
+                    },
+                    failure -> {
+                        CSend.error("Failed to update global commands on shard: " + failure.getMessage());
+                        future.complete(null);
+                    }
+            );
+            futures.add(future);
+        });
+
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenRun(() -> CSend.info("Triggered global command update across all shards."));
     }
 
     public static void register(Guild guild) {
@@ -75,7 +117,7 @@ public class BotCommandUtil {
                 .map(CommandData::getName)
                 .collect(Collectors.toSet());
 
-        BaseBot.getShardManager().getShards().forEach(jda ->
+        BaseBot.getInstance().getShardManager().getShards().forEach(jda ->
                 jda.retrieveCommands().queue(commands -> {
                     for (var command : commands) {
                         if (botCommandNames.contains(command.getName())) {
@@ -95,7 +137,7 @@ public class BotCommandUtil {
                 .map(CommandData::getName)
                 .collect(Collectors.toSet());
 
-        for (Guild guild : BaseBot.getShardManager().getGuilds()) {
+        for (Guild guild : BaseBot.getInstance().getShardManager().getGuilds()) {
             guild.retrieveCommands().queue(commands -> {
                 for (var command : commands) {
                     if (botCommandNames.contains(command.getName())) {
@@ -107,6 +149,108 @@ public class BotCommandUtil {
                 }
             });
         }
+    }
+
+    public static CompletableFuture<Void> clearGlobalCommandsAsync() {
+        Set<String> botCommandNames = botCommandsList.stream()
+                .map(CommandData::getName)
+                .collect(Collectors.toSet());
+
+        List<CompletableFuture<Void>> shardFutures = new ArrayList<>();
+
+        BaseBot.getInstance().getShardManager().getShards().forEach(jda -> {
+            CompletableFuture<Void> shardFuture = new CompletableFuture<>();
+
+            jda.retrieveCommands().queue(commands -> {
+                List<CompletableFuture<Void>> deleteFutures = new ArrayList<>();
+
+                for (var command : commands) {
+                    if (botCommandNames.contains(command.getName())) {
+                        CompletableFuture<Void> deleteFuture = new CompletableFuture<>();
+                        jda.deleteCommandById(command.getId()).queue(
+                                success -> {
+                                    CSend.debug("Deleted global command: " + command.getName());
+                                    deleteFuture.complete(null);
+                                },
+                                failure -> {
+                                    CSend.error("Failed to delete global command: " + failure.getMessage());
+                                    deleteFuture.complete(null);
+                                }
+                        );
+                        deleteFutures.add(deleteFuture);
+                    }
+                }
+
+                CompletableFuture.allOf(deleteFutures.toArray(new CompletableFuture[0]))
+                        .thenRun(() -> shardFuture.complete(null))
+                        .exceptionally(ex -> {
+                            shardFuture.completeExceptionally(ex);
+                            return null;
+                        });
+            }, failure -> {
+                CSend.error("Failed to retrieve global commands: " + failure.getMessage());
+                shardFuture.completeExceptionally(failure);
+            });
+
+            shardFutures.add(shardFuture);
+        });
+
+        return CompletableFuture.allOf(shardFutures.toArray(new CompletableFuture[0]));
+    }
+
+    public static CompletableFuture<Void> clearGuildCommandsAsync() {
+        Set<String> botCommandNames = botCommandsList.stream()
+                .map(CommandData::getName)
+                .collect(Collectors.toSet());
+
+        List<CompletableFuture<Void>> guildFutures = new ArrayList<>();
+
+        for (Guild guild : BaseBot.getInstance().getShardManager().getGuilds()) {
+            CompletableFuture<Void> guildFuture = new CompletableFuture<>();
+
+            guild.retrieveCommands().queue(commands -> {
+                List<CompletableFuture<Void>> deleteFutures = new ArrayList<>();
+
+                for (var command : commands) {
+                    if (botCommandNames.contains(command.getName())) {
+                        CompletableFuture<Void> deleteFuture = new CompletableFuture<>();
+                        guild.deleteCommandById(command.getId()).queue(
+                                success -> {
+                                    CSend.debug("Cleared command from guild: " + guild.getName() + " - " + command.getName());
+                                    deleteFuture.complete(null);
+                                },
+                                failure -> {
+                                    CSend.error("Failed to delete command from guild: " + guild.getName() + " - " + failure.getMessage());
+                                    deleteFuture.complete(null);
+                                }
+                        );
+                        deleteFutures.add(deleteFuture);
+                    }
+                }
+
+                CompletableFuture.allOf(deleteFutures.toArray(new CompletableFuture[0]))
+                        .thenRun(() -> guildFuture.complete(null))
+                        .exceptionally(ex -> {
+                            guildFuture.completeExceptionally(ex);
+                            return null;
+                        });
+            }, failure -> {
+                CSend.error("Failed to retrieve commands for guild: " + guild.getName() + " - " + failure.getMessage());
+                guildFuture.completeExceptionally(failure);
+            });
+
+            guildFutures.add(guildFuture);
+        }
+
+        return CompletableFuture.allOf(guildFutures.toArray(new CompletableFuture[0]));
+    }
+
+    public static CompletableFuture<Void> reloadAllCommandsAsync() {
+        return clearGlobalCommandsAsync()
+                .thenCompose(v -> clearGuildCommandsAsync())
+                .thenCompose(v -> updateGlobalCommandsAsync())
+                .thenCompose(v -> updateAllGuildCommandsAsync())
+                .thenRun(() -> CSend.info("Reloaded all commands successfully."));
     }
 
     public static void registerAllGuild() {
