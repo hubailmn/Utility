@@ -43,6 +43,7 @@ public abstract class BasePlugin extends JavaPlugin {
     private String pluginVersion;
     private PluginSettings pluginConfig;
     private boolean debug = false;
+    private boolean scanFullPackage = false;
     private boolean forceDebug = false;
     private boolean database = true;
     private boolean license = false;
