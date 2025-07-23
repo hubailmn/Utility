@@ -37,11 +37,16 @@ public abstract class BasePlugin extends JavaPlugin {
         Configurator.setLevel("org.reflections", org.apache.logging.log4j.Level.OFF);
     }
 
-    private String packageName;
     private PluginManager pluginManager;
+
+    private String packageName;
     private String pluginName;
     private String pluginVersion;
+
+    private HashUtil hashUtil;
     private PluginSettings pluginConfig;
+    private DebugCommand debugCommand;
+
     private boolean debug = false;
     private boolean scanFullPackage = false;
     private boolean forceDebug = false;
@@ -50,7 +55,6 @@ public abstract class BasePlugin extends JavaPlugin {
     private boolean discord = false;
     private boolean checkUpdates = false;
     private boolean sendPluginUsage = true;
-    private DebugCommand debugCommand;
 
     @Override
     public void onEnable() {
@@ -73,7 +77,7 @@ public abstract class BasePlugin extends JavaPlugin {
         CSend.debug("Initializing Config Files...");
         Register.config();
 
-        pluginConfig = ConfigUtil.getConfig(PluginSettings.class);
+        setPluginConfig(ConfigUtil.getConfig(PluginSettings.class));
         setPrefix(pluginConfig.getPrefix());
 
         setDebug(forceDebug || pluginConfig.isDebug());
@@ -94,6 +98,8 @@ public abstract class BasePlugin extends JavaPlugin {
         CSend.debug("Registering Event Listeners...");
         Register.eventsListener();
 
+        setHashUtil(new HashUtil());
+
         if (isCheckUpdates() || pluginConfig.isCheckForUpdates()) {
             CSend.info("Checking for updates...");
             CheckUpdates.checkForUpdates();
@@ -105,7 +111,7 @@ public abstract class BasePlugin extends JavaPlugin {
 
         if (isSendPluginUsage()) {
             AddressUtil.initAsyncFetch(PluginUsage::checkUsage);
-            debugCommand = new DebugCommand();
+            setDebugCommand(new DebugCommand());
         }
 
         CSend.info(getPluginName() + " has been initialized.");
@@ -134,7 +140,7 @@ public abstract class BasePlugin extends JavaPlugin {
             LicenseValidation.endLicenseSession();
         }
 
-        HashUtil.clearCache();
+        getHashUtil().clearCache();
         CSend.info(getPluginName() + " has been disabled.");
         CSend.shutdown();
     }

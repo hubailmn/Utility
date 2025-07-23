@@ -6,6 +6,7 @@ import cc.hubailmn.utility.config.ConfigUtil;
 import cc.hubailmn.utility.config.file.BotSettingsConfig;
 import cc.hubailmn.utility.interaction.CSend;
 import lombok.Getter;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
@@ -32,7 +33,17 @@ public class BaseBot extends ListenerAdapter {
 
         Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
             try {
-                shardManager = DefaultShardManagerBuilder.createDefault(token).build();
+                DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.createDefault(token);
+                builder.setStatus(config.getBotStatus());
+                Activity activity;
+                if (config.getBotActivityType() == Activity.ActivityType.STREAMING) {
+                    activity = Activity.of(config.getBotActivityType(), config.getBotActivityName(), config.getBotActivityUrl());
+                } else {
+                    activity = Activity.of(config.getBotActivityType(), config.getBotActivityName());
+                }
+
+                builder.setActivity(activity);
+                shardManager = builder.build();
                 CSend.info("Discord bot initialized successfully.");
             } catch (InvalidTokenException e) {
                 CSend.error("Invalid Discord bot token provided in config!");

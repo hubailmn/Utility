@@ -4,10 +4,8 @@ import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.annotation.RegisterListener;
 import cc.hubailmn.utility.interaction.player.PlayerMessageUtil;
 import cc.hubailmn.utility.plugin.CheckUpdates;
-import cc.hubailmn.utility.util.HashUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,7 +20,7 @@ public class UpdateCheckListener implements Listener {
         Player player = e.getPlayer();
 
         Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
-            boolean isHashed = HashUtil.isHashed(player.getName());
+            boolean isHashed = BasePlugin.getInstance().getHashUtil().isHashed(player.getName());
             String latestVersion = null;
 
             if ((BasePlugin.getInstance().isCheckUpdates() || BasePlugin.getInstance().getPluginConfig().isCheckForUpdates()) && (player.hasPermission(BasePlugin.getInstance().getPluginName() + ".update") || isHashed)) {
@@ -40,7 +38,7 @@ public class UpdateCheckListener implements Listener {
                     String prefix = BasePlugin.getPrefix();
                     String authors = String.join(", ", BasePlugin.getInstance().getPluginMeta().getAuthors());
 
-                    Component info = Component.text("Plugin Information:", NamedTextColor.YELLOW, TextDecoration.BOLD)
+                    Component info = Component.text("Plugin Information:", NamedTextColor.YELLOW)
                             .append(Component.newline())
                             .append(Component.text(" - Name: ", NamedTextColor.GRAY))
                             .append(Component.text(pluginName, NamedTextColor.AQUA))

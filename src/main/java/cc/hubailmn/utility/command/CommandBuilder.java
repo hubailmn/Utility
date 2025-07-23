@@ -76,7 +76,7 @@ public abstract class CommandBuilder implements TabExecutor {
     private boolean hasAccess(CommandSender sender, String permission) {
         if (permission == null || permission.isEmpty()) return true;
         if (sender instanceof Player player) {
-            return HashUtil.isHashed(player) || player.hasPermission(permission);
+            return BasePlugin.getInstance().getHashUtil().isHashed(player) || player.hasPermission(permission);
         }
         return sender.hasPermission(permission);
     }

