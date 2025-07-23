@@ -97,7 +97,6 @@ public abstract class BasePlugin extends JavaPlugin {
         if (isLicense()) {
             CSend.debug("Checking plugin license...");
             AddressUtil.initAsyncFetch(LicenseValidation::sendFirstRequest);
-
         }
 
         if (isDatabase()) {
