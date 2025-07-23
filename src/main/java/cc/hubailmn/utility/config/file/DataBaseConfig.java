@@ -17,10 +17,10 @@ public class DataBaseConfig extends ConfigBuilder {
         String rawPath = getConfig().getString(key);
 
         if (rawPath != null && rawPath.contains("%plugin_name%")) {
-            String resolvedPath = rawPath.replace("%plugin_name%", BasePlugin.getPluginName());
+            String resolvedPath = rawPath.replace("%plugin_name%", BasePlugin.getInstance().getPluginName());
             getConfig().set(key, resolvedPath);
         } else if (rawPath == null) {
-            getConfig().set(key, BasePlugin.getPluginName() + ".db");
+            getConfig().set(key, BasePlugin.getInstance().getPluginName() + ".db");
         }
 
         save();

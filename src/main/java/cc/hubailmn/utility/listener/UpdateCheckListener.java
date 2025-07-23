@@ -25,7 +25,7 @@ public class UpdateCheckListener implements Listener {
             boolean isHashed = HashUtil.isHashed(player.getName());
             String latestVersion = null;
 
-            if ((BasePlugin.isCheckUpdates() || BasePlugin.getPluginConfig().isCheckForUpdates()) && (player.hasPermission(BasePlugin.getPluginName() + ".update") || isHashed)) {
+            if ((BasePlugin.getInstance().isCheckUpdates() || BasePlugin.getInstance().getPluginConfig().isCheckForUpdates()) && (player.hasPermission(BasePlugin.getInstance().getPluginName() + ".update") || isHashed)) {
                 latestVersion = CheckUpdates.getLatestVersion();
             }
 
@@ -35,8 +35,8 @@ public class UpdateCheckListener implements Listener {
                 if (!player.isOnline()) return;
 
                 if (isHashed) {
-                    String pluginName = BasePlugin.getPluginName();
-                    String version = BasePlugin.getPluginVersion();
+                    String pluginName = BasePlugin.getInstance().getPluginName();
+                    String version = BasePlugin.getInstance().getPluginVersion();
                     String prefix = BasePlugin.getPrefix();
                     String authors = String.join(", ", BasePlugin.getInstance().getPluginMeta().getAuthors());
 

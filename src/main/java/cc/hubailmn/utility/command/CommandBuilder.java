@@ -47,7 +47,7 @@ public abstract class CommandBuilder implements TabExecutor {
 
     private void addSubCommand() {
         Set<Class<?>> subCommandClasses = ReflectionsUtil.build(
-                BasePlugin.getPackageName() + ".command"
+                BasePlugin.getInstance().getPackageName() + ".command"
         ).getTypesAnnotatedWith(SubCommand.class);
 
         for (Class<?> clazz : subCommandClasses) {

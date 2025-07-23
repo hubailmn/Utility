@@ -18,7 +18,7 @@ import java.util.Set;
 
 public final class Register {
 
-    private static final String BASE_PACKAGE = BasePlugin.getPackageName();
+    private static final String BASE_PACKAGE = BasePlugin.getInstance().getPackageName();
     private static final String UTIL_PACKAGE = "cc.hubailmn.utility";
 
     private Register() {
@@ -37,7 +37,7 @@ public final class Register {
             }
 
             Listener listener = (Listener) clazz.getDeclaredConstructor().newInstance();
-            BasePlugin.getPluginManager().registerEvents(listener, BasePlugin.getInstance());
+            BasePlugin.getInstance().getPluginManager().registerEvents(listener, BasePlugin.getInstance());
             CSend.debug("Registered listener: " + clazz.getSimpleName());
         });
     }
@@ -88,7 +88,7 @@ public final class Register {
 
             if (clazz.isAnnotationPresent(IgnoreFile.class)) {
                 IgnoreFile ignore = clazz.getAnnotation(IgnoreFile.class);
-                if ((ignore.database() && !BasePlugin.isDatabase()) || (ignore.license() && !BasePlugin.isLicense()) || (ignore.discord() && !BasePlugin.isDiscord())) {
+                if ((ignore.database() && !BasePlugin.getInstance().isDatabase()) || (ignore.license() && !BasePlugin.getInstance().isLicense()) || (ignore.discord() && !BasePlugin.getInstance().isDiscord())) {
                     CSend.debug("Skipping config " + clazz.getSimpleName() + " due to @IgnoreFile conditions.");
                     return;
                 }

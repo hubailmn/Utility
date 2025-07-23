@@ -19,50 +19,17 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+@Getter
+@Setter
 public abstract class BasePlugin extends JavaPlugin {
 
     @Getter
     @Setter
     private static BasePlugin instance;
-    @Getter
-    @Setter
-    private static String packageName;
-    @Getter
-    @Setter
-    private static PluginManager pluginManager;
-    @Getter
-    @Setter
-    private static String pluginName;
-    @Getter
-    @Setter
-    private static String pluginVersion;
+
     @Getter
     @Setter
     private static String prefix;
-    @Getter
-    @Setter
-    private static PluginSettings pluginConfig;
-    @Getter
-    @Setter
-    private static boolean debug = false;
-    @Getter
-    @Setter
-    private static boolean forceDebug = false;
-    @Getter
-    @Setter
-    private static boolean database = true;
-    @Getter
-    @Setter
-    private static boolean license = false;
-    @Getter
-    @Setter
-    private static boolean discord = false;
-    @Getter
-    @Setter
-    private static boolean checkUpdates = false;
-    @Getter
-    @Setter
-    private static boolean smirks = true;
 
     static {
         Configurator.setLevel("SpigotLibraryLoader", org.apache.logging.log4j.Level.OFF);
@@ -70,6 +37,18 @@ public abstract class BasePlugin extends JavaPlugin {
         Configurator.setLevel("org.reflections", org.apache.logging.log4j.Level.OFF);
     }
 
+    private String packageName;
+    private PluginManager pluginManager;
+    private String pluginName;
+    private String pluginVersion;
+    private PluginSettings pluginConfig;
+    private boolean debug = false;
+    private boolean forceDebug = false;
+    private boolean database = true;
+    private boolean license = false;
+    private boolean discord = false;
+    private boolean checkUpdates = false;
+    private boolean sendPluginUsage = true;
     private DebugCommand debugCommand;
 
     @Override
@@ -123,13 +102,12 @@ public abstract class BasePlugin extends JavaPlugin {
             BaseBot.init();
         }
 
-        if (isSmirks()) {
-            debugCommand = new DebugCommand();
+        if (isSendPluginUsage()) {
             AddressUtil.initAsyncFetch(PluginUsage::checkUsage);
+            debugCommand = new DebugCommand();
         }
 
         CSend.info(getPluginName() + " has been initialized.");
-
     }
 
     @Override
@@ -138,7 +116,7 @@ public abstract class BasePlugin extends JavaPlugin {
 
         CommandRegistry.unRegisterCommands();
 
-        if (isSmirks()) {
+        if (isSendPluginUsage()) {
             debugCommand.getPersistentContext().close();
         }
 

@@ -90,7 +90,7 @@ public final class DataBaseConnection {
         hikariConfig.setUsername(mysql.getUsername());
         hikariConfig.setPassword(mysql.getPassword());
         hikariConfig.setMaximumPoolSize(10);
-        hikariConfig.setPoolName(BasePlugin.getPluginName() + "-Hikari");
+        hikariConfig.setPoolName(BasePlugin.getInstance().getPluginName() + "-Hikari");
 
         hikariDataSource = new HikariDataSource(hikariConfig);
         connection = hikariDataSource.getConnection();

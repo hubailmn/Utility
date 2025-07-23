@@ -73,13 +73,13 @@ public final class CSend {
     }
 
     private static String getPrefix() {
-        if (BasePlugin.getInstance() == null || BasePlugin.getPluginName() == null) {
+        if (BasePlugin.getInstance() == null || BasePlugin.getInstance().getPluginName() == null) {
             return "§7[§aPlugin§7] §b>>§r";
         }
 
         String prefix = BasePlugin.getPrefix();
         return (prefix == null || prefix.isEmpty())
-               ? "§7[§a" + BasePlugin.getPluginName() + "§7] §b>>§r"
+               ? "§7[§a" + BasePlugin.getInstance().getPluginName() + "§7] §b>>§r"
                : prefix;
     }
 
@@ -105,7 +105,7 @@ public final class CSend {
 
     public static void debug(String message) {
         String fullMessage = "§b[DEBUG] §r" + message;
-        if (BasePlugin.isDebug()) {
+        if (BasePlugin.getInstance().isDebug()) {
             prefixed(fullMessage);
             logAsync(DEBUG_LOG, fullMessage);
         } else {

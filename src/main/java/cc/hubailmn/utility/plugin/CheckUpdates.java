@@ -27,8 +27,8 @@ public class CheckUpdates {
     private static String latestVersion = null;
 
     public static void checkForUpdates() {
-        final String pluginName = BasePlugin.getPluginName();
-        final String pluginVersion = BasePlugin.getPluginVersion();
+        final String pluginName = BasePlugin.getInstance().getPluginName();
+        final String pluginVersion = BasePlugin.getInstance().getPluginVersion();
         final String apiUrl = String.format(API_URL_TEMPLATE, pluginName);
         final String releasesPage = String.format(RELEASE_PAGE_TEMPLATE, pluginName);
 

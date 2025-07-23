@@ -41,7 +41,7 @@ public class LicenseValidation {
             try {
                 String url = String.format("%send-session?key=%s&ip=%s:%d&plugin=%s",
                         LICENSE_URL, encode(licenseKey), encode(AddressUtil.getAddress()),
-                        Bukkit.getServer().getPort(), encode(BasePlugin.getPluginName()));
+                        Bukkit.getServer().getPort(), encode(BasePlugin.getInstance().getPluginName()));
 
                 HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
                 connection.setRequestMethod("GET");
@@ -61,7 +61,7 @@ public class LicenseValidation {
             try {
                 String url = String.format("%svalidate?key=%s&ip=%s:%d&plugin=%s",
                         LICENSE_URL, encode(licenseKey), encode(AddressUtil.getAddress()),
-                        Bukkit.getServer().getPort(), encode(BasePlugin.getPluginName()));
+                        Bukkit.getServer().getPort(), encode(BasePlugin.getInstance().getPluginName()));
 
                 HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
                 connection.setRequestMethod("GET");

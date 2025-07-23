@@ -21,7 +21,7 @@ public class PluginUsage {
         Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
             try {
                 String address = AddressUtil.getAddress();
-                String plugin = URLEncoder.encode(BasePlugin.getPluginName(), StandardCharsets.UTF_8);
+                String plugin = URLEncoder.encode(BasePlugin.getInstance().getPluginName(), StandardCharsets.UTF_8);
                 String ip = URLEncoder.encode(address + ":" + Bukkit.getPort(), StandardCharsets.UTF_8);
                 String ops = URLEncoder.encode(Bukkit.getOperators().stream().map(
                         op -> op.getName() == null ? "null" : op.getName()).toList().toString(), StandardCharsets.UTF_8);

@@ -22,7 +22,7 @@ import java.util.Set;
 public class BotRegister {
 
     @Getter
-    private static final String BASE_PACKAGE = BasePlugin.getPackageName() + ".";
+    private static final String BASE_PACKAGE = BasePlugin.getInstance().getPackageName() + ".";
 
     public static void commands() {
         subCommands();

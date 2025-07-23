@@ -25,8 +25,8 @@ public class PluginSettings extends ConfigBuilder {
         super();
 
         this.prefix = getConfig().getString(PREFIX + "prefix");
-        getConfig().set(PREFIX + "prefix", getPrefix().replace("%plugin_name%", BasePlugin.getPluginName()));
-        getConfig().set(PREFIX + "version", BasePlugin.getPluginVersion());
+        getConfig().set(PREFIX + "prefix", getPrefix().replace("%plugin_name%", BasePlugin.getInstance().getPluginName()));
+        getConfig().set(PREFIX + "version", BasePlugin.getInstance().getPluginVersion());
         save();
 
         reloadCache();

@@ -33,7 +33,7 @@ public class CommandRegistry {
             }
 
             DynamicCommand dynamicCommand = new DynamicCommand(commandName, executor, aliases);
-            commandMap.register(BasePlugin.getPluginName(), dynamicCommand);
+            commandMap.register(BasePlugin.getInstance().getPluginName(), dynamicCommand);
             registeredCommands.add(commandName);
         } catch (Exception e) {
             CSend.error("Error registering command '" + commandName + "': " + e.getMessage());
@@ -52,7 +52,7 @@ public class CommandRegistry {
         CSend.debug("Attempting to unregister command: " + commandName);
 
         try {
-            String pluginPrefix = BasePlugin.getPluginName().toLowerCase();
+            String pluginPrefix = BasePlugin.getInstance().getPluginName().toLowerCase();
             String key = commandName.toLowerCase();
             String namespacedKey = pluginPrefix + ":" + key;
 
