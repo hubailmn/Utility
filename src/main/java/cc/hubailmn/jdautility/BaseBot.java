@@ -9,11 +9,15 @@ import cc.hubailmn.utility.config.file.BotSettingsConfig;
 import cc.hubailmn.utility.interaction.CSend;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
+import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import org.bukkit.Bukkit;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -58,6 +62,8 @@ public class BaseBot extends ListenerAdapter {
                     shardManager = builder.build();
                     CSend.info("Discord bot initialized successfully.");
 
+                    BotRegister.commands();
+
                     BotCommandUtil.reloadAllCommandsAsync()
                             .thenRun(() -> {
                                 BotRegister.listeners();
@@ -76,8 +82,6 @@ public class BaseBot extends ListenerAdapter {
                     CSend.error("Failed to initialize Discord bot!");
                     CSend.error(e);
                 }
-
-                BotRegister.commands();
             });
         });
     }
