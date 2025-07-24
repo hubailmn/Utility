@@ -7,9 +7,13 @@
     <groupId>cc.hubailmn</groupId>
     <artifactId>Utility</artifactId>
     <version>LocalBuild</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <name>Utility</name>
+    <modules>
+        <module>menus</module>
+        <module>common</module>
+    </modules>
 
     <properties>
         <java.version>17</java.version>
