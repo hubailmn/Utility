@@ -27,6 +27,79 @@ public class BotCommandUtil {
         botCommandsList.clear();
     }
 
+    public static void updateAllGuildCommands() {
+        int count = 0;
+        for (Guild guild : BaseBot.getInstance().getShardManager().getGuilds()) {
+            guild.updateCommands().addCommands(botCommandsList).queue(
+                    success -> CSend.debug("Updated commands for guild: " + guild.getName()),
+                    failure -> CSend.error("Failed to update commands for guild: " + guild.getName() + " - " + failure.getMessage())
+            );
+            count++;
+        }
+        CSend.debug("Updated commands for " + count + " guild(s).");
+    }
+
+    public static CompletableFuture<Void> updateAllGuildCommandsAsync() {
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+
+        for (Guild guild : BaseBot.getInstance().getShardManager().getGuilds()) {
+            CompletableFuture<Void> future = new CompletableFuture<>();
+            guild.updateCommands().addCommands(botCommandsList).queue(
+                    success -> {
+                        CSend.debug("Updated commands for guild: " + guild.getName());
+                        future.complete(null);
+                    },
+                    failure -> {
+                        CSend.error("Failed to update commands for guild: " + guild.getName() + " - " + failure.getMessage());
+                        future.complete(null);
+                    }
+            );
+            futures.add(future);
+        }
+
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenRun(() -> CSend.debug("Updated commands for all guilds."));
+    }
+
+    public static void updateGuildCommands(Guild guild) {
+        guild.updateCommands().addCommands(botCommandsList).queue(
+                success -> CSend.debug("Updated commands for guild: " + guild.getName()),
+                failure -> CSend.error("Failed to update commands for guild: " + guild + " - " + failure.getMessage())
+        );
+    }
+
+    public static void updateGlobalCommands() {
+        BaseBot.getInstance().getShardManager().getShards().forEach(jda ->
+                jda.updateCommands().addCommands().queue(
+                        success -> CSend.debug("Cleared global commands on shard: " + jda.getShardInfo().getShardId()),
+                        failure -> CSend.error("Failed to clear global commands on shard: " + failure.getMessage())
+                )
+        );
+        CSend.debug("Cleared global commands across all shards.");
+    }
+
+    public static CompletableFuture<Void> updateGlobalCommandsAsync() {
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+
+        BaseBot.getInstance().getShardManager().getShards().forEach(jda -> {
+            CompletableFuture<Void> future = new CompletableFuture<>();
+            jda.updateCommands().addCommands().queue( // Empty - no commands added
+                    success -> {
+                        CSend.debug("Cleared global commands on shard: " + jda.getShardInfo().getShardId());
+                        future.complete(null);
+                    },
+                    failure -> {
+                        CSend.error("Failed to clear global commands on shard: " + failure.getMessage());
+                        future.complete(null);
+                    }
+            );
+            futures.add(future);
+        });
+
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenRun(() -> CSend.debug("Cleared global commands across all shards."));
+    }
+
     public static void register(Guild guild) {
         if (guild == null) {
             CSend.warn("Tried to register commands for null guild.");
@@ -37,6 +110,45 @@ public class BotCommandUtil {
                 success -> CSend.debug("Registered commands for guild: " + guild.getName()),
                 failure -> CSend.error("Failed to register commands for guild: " + guild.getName() + " - " + failure.getMessage())
         );
+    }
+
+    public static void clearGlobalCommands() {
+        Set<String> botCommandNames = botCommandsList.stream()
+                .map(CommandData::getName)
+                .collect(Collectors.toSet());
+
+        BaseBot.getInstance().getShardManager().getShards().forEach(jda ->
+                jda.retrieveCommands().queue(commands -> {
+                    for (var command : commands) {
+                        if (botCommandNames.contains(command.getName())) {
+                            jda.deleteCommandById(command.getId()).queue(
+                                    success -> CSend.debug("Deleted global command: " + command.getName()),
+                                    failure -> CSend.error("Failed to delete global command: " + failure.getMessage())
+                            );
+                        }
+                    }
+                })
+        );
+        CSend.debug("Triggered global command clearing across all shards.");
+    }
+
+    public static void clearGuildCommands() {
+        Set<String> botCommandNames = botCommandsList.stream()
+                .map(CommandData::getName)
+                .collect(Collectors.toSet());
+
+        for (Guild guild : BaseBot.getInstance().getShardManager().getGuilds()) {
+            guild.retrieveCommands().queue(commands -> {
+                for (var command : commands) {
+                    if (botCommandNames.contains(command.getName())) {
+                        guild.deleteCommandById(command.getId()).queue(
+                                success -> CSend.debug("Cleared command from guild: " + guild.getName() + " - " + command.getName()),
+                                failure -> CSend.error("Failed to delete command from guild: " + guild.getName() + " - " + failure.getMessage())
+                        );
+                    }
+                }
+            });
+        }
     }
 
     public static CompletableFuture<Void> clearGlobalCommandsAsync() {
@@ -133,32 +245,14 @@ public class BotCommandUtil {
         return CompletableFuture.allOf(guildFutures.toArray(new CompletableFuture[0]));
     }
 
-    public static CompletableFuture<Void> updateAllGuildCommandsAsync() {
-        List<CompletableFuture<Void>> futures = new ArrayList<>();
-
-        for (Guild guild : BaseBot.getInstance().getShardManager().getGuilds()) {
-            CompletableFuture<Void> future = new CompletableFuture<>();
-            guild.updateCommands().addCommands(botCommandsList).queue(
-                    success -> {
-                        CSend.debug("Updated commands for guild: " + guild.getName());
-                        future.complete(null);
-                    },
-                    failure -> {
-                        CSend.error("Failed to update commands for guild: " + guild.getName() + " - " + failure.getMessage());
-                        future.complete(null);
-                    }
-            );
-            futures.add(future);
-        }
-
-        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                .thenRun(() -> CSend.debug("Updated commands for all guilds."));
-    }
-
     public static CompletableFuture<Void> reloadAllCommandsAsync() {
         return clearGlobalCommandsAsync()
                 .thenCompose(v -> clearGuildCommandsAsync())
                 .thenCompose(v -> updateAllGuildCommandsAsync())
                 .thenRun(() -> CSend.debug("Reloaded all commands successfully."));
+    }
+
+    public static void registerAllGuild() {
+        updateAllGuildCommands();
     }
 }

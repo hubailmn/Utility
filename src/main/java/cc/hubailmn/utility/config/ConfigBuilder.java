@@ -13,7 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 @Data
-public class ConfigBuilder {
+public abstract class ConfigBuilder {
 
     private final String fileName;
     private final File file;
@@ -30,6 +30,7 @@ public class ConfigBuilder {
 
         this.file = new File(BasePlugin.getInstance().getDataFolder(), fileName);
         createAndLoad();
+        reloadCache();
     }
 
     private void createAndLoad() {
@@ -58,5 +59,9 @@ public class ConfigBuilder {
 
     public void reload() {
         config = YamlConfiguration.loadConfiguration(file);
+        reloadCache();
     }
+
+    public abstract void reloadCache();
+
 }

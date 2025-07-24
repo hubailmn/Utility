@@ -26,6 +26,10 @@ public class DataBaseConfig extends ConfigBuilder {
         save();
     }
 
+    @Override
+    public void reloadCache() {
+    }
+
     public String getModule() {
         return getConfig().getString("database.module");
     }

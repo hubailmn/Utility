@@ -62,6 +62,7 @@ public class BaseBot extends ListenerAdapter {
                     shardManager = builder.build();
                     CSend.info("Discord bot initialized successfully.");
 
+                    shardManager.addEventListener(this);
                     BotRegister.commands();
 
                     BotCommandUtil.reloadAllCommandsAsync()
@@ -116,5 +117,17 @@ public class BaseBot extends ListenerAdapter {
             return CompletableFuture.completedFuture(null);
         }
         return BotCommandUtil.reloadAllCommandsAsync();
+    }
+
+    @Override
+    public void onGuildJoin(@NotNull GuildJoinEvent e) {
+        Guild guild = e.getGuild();
+        BotCommandUtil.register(guild);
+    }
+
+    @Override
+    public void onGuildReady(@NotNull GuildReadyEvent e) {
+        Guild guild = e.getGuild();
+        BotCommandUtil.register(guild);
     }
 }
