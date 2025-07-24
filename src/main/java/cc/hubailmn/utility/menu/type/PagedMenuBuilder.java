@@ -85,6 +85,7 @@ public abstract class PagedMenuBuilder extends MenuBuilder {
 
     protected void loadPage(Inventory inventory) {
         inventory.clear();
+        buttons.clear();
         setupButtons();
         setItems(inventory);
 
