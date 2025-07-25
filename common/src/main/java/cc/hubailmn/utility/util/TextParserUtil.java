@@ -25,7 +25,7 @@ public class TextParserUtil {
             try {
                 return MINI.deserialize(input);
             } catch (Exception ignored) {
-                
+
             }
         }
 
