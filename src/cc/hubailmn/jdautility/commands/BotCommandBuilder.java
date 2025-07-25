@@ -2,7 +2,6 @@ package cc.hubailmn.jdautility.commands;
 
 import cc.hubailmn.jdautility.BaseBot;
 import cc.hubailmn.jdautility.commands.annotation.BotCommand;
-import cc.hubailmn.jdautility.register.InstanceManager;
 import cc.hubailmn.utility.interaction.CSend;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
