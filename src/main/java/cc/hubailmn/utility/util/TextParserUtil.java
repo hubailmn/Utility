@@ -1,7 +1,7 @@
 package cc.hubailmn.utility.util;
 
-import cc.hubailmn.utility.interaction.CSend;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
@@ -13,6 +13,7 @@ public class TextParserUtil {
                     .character('&')
                     .hexCharacter('#')
                     .hexColors()
+                    .useUnusualXRepeatedCharacterHexFormat()
                     .build();
 
     private TextParserUtil() {
@@ -22,14 +23,18 @@ public class TextParserUtil {
     public static Component parse(String input) {
         if (input == null || input.isEmpty()) return Component.empty();
 
+        Component result;
         if (input.contains("<") && input.contains(">")) {
             try {
-                return MINI.deserialize(input);
+                result = MINI.deserialize(input);
             } catch (Exception ignored) {
-                CSend.error("Failed to parse MiniMessage: " + input);
+                result = LEGACY_SERIALIZER.deserialize(input);
             }
+        } else {
+            result = LEGACY_SERIALIZER.deserialize(input);
         }
 
-        return LEGACY_SERIALIZER.deserialize(input);
+        return result.decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
     }
+
 }
