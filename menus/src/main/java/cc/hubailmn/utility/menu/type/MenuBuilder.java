@@ -3,6 +3,7 @@ package cc.hubailmn.utility.menu.type;
 import cc.hubailmn.utility.menu.MenuInventoryHolder;
 import cc.hubailmn.utility.menu.annotation.Menu;
 import cc.hubailmn.utility.menu.interactive.GuiSlotButton;
+import cc.hubailmn.utility.util.TextParserUtil;
 import lombok.Data;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -29,7 +30,7 @@ public abstract class MenuBuilder {
             throw new IllegalStateException("Missing @Menu annotation on " + getClass().getName());
         }
 
-        this.title = Component.text(annotation.title());
+        this.title = TextParserUtil.parse(annotation.title());
         this.size = annotation.rows() * 9;
         this.inventoryClickCancelled = annotation.inventoryClickCancelled();
         this.menuClickCancelled = annotation.menuClickCancelled();

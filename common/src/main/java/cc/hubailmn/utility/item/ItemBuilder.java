@@ -1,22 +1,23 @@
 package cc.hubailmn.utility.item;
 
 import cc.hubailmn.utility.util.TextParserUtil;
+import com.destroystokyo.paper.profile.PlayerProfile;
+import com.destroystokyo.paper.profile.ProfileProperty;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Damageable;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class ItemBuilder {
     private final ItemStack stack;
@@ -43,6 +44,13 @@ public class ItemBuilder {
 
     public ItemBuilder name(Component name) {
         this.meta.displayName(name);
+        return this;
+    }
+
+    public ItemBuilder durability(int durability) {
+        if (meta instanceof Damageable damageable) {
+            damageable.damage(durability);
+        }
         return this;
     }
 
@@ -95,6 +103,28 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder addUnsafeEnchantment(Enchantment enchantment, int level) {
+        this.stack.addUnsafeEnchantment(enchantment, level);
+        return this;
+    }
+
+    public ItemBuilder removeEnchantment(Enchantment enchantment) {
+        this.stack.removeEnchantment(enchantment);
+        return this;
+    }
+
+    public ItemBuilder setInfinityDurability() {
+        durability(32767);
+        return this;
+    }
+
+    public ItemBuilder setArmorColor(Color color) {
+        if (this.meta instanceof LeatherArmorMeta leatherArmorMeta) {
+            leatherArmorMeta.setColor(color);
+        }
+        return this;
+    }
+
     public ItemBuilder flag(ItemFlag... flags) {
         this.meta.addItemFlags(flags);
         return this;
@@ -115,13 +145,36 @@ public class ItemBuilder {
         return this;
     }
 
-    public ItemBuilder owningPlayer(String playerName) {
-        if (this.stack.getType() != Material.PLAYER_HEAD) return this;
-
-        OfflinePlayer player = Bukkit.getOfflinePlayer(playerName);
-        if (this.meta instanceof SkullMeta skullMeta) {
-            skullMeta.setOwningPlayer(player);
+    public ItemBuilder skull(String playerName) {
+        if (!(meta instanceof SkullMeta skullMeta) || stack.getType() != Material.PLAYER_HEAD) {
+            return this;
         }
+
+        skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(playerName));
+        return this;
+    }
+
+    public ItemBuilder skullTexture(String base64) {
+        if (!(meta instanceof SkullMeta skullMeta) || stack.getType() != Material.PLAYER_HEAD) {
+            return this;
+        }
+
+        PlayerProfile profile = Bukkit.createProfile(UUID.randomUUID(), null);
+        profile.setProperty(new ProfileProperty("textures", base64));
+        skullMeta.setPlayerProfile(profile);
+
+        return this;
+    }
+
+    public ItemBuilder skullTexture(String texture, String signature) {
+        if (!(meta instanceof SkullMeta skullMeta) || stack.getType() != Material.PLAYER_HEAD) {
+            return this;
+        }
+
+        PlayerProfile profile = Bukkit.createProfile(UUID.randomUUID(), null);
+        profile.setProperty(new ProfileProperty("textures", texture, signature));
+        skullMeta.setPlayerProfile(profile);
+
         return this;
     }
 
