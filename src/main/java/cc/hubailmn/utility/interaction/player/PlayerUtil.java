@@ -3,6 +3,8 @@ package cc.hubailmn.utility.interaction.player;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.MetadataValue;
 
@@ -28,6 +30,14 @@ public final class PlayerUtil {
         }
 
         return false;
+    }
+
+    public static void heal(Player player) {
+        AttributeInstance maxHealthAttr = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+        if (maxHealthAttr != null) {
+            player.setHealth(maxHealthAttr.getValue());
+            player.setSaturation(20);
+        }
     }
 
     public static boolean isBedrock(OfflinePlayer player) {

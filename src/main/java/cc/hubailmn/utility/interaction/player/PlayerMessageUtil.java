@@ -2,13 +2,13 @@ package cc.hubailmn.utility.interaction.player;
 
 import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.interaction.SoundUtil;
+import cc.hubailmn.utility.util.TextParserUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentBuilder;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -18,8 +18,6 @@ import java.time.Duration;
 import java.util.Objects;
 
 public final class PlayerMessageUtil {
-
-    private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacySection();
 
     private PlayerMessageUtil() {
         throw new UnsupportedOperationException("This is a utility class.");
@@ -32,16 +30,16 @@ public final class PlayerMessageUtil {
 
     public static void send(Player player, String content) {
         if (player == null || content == null) return;
-        player.sendMessage(LEGACY_SERIALIZER.deserialize(content));
+        player.sendMessage(TextParserUtil.parse(content));
     }
 
     public static void prefixed(Player player, Component content) {
-        Component prefix = LEGACY_SERIALIZER.deserialize(BasePlugin.getPrefix());
+        Component prefix = TextParserUtil.parse(BasePlugin.getPrefix());
         send(player, prefix.append(Component.space()).append(content));
     }
 
     public static void prefixed(Player player, String content) {
-        send(player, BasePlugin.getPrefix() + " " + content);
+        prefixed(player, TextParserUtil.parse(content));
     }
 
     public static void sendActionBarMessage(Player player, Component message) {
@@ -51,16 +49,16 @@ public final class PlayerMessageUtil {
 
     public static void sendActionBarMessage(Player player, String message) {
         if (player == null || message == null) return;
-        player.sendActionBar(LEGACY_SERIALIZER.deserialize(message));
+        player.sendActionBar(TextParserUtil.parse(message));
     }
 
     public static void sendPrefixedActionBarMessage(Player player, Component message) {
-        Component prefix = LEGACY_SERIALIZER.deserialize(BasePlugin.getPrefix());
+        Component prefix = TextParserUtil.parse(BasePlugin.getPrefix());
         sendActionBarMessage(player, prefix.append(Component.space()).append(message));
     }
 
     public static void sendPrefixedActionBarMessage(Player player, String message) {
-        sendActionBarMessage(player, BasePlugin.getPrefix() + " " + message);
+        sendPrefixedActionBarMessage(player, TextParserUtil.parse(message));
     }
 
     public static void sendCenteredMessage(Player player, String message) {
@@ -71,21 +69,20 @@ public final class PlayerMessageUtil {
         int spacesNeeded = (centerPx - messagePxSize / 2) / 4;
 
         player.sendMessage(
-                LEGACY_SERIALIZER.deserialize(" ".repeat(Math.max(0, spacesNeeded)) + message)
+                TextParserUtil.parse(" ".repeat(Math.max(0, spacesNeeded)) + message)
         );
     }
 
     public static void sendCenteredMessage(Player player, Component message) {
         if (player == null || message == null) return;
-
-        String legacyMessage = LEGACY_SERIALIZER.serialize(message);
-        sendCenteredMessage(player, legacyMessage);
+        String plain = TextParserUtil.toPlainText(message);
+        sendCenteredMessage(player, plain);
     }
 
     public static void title(Player p, String main, String sub) {
         title(p,
-                LEGACY_SERIALIZER.deserialize(main != null ? main : ""),
-                LEGACY_SERIALIZER.deserialize(sub != null ? sub : "")
+                main != null ? TextParserUtil.parse(main) : Component.empty(),
+                sub != null ? TextParserUtil.parse(sub) : Component.empty()
         );
     }
 
@@ -101,12 +98,12 @@ public final class PlayerMessageUtil {
     }
 
     public static Component hover(String text, String hoverText) {
-        return LEGACY_SERIALIZER.deserialize(text)
-                .hoverEvent(HoverEvent.showText(LEGACY_SERIALIZER.deserialize(hoverText)));
+        return TextParserUtil.parse(text)
+                .hoverEvent(HoverEvent.showText(TextParserUtil.parse(hoverText)));
     }
 
     public static Component hover(Component text, String hoverText) {
-        return text.hoverEvent(HoverEvent.showText(LEGACY_SERIALIZER.deserialize(hoverText)));
+        return text.hoverEvent(HoverEvent.showText(TextParserUtil.parse(hoverText)));
     }
 
     public static Component hover(Component text, Component hoverText) {
@@ -114,7 +111,7 @@ public final class PlayerMessageUtil {
     }
 
     public static Component clickRunCommand(String text, String command) {
-        return LEGACY_SERIALIZER.deserialize(text)
+        return TextParserUtil.parse(text)
                 .clickEvent(ClickEvent.runCommand(command));
     }
 
@@ -123,7 +120,7 @@ public final class PlayerMessageUtil {
     }
 
     public static Component clickOpenUrl(String text, String url) {
-        return LEGACY_SERIALIZER.deserialize(text)
+        return TextParserUtil.parse(text)
                 .clickEvent(ClickEvent.openUrl(url));
     }
 
@@ -132,13 +129,13 @@ public final class PlayerMessageUtil {
     }
 
     public static Component hoverAndClick(String text, String hoverText, String command) {
-        return LEGACY_SERIALIZER.deserialize(text)
-                .hoverEvent(HoverEvent.showText(LEGACY_SERIALIZER.deserialize(hoverText)))
+        return TextParserUtil.parse(text)
+                .hoverEvent(HoverEvent.showText(TextParserUtil.parse(hoverText)))
                 .clickEvent(ClickEvent.runCommand(command));
     }
 
     public static Component hoverAndClick(Component text, String hoverText, String command) {
-        return text.hoverEvent(HoverEvent.showText(LEGACY_SERIALIZER.deserialize(hoverText)))
+        return text.hoverEvent(HoverEvent.showText(TextParserUtil.parse(hoverText)))
                 .clickEvent(ClickEvent.runCommand(command));
     }
 
@@ -208,38 +205,7 @@ public final class PlayerMessageUtil {
 
                 String frame = frames[index++];
                 player.showTitle(Title.title(
-                        LEGACY_SERIALIZER.deserialize(frame),
-                        Component.empty(),
-                        Title.Times.times(
-                                Duration.ofMillis(100),
-                                Duration.ofMillis(frameDurationMillis),
-                                Duration.ofMillis(100)
-                        )
-                ));
-
-                if (sound != null) {
-                    SoundUtil.playSound(player, sound, volume, pitch);
-                }
-            }
-        }.runTaskTimer(BasePlugin.getInstance(), 0L, frameDurationMillis / 50L);
-    }
-
-    public static void animateTitle(Player player, Component[] frames, long frameDurationMillis, Sound sound, float volume, float pitch) {
-        if (player == null || frames == null || frames.length == 0) return;
-
-        new BukkitRunnable() {
-            int index = 0;
-
-            @Override
-            public void run() {
-                if (index >= frames.length) {
-                    cancel();
-                    return;
-                }
-
-                Component frame = frames[index++];
-                player.showTitle(Title.title(
-                        frame,
+                        TextParserUtil.parse(frame),
                         Component.empty(),
                         Title.Times.times(
                                 Duration.ofMillis(100),
