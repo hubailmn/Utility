@@ -93,6 +93,18 @@ public final class PlayerMessageUtil {
         p.showTitle(fullTitle);
     }
 
+    public static void title(Player player, Component title, Component subtitle, float fadeIn, float stay, float fadeOut) {
+        player.showTitle(
+                Title.title(title, subtitle == null ? Component.empty() : subtitle,
+                        Title.Times.times(
+                                java.time.Duration.ofMillis((long) (fadeIn * 50)),
+                                java.time.Duration.ofMillis((long) (stay * 50)),
+                                java.time.Duration.ofMillis((long) (fadeOut * 50))
+                        )
+                )
+        );
+    }
+
     public static void resetTitle(Player player) {
         if (player != null) player.clearTitle();
     }

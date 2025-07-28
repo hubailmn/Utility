@@ -87,7 +87,7 @@ public abstract class CommandBuilder implements TabExecutor {
             if (hasAccess(sender, permission)) {
                 return perform(sender, command, label, args);
             }
-            return sendHelp(sender);
+            return true;
         }
 
         String subCommandName = args[0];
@@ -97,7 +97,7 @@ public abstract class CommandBuilder implements TabExecutor {
             if (hasAccess(sender, permission)) {
                 return perform(sender, command, label, args);
             }
-            return sendHelp(sender);
+            return true;
         }
 
         if (baseSubCommand.isRequiresPlayer() && !(sender instanceof Player)) {
