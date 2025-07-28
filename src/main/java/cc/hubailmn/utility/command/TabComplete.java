@@ -3,6 +3,7 @@ package cc.hubailmn.utility.command;
 import lombok.Getter;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,6 +67,84 @@ public class TabComplete {
         return this;
     }
 
+    public TabComplete addIfPerm(int index, String perm, String... values) {
+        if (sender.hasPermission(perm)) {
+            add(index, values);
+        }
+        return this;
+    }
+
+    public TabComplete addIfPerm(int index, String perm, List<String> values) {
+        if (sender.hasPermission(perm)) {
+            add(index, values);
+        }
+        return this;
+    }
+
+    public TabComplete addPlayerNames(int index) {
+        return add(index, sender.getServer().getOnlinePlayers().stream().map(Player::getName).toList());
+    }
+
+    public TabComplete addPlayerIfOnline(int index, String playerName) {
+        if (sender.getServer().getPlayer(playerName) != null) {
+            add(index, playerName);
+        }
+        return this;
+    }
+
+    public TabComplete addPlayersWithPerm(int index, String perm) {
+        if (sender.hasPermission(perm)) {
+            List<String> names = sender.getServer().getOnlinePlayers()
+                    .stream()
+                    .map(Player::getName)
+                    .toList();
+            add(index, names);
+        }
+        return this;
+    }
+
+    public TabComplete addWildcardAndPlayers(int index, String wildcardPermission) {
+        if (sender.hasPermission(wildcardPermission)) {
+            add(index, "*");
+        }
+        return addPlayerNames(index);
+    }
+
+    public TabComplete addWildcardAndPlayersIfPerm(int index, String perm) {
+        if (sender.hasPermission(perm)) {
+            add(index, "*");
+            add(index, sender.getServer().getOnlinePlayers().stream().map(Player::getName).toList());
+        }
+        return this;
+    }
+
+    public <E extends Enum<E>> TabComplete addEnum(int index, Class<E> enumClass) {
+        for (E e : enumClass.getEnumConstants()) {
+            add(index, e.name().toLowerCase());
+        }
+        return this;
+    }
+
+    public TabComplete addIf(int index, Predicate<CommandSender> condition, String... values) {
+        if (condition.test(sender)) {
+            add(index, values);
+        }
+        return this;
+    }
+
+    public TabComplete addMatching(int index, List<String> values, String filter) {
+        for (String value : values) {
+            if (value.toLowerCase().startsWith(filter.toLowerCase())) {
+                add(index, value);
+            }
+        }
+        return this;
+    }
+
+    public TabComplete addBoolean(int index) {
+        return add(index, "true", "false");
+    }
+
     public List<String> build() {
         if (args.length == 0) {
             return Collections.emptyList();
@@ -96,6 +175,12 @@ public class TabComplete {
             Collections.sort(results);
         }
         return results;
+    }
+
+    public TabComplete debug() {
+        System.out.println("TabComplete[" + alias + "] args=" + String.join(" ", args));
+        entries.forEach((k, v) -> System.out.println("Index " + k + ": " + v));
+        return this;
     }
 
     public void clear() {
