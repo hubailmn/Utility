@@ -28,7 +28,6 @@ public class CommandRegistry {
     public static void registerCommand(String commandName, TabExecutor executor, List<String> aliases) {
         try {
             if (registeredCommands.contains(commandName)) {
-                CSend.debug("Command '" + commandName + "' already registered. Skipping.");
                 return;
             }
 
@@ -42,7 +41,6 @@ public class CommandRegistry {
     }
 
     public static void unRegisterCommands() {
-        CSend.debug("Unregistering all registered commands...");
         for (String commandName : new HashSet<>(registeredCommands)) {
             unRegisterCommand(commandName);
         }
@@ -56,23 +54,46 @@ public class CommandRegistry {
             String key = commandName.toLowerCase();
             String namespacedKey = pluginPrefix + ":" + key;
 
-            Command command = knownCommands.getOrDefault(key, knownCommands.get(namespacedKey));
+            Command command = knownCommands.get(key);
+            if (command == null) {
+                command = knownCommands.get(namespacedKey);
+            }
 
             if (command != null) {
+                List<String> aliasesToRemove = new ArrayList<>(command.getAliases());
+
                 knownCommands.remove(key);
                 knownCommands.remove(namespacedKey);
                 registeredCommands.remove(commandName);
 
-                CSend.debug("Successfully unregistered command: " + commandName);
+                for (String alias : aliasesToRemove) {
+                    String aliasLower = alias.toLowerCase();
+                    String namespacedAlias = pluginPrefix + ":" + aliasLower;
 
-                for (String alias : command.getAliases()) {
-                    if (knownCommands.containsKey(alias) && knownCommands.get(alias).toString().toLowerCase().contains(pluginPrefix)) {
-                        knownCommands.remove(alias);
-                        CSend.debug("Removed alias '" + alias + "' for command '" + commandName + "'");
+                    Command aliasCommand = knownCommands.get(aliasLower);
+                    if (aliasCommand != null && aliasCommand.equals(command)) {
+                        knownCommands.remove(aliasLower);
+                    }
+
+                    Command namespacedAliasCommand = knownCommands.get(namespacedAlias);
+                    if (namespacedAliasCommand != null && namespacedAliasCommand.equals(command)) {
+                        knownCommands.remove(namespacedAlias);
                     }
                 }
+
+                Iterator<Map.Entry<String, Command>> iterator = knownCommands.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Map.Entry<String, Command> entry = iterator.next();
+                    if (entry.getValue().equals(command)) {
+                        iterator.remove();
+                    }
+                }
+
             } else {
                 CSend.warn("Command '" + commandName + "' not found in knownCommands.");
+                knownCommands.remove(key);
+                knownCommands.remove(namespacedKey);
+                registeredCommands.remove(commandName);
             }
         } catch (Exception e) {
             CSend.error("Failed to unregister command '" + commandName + "': " + e.getMessage());
@@ -109,8 +130,8 @@ public class CommandRegistry {
 
         @Override
         public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, String[] args) {
-            return Objects.requireNonNull(executor.onTabComplete(sender, this, alias, args));
+            List<String> completions = executor.onTabComplete(sender, this, alias, args);
+            return completions != null ? completions : new ArrayList<>();
         }
     }
-
 }
