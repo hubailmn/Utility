@@ -27,13 +27,27 @@ public class CommandRegistry {
 
     public static void registerCommand(String commandName, TabExecutor executor, List<String> aliases) {
         try {
+            String key = commandName.toLowerCase();
+            String pluginPrefix = BasePlugin.getInstance().getPluginName().toLowerCase();
+            String namespacedKey = pluginPrefix + ":" + key;
+
             if (registeredCommands.contains(commandName)) {
-                return;
+                Command existingCommand = knownCommands.get(key);
+                Command namespacedCommand = knownCommands.get(namespacedKey);
+
+                if (existingCommand == null && namespacedCommand == null) {
+                    CSend.debug("Command '" + commandName + "' was tracked as registered but not found in knownCommands. Removing from tracking.");
+                    registeredCommands.remove(commandName);
+                } else {
+                    CSend.debug("Command '" + commandName + "' already registered. Skipping.");
+                    return;
+                }
             }
 
             DynamicCommand dynamicCommand = new DynamicCommand(commandName, executor, aliases);
             commandMap.register(BasePlugin.getInstance().getPluginName(), dynamicCommand);
             registeredCommands.add(commandName);
+            CSend.debug("Registered command: " + commandName);
         } catch (Exception e) {
             CSend.error("Error registering command '" + commandName + "': " + e.getMessage());
             CSend.error(e);
@@ -44,6 +58,15 @@ public class CommandRegistry {
         for (String commandName : new HashSet<>(registeredCommands)) {
             unRegisterCommand(commandName);
         }
+        registeredCommands.clear();
+    }
+
+    public static void resetRegistry() {
+        registeredCommands.clear();
+    }
+
+    public static Set<String> getRegisteredCommands() {
+        return new HashSet<>(registeredCommands);
     }
 
     public static void unRegisterCommand(String commandName) {
@@ -60,6 +83,7 @@ public class CommandRegistry {
             }
 
             if (command != null) {
+
                 List<String> aliasesToRemove = new ArrayList<>(command.getAliases());
 
                 knownCommands.remove(key);
@@ -90,7 +114,6 @@ public class CommandRegistry {
                 }
 
             } else {
-                CSend.warn("Command '" + commandName + "' not found in knownCommands.");
                 knownCommands.remove(key);
                 knownCommands.remove(namespacedKey);
                 registeredCommands.remove(commandName);
@@ -125,6 +148,10 @@ public class CommandRegistry {
 
         @Override
         public boolean execute(@NotNull CommandSender sender, @NotNull String label, String[] args) {
+            if (!BasePlugin.getInstance().isEnabled()) {
+                sender.sendMessage("§cThis plugin is currently disabled.");
+                return true;
+            }
             return executor.onCommand(sender, this, label, args);
         }
 
