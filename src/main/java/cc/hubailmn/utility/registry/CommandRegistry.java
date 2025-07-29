@@ -148,10 +148,6 @@ public class CommandRegistry {
 
         @Override
         public boolean execute(@NotNull CommandSender sender, @NotNull String label, String[] args) {
-            if (!BasePlugin.getInstance().isEnabled()) {
-                sender.sendMessage("§cThis plugin is currently disabled.");
-                return true;
-            }
             return executor.onCommand(sender, this, label, args);
         }
 
