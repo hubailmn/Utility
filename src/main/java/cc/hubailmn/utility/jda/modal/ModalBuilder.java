@@ -1,6 +1,6 @@
-package cc.hubailmn.jdautility.modal;
+package cc.hubailmn.utility.jda.modal;
 
-import cc.hubailmn.jdautility.modal.annotation.BotModal;
+import cc.hubailmn.utility.jda.modal.annotation.BotModal;
 import cc.hubailmn.utility.interaction.CSend;
 import lombok.Getter;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;

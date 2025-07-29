@@ -1,4 +1,4 @@
-package cc.hubailmn.jdautility.commands.annotation;
+package cc.hubailmn.utility.jda.commands.annotation;
 
 import net.dv8tion.jda.api.Permission;
 

@@ -1,7 +1,7 @@
-package cc.hubailmn.jdautility.commands;
+package cc.hubailmn.utility.jda.commands;
 
-import cc.hubailmn.jdautility.commands.annotation.BotCommand;
-import cc.hubailmn.jdautility.commands.annotation.BotSubCommand;
+import cc.hubailmn.utility.jda.commands.annotation.BotCommand;
+import cc.hubailmn.utility.jda.commands.annotation.BotSubCommand;
 import cc.hubailmn.utility.interaction.CSend;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

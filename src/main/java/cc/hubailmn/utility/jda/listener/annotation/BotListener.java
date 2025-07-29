@@ -1,4 +1,4 @@
-package cc.hubailmn.jdautility.listener.annotation;
+package cc.hubailmn.utility.jda.listener.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

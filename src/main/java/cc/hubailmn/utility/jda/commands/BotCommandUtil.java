@@ -1,6 +1,6 @@
-package cc.hubailmn.jdautility.commands;
+package cc.hubailmn.utility.jda.commands;
 
-import cc.hubailmn.jdautility.BaseBot;
+import cc.hubailmn.utility.jda.BaseBot;
 import cc.hubailmn.utility.interaction.CSend;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Guild;

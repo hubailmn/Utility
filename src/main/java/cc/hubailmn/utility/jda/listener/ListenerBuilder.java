@@ -1,6 +1,6 @@
-package cc.hubailmn.jdautility.listener;
+package cc.hubailmn.utility.jda.listener;
 
-import cc.hubailmn.jdautility.listener.annotation.BotListener;
+import cc.hubailmn.utility.jda.listener.annotation.BotListener;
 import cc.hubailmn.utility.interaction.CSend;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
