@@ -86,6 +86,8 @@ public abstract class CommandBuilder implements TabExecutor {
             if (hasAccess(sender, permission)) {
                 return perform(sender, command, label, args);
             }
+            sender.sendMessage(BasePlugin.getPrefix() + "§c You don't have permission to execute this command.");
+            if (sender instanceof Player player) SoundUtil.play(player, SoundUtil.SoundType.DENY);
             return true;
         }
 
@@ -96,6 +98,8 @@ public abstract class CommandBuilder implements TabExecutor {
             if (hasAccess(sender, permission)) {
                 return perform(sender, command, label, args);
             }
+            sender.sendMessage(BasePlugin.getPrefix() + "§c You don't have permission to execute this command.");
+            if (sender instanceof Player player) SoundUtil.play(player, SoundUtil.SoundType.DENY);
             return true;
         }
 
@@ -106,6 +110,7 @@ public abstract class CommandBuilder implements TabExecutor {
 
         if (!hasAccess(sender, baseSubCommand.getPermission())) {
             sender.sendMessage(BasePlugin.getPrefix() + "§c You don't have permission to execute this command.");
+            if (sender instanceof Player player) SoundUtil.play(player, SoundUtil.SoundType.DENY);
             return true;
         }
 

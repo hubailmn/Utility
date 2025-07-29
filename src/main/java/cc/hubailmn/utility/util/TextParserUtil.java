@@ -1,6 +1,7 @@
 package cc.hubailmn.utility.util;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -39,6 +40,25 @@ public class TextParserUtil {
 
     public static String toPlainText(Component component) {
         return LegacyComponentSerializer.legacySection().serialize(component);
+    }
+
+    public static Component stripNewlinesPreservingStyle(Component component) {
+        if (component instanceof TextComponent textComponent) {
+            String cleanText = textComponent.content().replace("\n", " ");
+            Component base = Component.text(cleanText, textComponent.style());
+
+            for (Component child : textComponent.children()) {
+                base = base.append(stripNewlinesPreservingStyle(child));
+            }
+
+            return base;
+        }
+
+        return component.children().isEmpty()
+               ? component
+               : component.children().stream()
+                       .map(TextParserUtil::stripNewlinesPreservingStyle)
+                       .reduce(component, Component::append);
     }
 
 }

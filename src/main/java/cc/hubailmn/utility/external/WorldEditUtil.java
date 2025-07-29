@@ -25,25 +25,20 @@ public class WorldEditUtil {
                 ProtectedRegion protectedRegion = WorldGuardUtil.getProtectedRegion(regionName);
                 if (protectedRegion == null) return;
 
+                Region region = new CuboidRegion(protectedRegion.getMinimumPoint(), protectedRegion.getMaximumPoint());
                 org.bukkit.World bukkitWorld = WorldGuardUtil.getRegionWorld(regionName);
                 if (bukkitWorld == null) return;
 
-                Region region = new CuboidRegion(protectedRegion.getMinimumPoint(), protectedRegion.getMaximumPoint());
-                World weWorld = BukkitAdapter.adapt(bukkitWorld);
+                com.sk89q.worldedit.world.World weWorld = BukkitAdapter.adapt(bukkitWorld);
 
                 Bukkit.getScheduler().runTask(BasePlugin.getInstance(), () -> {
-                    try (EditSession editSession = WorldEdit.getInstance()
-                            .newEditSessionBuilder()
-                            .world(weWorld)
-                            .build()) {
-
+                    try (EditSession editSession = WorldEdit.getInstance().newEditSessionBuilder().world(weWorld).build()) {
                         editSession.setBlocks(region, BukkitAdapter.adapt(material.createBlockData()));
                     } catch (MaxChangedBlocksException e) {
                         CSend.error("Failed to fill region: " + e.getMessage());
                         CSend.error(e);
                     }
                 });
-
             } catch (Exception ex) {
                 CSend.error("Exception while preparing region fill: " + ex.getMessage());
                 CSend.error(ex);
@@ -56,21 +51,15 @@ public class WorldEditUtil {
         BukkitPlayer actor = BukkitAdapter.adapt(player);
         LocalSession localSession = manager.get(actor);
 
-        if (localSession == null) {
-            actor.printError(TextComponent.of("No WorldEdit session found."));
-            return Optional.empty();
-        }
-
+        Region region;
+        World selectionWorld = localSession.getSelectionWorld();
         try {
-            World selectionWorld = localSession.getSelectionWorld();
             if (selectionWorld == null) throw new IncompleteRegionException();
-
-            Region region = localSession.getSelection(selectionWorld);
-            return Optional.of(region);
-
+            region = localSession.getSelection(selectionWorld);
         } catch (IncompleteRegionException ex) {
             actor.printError(TextComponent.of("Please make a region selection first."));
             return Optional.empty();
         }
+        return Optional.of(region);
     }
 }
