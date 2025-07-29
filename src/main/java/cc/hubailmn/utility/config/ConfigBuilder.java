@@ -109,7 +109,6 @@ public abstract class ConfigBuilder {
         return result;
     }
 
-
     public boolean getBool(Map<String, Object> map, String key, boolean def) {
         Object val = map.get(key);
         return val instanceof Boolean ? (Boolean) val : def;

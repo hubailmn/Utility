@@ -1,12 +1,14 @@
 package cc.hubailmn.utility.menu.interactive;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.function.Consumer;
 
 @Getter
+@Setter
 public class GuiSlotButton extends GuiElement {
 
     private final int slot;

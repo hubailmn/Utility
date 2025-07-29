@@ -2,7 +2,6 @@ package cc.hubailmn.jdautility.commands;
 
 import cc.hubailmn.jdautility.BaseBot;
 import cc.hubailmn.jdautility.commands.annotation.BotCommand;
-import cc.hubailmn.jdautility.register.InstanceManager;
 import cc.hubailmn.utility.interaction.CSend;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -64,7 +63,7 @@ public abstract class BotCommandBuilder extends ListenerAdapter {
     }
 
     private void addSubCommands() {
-        var subCommandsInstance =  BaseBot.getInstance().getInstanceManager().getAllSubCommands();
+        var subCommandsInstance = BaseBot.getInstance().getInstanceManager().getAllSubCommands();
         for (BotSubCommandBuilder subCommand : subCommandsInstance) {
             if (subCommand.getParent().equals(this.getClass())) {
                 getCommandData().addSubcommands(subCommand.getSubcommandData());

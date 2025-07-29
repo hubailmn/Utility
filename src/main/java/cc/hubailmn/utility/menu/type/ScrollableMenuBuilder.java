@@ -20,6 +20,7 @@ public abstract class ScrollableMenuBuilder extends MenuBuilder {
     protected final Map<Integer, GuiElement> renderedItems = new HashMap<>();
     protected List<Integer> contentSlots = new ArrayList<>();
     protected int scrollOffset = 0;
+    protected int scrollAmount = 1;
 
     protected GuiSlotButton scrollBackButton;
     protected GuiSlotButton scrollNextButton;
@@ -33,7 +34,7 @@ public abstract class ScrollableMenuBuilder extends MenuBuilder {
                 .name("§eScroll Back")
                 .build(), player -> {
             if (scrollOffset > 0) {
-                scrollBy(-1);
+                scrollBy(-scrollAmount);
                 SoundUtil.play(player, SoundUtil.SoundType.PAGE_FLIP);
             }
         }, true);
@@ -44,7 +45,7 @@ public abstract class ScrollableMenuBuilder extends MenuBuilder {
                 .build(), player -> {
             int maxOffset = Math.max(0, items.size() - contentSlots.size());
             if (scrollOffset < maxOffset) {
-                scrollBy(1);
+                scrollBy(scrollAmount);
                 SoundUtil.play(player, SoundUtil.SoundType.PAGE_FLIP);
             }
         }, true);
@@ -123,4 +124,9 @@ public abstract class ScrollableMenuBuilder extends MenuBuilder {
     public abstract void setupButtons();
 
     public abstract void setItems(Inventory inventory);
+
+    public void setScrollAmount(int scrollAmount) {
+        this.scrollAmount = Math.max(1, scrollAmount);
+    }
+
 }

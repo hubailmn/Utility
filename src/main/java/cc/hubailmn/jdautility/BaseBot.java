@@ -26,9 +26,9 @@ public class BaseBot extends ListenerAdapter {
 
     @Getter
     private static BaseBot instance;
+    private final InstanceManager instanceManager;
     private ShardManager shardManager;
     private BotSettingsConfig config;
-    private final InstanceManager instanceManager;
 
     public BaseBot() {
         instance = this;

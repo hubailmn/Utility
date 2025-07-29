@@ -1,7 +1,6 @@
 package cc.hubailmn.utility.command;
 
 import cc.hubailmn.utility.BasePlugin;
-import cc.hubailmn.utility.util.HashUtil;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
