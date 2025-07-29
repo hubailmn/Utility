@@ -1,11 +1,11 @@
 package cc.hubailmn.utility;
 
-import cc.hubailmn.jdautility.BaseBot;
 import cc.hubailmn.utility.command.DebugCommand;
 import cc.hubailmn.utility.config.ConfigUtil;
 import cc.hubailmn.utility.config.file.PluginSettings;
 import cc.hubailmn.utility.database.DataBaseConnection;
 import cc.hubailmn.utility.interaction.CSend;
+import cc.hubailmn.utility.jda.BaseBot;
 import cc.hubailmn.utility.plugin.CheckUpdates;
 import cc.hubailmn.utility.plugin.LicenseValidation;
 import cc.hubailmn.utility.plugin.PluginUsage;
