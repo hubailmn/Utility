@@ -83,7 +83,7 @@ public class BotCommandUtil {
 
         BaseBot.getInstance().getShardManager().getShards().forEach(jda -> {
             CompletableFuture<Void> future = new CompletableFuture<>();
-            jda.updateCommands().addCommands().queue( // Empty - no commands added
+            jda.updateCommands().addCommands().queue(
                     success -> {
                         CSend.debug("Cleared global commands on shard: " + jda.getShardInfo().getShardId());
                         future.complete(null);
