@@ -17,9 +17,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.time.Duration;
 import java.util.Objects;
 
-public final class PlayerMessageUtil {
+public final class PMessage {
 
-    private PlayerMessageUtil() {
+    private PMessage() {
         throw new UnsupportedOperationException("This is a utility class.");
     }
 

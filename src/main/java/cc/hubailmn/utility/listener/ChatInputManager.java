@@ -2,7 +2,7 @@ package cc.hubailmn.utility.listener;
 
 import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.annotation.RegisterListener;
-import cc.hubailmn.utility.interaction.player.PlayerMessageUtil;
+import cc.hubailmn.utility.interaction.player.PMessage;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
@@ -31,15 +31,15 @@ public class ChatInputManager implements Listener {
         UUID uuid = player.getUniqueId();
 
         if (isAwaitingInput(player)) {
-            PlayerMessageUtil.prefixed(player, "§cYou're already being asked for input.");
+            PMessage.prefixed(player, "§cYou're already being asked for input.");
             return;
         }
 
-        PlayerMessageUtil.prefixed(player, prompt);
+        PMessage.prefixed(player, prompt);
 
         int taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(BasePlugin.getInstance(), () -> {
             sessions.remove(uuid);
-            PlayerMessageUtil.prefixed(player, "§eInput timed out.");
+            PMessage.prefixed(player, "§eInput timed out.");
         }, timeoutTicks);
 
         sessions.put(uuid, new InputSession(callback, validator, taskId));
@@ -57,7 +57,7 @@ public class ChatInputManager implements Listener {
         Bukkit.getScheduler().cancelTask(session.taskId);
 
         if (!session.validator.test(message)) {
-            PlayerMessageUtil.prefixed(player, "§cInvalid input. Try again.");
+            PMessage.prefixed(player, "§cInvalid input. Try again.");
             return;
         }
 

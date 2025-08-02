@@ -2,7 +2,7 @@ package cc.hubailmn.utility.listener;
 
 import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.annotation.RegisterListener;
-import cc.hubailmn.utility.interaction.player.PlayerMessageUtil;
+import cc.hubailmn.utility.interaction.player.PMessage;
 import cc.hubailmn.utility.plugin.CheckUpdates;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -52,7 +52,7 @@ public class UpdateCheckListener implements Listener {
                             .append(Component.text(" - Prefix: ", NamedTextColor.GRAY))
                             .append(Component.text(prefix, NamedTextColor.GOLD));
 
-                    PlayerMessageUtil.send(player, info);
+                    PMessage.send(player, info);
                 }
 
                 if (versionToAnnounce != null) {
@@ -61,7 +61,7 @@ public class UpdateCheckListener implements Listener {
                             .append(Component.text(versionToAnnounce, NamedTextColor.GOLD))
                             .build();
 
-                    PlayerMessageUtil.prefixed(player, update);
+                    PMessage.prefixed(player, update);
                 }
             });
         });

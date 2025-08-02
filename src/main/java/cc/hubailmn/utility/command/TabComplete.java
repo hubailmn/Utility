@@ -1,15 +1,14 @@
 package cc.hubailmn.utility.command;
 
 import lombok.Getter;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Getter
 public class TabComplete {
@@ -18,6 +17,38 @@ public class TabComplete {
     private final String alias;
     private final String[] args;
     private final TreeMap<Integer, List<String>> entries = new TreeMap<>();
+
+    public static final List<String> ALL_MATERIAL_NAMES = Arrays.stream(Material.values())
+            .map(Material::name)
+            .toList();
+
+    public static final List<String> ITEM_MATERIAL_NAMES = Arrays.stream(Material.values())
+            .filter(Material::isItem)
+            .map(Material::name)
+            .toList();
+
+    public static final List<String> FOOD_MATERIALS = Arrays.stream(Material.values())
+            .filter(Material::isEdible)
+            .map(Material::name)
+            .toList();
+
+    public static final List<String> TOOL_MATERIALS = Arrays.stream(Material.values())
+            .filter(m -> m.name().endsWith("_AXE")
+                    || m.name().endsWith("_PICKAXE")
+                    || m.name().endsWith("_SHOVEL")
+                    || m.name().endsWith("_HOE")
+                    || m.name().equals("MACE")
+                    || m.name().endsWith("_SWORD")
+                    || m.name().contains("SHEARS")
+                    || m.name().contains("FISHING_ROD")
+            )
+            .map(Material::name)
+            .toList();
+
+    public static final List<String> BLOCK_MATERIALS = Arrays.stream(Material.values())
+            .filter(Material::isBlock)
+            .map(Material::name)
+            .toList();
 
     private String currentArg;
     private int currentArgLength;
@@ -145,6 +176,26 @@ public class TabComplete {
         return add(index, "true", "false");
     }
 
+    public TabComplete addBlocks(int index) {
+        return add(index, toReadableNames(BLOCK_MATERIALS));
+    }
+
+    public TabComplete addItems(int index) {
+        return add(index, toReadableNames(ITEM_MATERIAL_NAMES));
+    }
+
+    public TabComplete addFood(int index) {
+        return add(index, toReadableNames(FOOD_MATERIALS));
+    }
+
+    public TabComplete addTools(int index) {
+        return add(index, toReadableNames(TOOL_MATERIALS));
+    }
+
+    public TabComplete addMaterials(int index) {
+        return add(index, toReadableNames(ALL_MATERIAL_NAMES));
+    }
+
     public List<String> build() {
         if (args.length == 0) {
             return Collections.emptyList();
@@ -175,6 +226,14 @@ public class TabComplete {
             Collections.sort(results);
         }
         return results;
+    }
+
+    public static List<String> toReadableNames(List<String> materialNames) {
+        return materialNames.stream()
+                .map(name -> Arrays.stream(name.split("_"))
+                        .map(part -> part.substring(0, 1).toUpperCase() + part.substring(1).toLowerCase())
+                        .collect(Collectors.joining("_")))
+                .toList();
     }
 
     public TabComplete debug() {
