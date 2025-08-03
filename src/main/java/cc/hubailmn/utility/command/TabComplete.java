@@ -12,26 +12,17 @@ import java.util.stream.Collectors;
 
 @Getter
 public class TabComplete {
-    private final CommandSender sender;
-    private final Command command;
-    private final String alias;
-    private final String[] args;
-    private final TreeMap<Integer, List<String>> entries = new TreeMap<>();
-
     public static final List<String> ALL_MATERIAL_NAMES = Arrays.stream(Material.values())
             .map(Material::name)
             .toList();
-
     public static final List<String> ITEM_MATERIAL_NAMES = Arrays.stream(Material.values())
             .filter(Material::isItem)
             .map(Material::name)
             .toList();
-
     public static final List<String> FOOD_MATERIALS = Arrays.stream(Material.values())
             .filter(Material::isEdible)
             .map(Material::name)
             .toList();
-
     public static final List<String> TOOL_MATERIALS = Arrays.stream(Material.values())
             .filter(m -> m.name().endsWith("_AXE")
                     || m.name().endsWith("_PICKAXE")
@@ -44,12 +35,15 @@ public class TabComplete {
             )
             .map(Material::name)
             .toList();
-
     public static final List<String> BLOCK_MATERIALS = Arrays.stream(Material.values())
             .filter(Material::isBlock)
             .map(Material::name)
             .toList();
-
+    private final CommandSender sender;
+    private final Command command;
+    private final String alias;
+    private final String[] args;
+    private final TreeMap<Integer, List<String>> entries = new TreeMap<>();
     private String currentArg;
     private int currentArgLength;
 
@@ -62,6 +56,14 @@ public class TabComplete {
             this.currentArg = args[args.length - 1].toLowerCase();
             this.currentArgLength = currentArg.length();
         }
+    }
+
+    public static List<String> toReadableNames(List<String> materialNames) {
+        return materialNames.stream()
+                .map(name -> Arrays.stream(name.split("_"))
+                        .map(part -> part.substring(0, 1).toUpperCase() + part.substring(1).toLowerCase())
+                        .collect(Collectors.joining("_")))
+                .toList();
     }
 
     public TabComplete add(int atIndex, String[] entry, Predicate<String[]> condition) {
@@ -226,14 +228,6 @@ public class TabComplete {
             Collections.sort(results);
         }
         return results;
-    }
-
-    public static List<String> toReadableNames(List<String> materialNames) {
-        return materialNames.stream()
-                .map(name -> Arrays.stream(name.split("_"))
-                        .map(part -> part.substring(0, 1).toUpperCase() + part.substring(1).toLowerCase())
-                        .collect(Collectors.joining("_")))
-                .toList();
     }
 
     public TabComplete debug() {
