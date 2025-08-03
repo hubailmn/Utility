@@ -29,8 +29,8 @@ public class ItemSerializer {
 
             dataOutput.writeInt(items.length);
 
-            for (int i = 0; i < items.length; i++) {
-                dataOutput.writeObject(items[i]);
+            for (ItemStack item : items) {
+                dataOutput.writeObject(item);
             }
 
             dataOutput.close();
@@ -65,7 +65,7 @@ public class ItemSerializer {
 
     public static String toBase64(ItemStack item) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        BukkitObjectOutputStream dataOutput = null;
+        BukkitObjectOutputStream dataOutput;
         try {
             dataOutput = new BukkitObjectOutputStream(outputStream);
         } catch (IOException e) {
@@ -93,7 +93,6 @@ public class ItemSerializer {
             BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
 
             ItemStack item = (ItemStack) dataInput.readObject();
-
             dataInput.close();
             return item;
         } catch (ClassNotFoundException | IOException e) {
