@@ -106,20 +106,16 @@ public final class CSend {
         while (true) {
             int placeholderIndex = messagePattern.indexOf("{}", lastIndex);
             if (placeholderIndex == -1) {
-                // No more placeholders
                 result.append(messagePattern.substring(lastIndex));
                 break;
             }
 
-            // Append text before placeholder
-            result.append(messagePattern.substring(lastIndex, placeholderIndex));
+            result.append(messagePattern, lastIndex, placeholderIndex);
 
-            // Replace placeholder with argument
             if (argIndex < arguments.length) {
                 Object arg = arguments[argIndex++];
                 result.append(formatArgument(arg));
             } else {
-                // No more arguments, keep placeholder
                 result.append("{}");
             }
 
@@ -134,8 +130,7 @@ public final class CSend {
             return "null";
         }
 
-        if (arg instanceof Throwable) {
-            Throwable t = (Throwable) arg;
+        if (arg instanceof Throwable t) {
             return t.getClass().getSimpleName() + ": " + t.getMessage();
         }
 
@@ -260,7 +255,6 @@ public final class CSend {
             logAsync(ERROR_LOG, "  at " + ste);
         }
 
-        // Handle nested exceptions
         Throwable cause = throwable.getCause();
         if (cause != null && cause != throwable) {
             logAsync(ERROR_LOG, "Caused by: " + cause.getClass().getSimpleName() + ": " + cause.getMessage());
