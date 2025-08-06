@@ -13,7 +13,7 @@ public class DatabaseManagerRegistry {
         return (GenericTableManager<T>) managers.get(entityClass);
     }
 
-    public static <T> void registerManager(Class<T> entityClass, GenericTableManager<T> manager) {
+    public static <T> void registerManager(Class<?> entityClass, GenericTableManager<?> manager) {
         managers.put(entityClass, manager);
     }
 

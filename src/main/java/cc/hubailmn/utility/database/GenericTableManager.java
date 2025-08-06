@@ -23,16 +23,15 @@ public class GenericTableManager<T> {
     private final Map<String, Field> updatableFields = new LinkedHashMap<>();
     private final Field primaryKeyField;
 
-    // Simple cache for frequently accessed entities
     private final Map<Object, T> entityCache = new ConcurrentHashMap<>();
-    private final long cacheExpiry = 30000; // 30 seconds cache
+    private final long cacheExpiry = 30000;
     private final Map<Object, Long> cacheTimestamps = new ConcurrentHashMap<>();
 
-    // Prepared statements cache
     private PreparedStatement selectByPkStmt;
     private PreparedStatement insertStmt;
     private PreparedStatement updateStmt;
     private PreparedStatement deleteStmt;
+    private boolean statementsReady = false;
 
     public GenericTableManager(Class<T> entityClass, Connection connection) {
         this.entityClass = entityClass;
@@ -52,7 +51,6 @@ public class GenericTableManager<T> {
             String colName = col.name().isEmpty() ? field.getName() : col.name();
             columnFieldMap.put(colName, field);
 
-            // Separate updatable fields
             if (col.updatable() && !col.primaryKey()) {
                 updatableFields.put(colName, field);
             }
@@ -66,27 +64,19 @@ public class GenericTableManager<T> {
         }
         this.primaryKeyField = pkField;
 
-        try {
-            prepareStatements();
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to prepare statements", e);
-        }
     }
 
     private void prepareStatements() throws SQLException {
         String pkColumn = getColumnName(primaryKeyField);
 
-        // SELECT statement
         String selectSql = "SELECT * FROM " + tableName + " WHERE " + pkColumn + " = ?";
         selectByPkStmt = connection.prepareStatement(selectSql);
 
-        // INSERT statement
         String columns = String.join(", ", columnFieldMap.keySet());
         String placeholders = columnFieldMap.keySet().stream().map(k -> "?").collect(Collectors.joining(", "));
         String insertSql = "INSERT INTO " + tableName + " (" + columns + ") VALUES (" + placeholders + ")";
         insertStmt = connection.prepareStatement(insertSql);
 
-        // UPDATE statement - only updatable fields
         if (!updatableFields.isEmpty()) {
             String updateFields = updatableFields.keySet().stream()
                     .map(col -> col + " = ?")
@@ -95,13 +85,16 @@ public class GenericTableManager<T> {
             updateStmt = connection.prepareStatement(updateSql);
         }
 
-        // DELETE statement
         String deleteSql = "DELETE FROM " + tableName + " WHERE " + pkColumn + " = ?";
         deleteStmt = connection.prepareStatement(deleteSql);
     }
 
     public void createTable() throws SQLException {
         SQLSchemaGenerator.createTable(entityClass, connection);
+        if (!statementsReady) {
+            prepareStatements();
+            statementsReady = true;
+        }
     }
 
     public void save(T entity) throws SQLException {
@@ -116,7 +109,6 @@ public class GenericTableManager<T> {
             insert(entity);
         }
 
-        // Update cache
         if (pkValue != null) {
             entityCache.put(pkValue, entity);
             cacheTimestamps.put(pkValue, System.currentTimeMillis());
@@ -138,16 +130,14 @@ public class GenericTableManager<T> {
     }
 
     private void update(T entity) throws SQLException {
-        if (updateStmt == null) return; // No updatable fields
+        if (updateStmt == null) return;
 
         try {
             int idx = 1;
-            // Set updatable field values
             for (Field field : updatableFields.values()) {
                 Object value = field.get(entity);
                 updateStmt.setObject(idx++, value);
             }
-            // Set primary key value for WHERE clause
             Object pkValue = getPrimaryKeyValue(entity);
             updateStmt.setObject(idx, pkValue);
 
@@ -158,7 +148,6 @@ public class GenericTableManager<T> {
         }
     }
 
-    // Batch operations for better performance
     public void saveBatch(List<T> entities) throws SQLException {
         if (entities.isEmpty()) return;
 
@@ -180,7 +169,6 @@ public class GenericTableManager<T> {
     public Optional<T> load(Object primaryKeyValue) throws SQLException {
         if (primaryKeyValue == null) return Optional.empty();
 
-        // Check cache first
         T cached = getCachedEntity(primaryKeyValue);
         if (cached != null) {
             return Optional.of(cached);
@@ -193,7 +181,6 @@ public class GenericTableManager<T> {
 
                 T entity = createEntityFromResultSet(rs);
 
-                // Cache the loaded entity
                 entityCache.put(primaryKeyValue, entity);
                 cacheTimestamps.put(primaryKeyValue, System.currentTimeMillis());
 
@@ -204,12 +191,10 @@ public class GenericTableManager<T> {
         }
     }
 
-    // Load multiple entities by primary keys
     public List<T> loadBatch(List<Object> primaryKeyValues) throws SQLException {
         List<T> results = new ArrayList<>();
         List<Object> toLoad = new ArrayList<>();
 
-        // Check cache for each key
         for (Object pkValue : primaryKeyValues) {
             T cached = getCachedEntity(pkValue);
             if (cached != null) {
@@ -219,7 +204,6 @@ public class GenericTableManager<T> {
             }
         }
 
-        // Load missing entities from database
         if (!toLoad.isEmpty()) {
             String pkColumn = getColumnName(primaryKeyField);
             String placeholders = toLoad.stream().map(k -> "?").collect(Collectors.joining(", "));
@@ -236,7 +220,6 @@ public class GenericTableManager<T> {
                         Object pkValue = getPrimaryKeyValue(entity);
                         results.add(entity);
 
-                        // Cache loaded entity
                         entityCache.put(pkValue, entity);
                         cacheTimestamps.put(pkValue, System.currentTimeMillis());
                     }
@@ -257,7 +240,6 @@ public class GenericTableManager<T> {
             int affected = deleteStmt.executeUpdate();
 
             if (affected > 0) {
-                // Remove from cache
                 entityCache.remove(primaryKeyValue);
                 cacheTimestamps.remove(primaryKeyValue);
             }
@@ -299,7 +281,6 @@ public class GenericTableManager<T> {
     public boolean exists(Object primaryKeyValue) throws SQLException {
         if (primaryKeyValue == null) return false;
 
-        // Check cache first
         if (getCachedEntity(primaryKeyValue) != null) {
             return true;
         }
@@ -314,7 +295,6 @@ public class GenericTableManager<T> {
         }
     }
 
-    // Clear cache entries older than expiry time
     public void clearExpiredCache() {
         long now = System.currentTimeMillis();
         List<Object> keysToRemove = new ArrayList<>();
@@ -349,7 +329,6 @@ public class GenericTableManager<T> {
             Object val = rs.getObject(col);
 
             if (val != null || !field.getType().isPrimitive()) {
-                // Handle UUID conversion
                 if (field.getType() == UUID.class && val instanceof String) {
                     val = UUID.fromString((String) val);
                 }
@@ -377,7 +356,6 @@ public class GenericTableManager<T> {
                 SQLColumn col = field.getAnnotation(SQLColumn.class);
                 Object value = field.get(entity);
 
-                // Check for null values in non-nullable fields
                 if (!col.nullable() && value == null && !field.getType().isPrimitive()) {
                     throw new IllegalArgumentException("Field " + field.getName() + " cannot be null");
                 }
@@ -392,7 +370,6 @@ public class GenericTableManager<T> {
         return (col != null && !col.name().isEmpty()) ? col.name() : field.getName();
     }
 
-    // Clean up prepared statements
     public void close() {
         try {
             if (selectByPkStmt != null) selectByPkStmt.close();

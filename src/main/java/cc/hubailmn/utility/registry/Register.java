@@ -71,6 +71,7 @@ public final class Register {
                 GenericTableManager<?> manager = new GenericTableManager<>(entityClass, conn);
                 manager.createTable();
                 managers.add(manager);
+                DatabaseManagerRegistry.registerManager(entityClass, manager);
 
                 CSend.debug("Registered database table for entity: " + entityClass.getSimpleName());
             } catch (Exception e) {
