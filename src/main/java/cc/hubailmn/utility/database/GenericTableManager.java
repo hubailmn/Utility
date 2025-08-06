@@ -10,10 +10,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class GenericTableManager<T> {
@@ -22,7 +20,19 @@ public class GenericTableManager<T> {
     private final Connection connection;
     private final String tableName;
     private final Map<String, Field> columnFieldMap = new LinkedHashMap<>();
+    private final Map<String, Field> updatableFields = new LinkedHashMap<>();
     private final Field primaryKeyField;
+
+    // Simple cache for frequently accessed entities
+    private final Map<Object, T> entityCache = new ConcurrentHashMap<>();
+    private final long cacheExpiry = 30000; // 30 seconds cache
+    private final Map<Object, Long> cacheTimestamps = new ConcurrentHashMap<>();
+
+    // Prepared statements cache
+    private PreparedStatement selectByPkStmt;
+    private PreparedStatement insertStmt;
+    private PreparedStatement updateStmt;
+    private PreparedStatement deleteStmt;
 
     public GenericTableManager(Class<T> entityClass, Connection connection) {
         this.entityClass = entityClass;
@@ -41,6 +51,12 @@ public class GenericTableManager<T> {
             field.setAccessible(true);
             String colName = col.name().isEmpty() ? field.getName() : col.name();
             columnFieldMap.put(colName, field);
+
+            // Separate updatable fields
+            if (col.updatable() && !col.primaryKey()) {
+                updatableFields.put(colName, field);
+            }
+
             if (col.primaryKey()) {
                 pkField = field;
             }
@@ -49,6 +65,39 @@ public class GenericTableManager<T> {
             throw new IllegalArgumentException("Entity class must have one primary key field annotated with @SQLColumn(primaryKey=true)");
         }
         this.primaryKeyField = pkField;
+
+        try {
+            prepareStatements();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to prepare statements", e);
+        }
+    }
+
+    private void prepareStatements() throws SQLException {
+        String pkColumn = getColumnName(primaryKeyField);
+
+        // SELECT statement
+        String selectSql = "SELECT * FROM " + tableName + " WHERE " + pkColumn + " = ?";
+        selectByPkStmt = connection.prepareStatement(selectSql);
+
+        // INSERT statement
+        String columns = String.join(", ", columnFieldMap.keySet());
+        String placeholders = columnFieldMap.keySet().stream().map(k -> "?").collect(Collectors.joining(", "));
+        String insertSql = "INSERT INTO " + tableName + " (" + columns + ") VALUES (" + placeholders + ")";
+        insertStmt = connection.prepareStatement(insertSql);
+
+        // UPDATE statement - only updatable fields
+        if (!updatableFields.isEmpty()) {
+            String updateFields = updatableFields.keySet().stream()
+                    .map(col -> col + " = ?")
+                    .collect(Collectors.joining(", "));
+            String updateSql = "UPDATE " + tableName + " SET " + updateFields + " WHERE " + pkColumn + " = ?";
+            updateStmt = connection.prepareStatement(updateSql);
+        }
+
+        // DELETE statement
+        String deleteSql = "DELETE FROM " + tableName + " WHERE " + pkColumn + " = ?";
+        deleteStmt = connection.prepareStatement(deleteSql);
     }
 
     public void createTable() throws SQLException {
@@ -56,60 +105,98 @@ public class GenericTableManager<T> {
     }
 
     public void save(T entity) throws SQLException {
-        String columns = String.join(", ", columnFieldMap.keySet());
-        String placeholders = columnFieldMap.keySet().stream().map(k -> "?").collect(Collectors.joining(", "));
-        String updates = columnFieldMap.entrySet().stream()
-                .filter(e -> !e.getValue().equals(primaryKeyField))
-                .map(e -> e.getKey() + " = VALUES(" + e.getKey() + ")")
-                .collect(Collectors.joining(", "));
+        validateEntity(entity);
 
-        boolean isSQLite = connection.getMetaData().getDatabaseProductName().toLowerCase().contains("sqlite");
+        Object pkValue = getPrimaryKeyValue(entity);
+        boolean isUpdate = pkValue != null && exists(pkValue);
 
-        String sql;
-        if (isSQLite) {
-            sql = "INSERT INTO " + tableName + " (" + columns + ") VALUES (" + placeholders + ") " +
-                    "ON CONFLICT(" + getColumnName(primaryKeyField) + ") DO UPDATE SET " +
-                    columnFieldMap.entrySet().stream()
-                            .filter(e -> !e.getValue().equals(primaryKeyField))
-                            .map(e -> e.getKey() + " = excluded." + e.getKey())
-                            .collect(Collectors.joining(", "));
+        if (isUpdate) {
+            update(entity);
         } else {
-            sql = "INSERT INTO " + tableName + " (" + columns + ") VALUES (" + placeholders + ") " +
-                    "ON DUPLICATE KEY UPDATE " + updates;
+            insert(entity);
         }
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        // Update cache
+        if (pkValue != null) {
+            entityCache.put(pkValue, entity);
+            cacheTimestamps.put(pkValue, System.currentTimeMillis());
+        }
+    }
+
+    private void insert(T entity) throws SQLException {
+        try {
             int idx = 1;
             for (Field field : columnFieldMap.values()) {
                 Object value = field.get(entity);
-                stmt.setObject(idx++, value);
+                insertStmt.setObject(idx++, value);
             }
-            int affected = stmt.executeUpdate();
-            CSend.debug("Saved entity in table '{}' - affected rows: {}", tableName, affected);
+            int affected = insertStmt.executeUpdate();
+            CSend.debug("Inserted entity in table '{}' - affected rows: {}", tableName, affected);
         } catch (IllegalAccessException e) {
-            throw new RuntimeException("Failed to access entity fields for saving", e);
+            throw new RuntimeException("Failed to access entity fields for insertion", e);
+        }
+    }
+
+    private void update(T entity) throws SQLException {
+        if (updateStmt == null) return; // No updatable fields
+
+        try {
+            int idx = 1;
+            // Set updatable field values
+            for (Field field : updatableFields.values()) {
+                Object value = field.get(entity);
+                updateStmt.setObject(idx++, value);
+            }
+            // Set primary key value for WHERE clause
+            Object pkValue = getPrimaryKeyValue(entity);
+            updateStmt.setObject(idx, pkValue);
+
+            int affected = updateStmt.executeUpdate();
+            CSend.debug("Updated entity in table '{}' - affected rows: {}", tableName, affected);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Failed to access entity fields for update", e);
+        }
+    }
+
+    // Batch operations for better performance
+    public void saveBatch(List<T> entities) throws SQLException {
+        if (entities.isEmpty()) return;
+
+        connection.setAutoCommit(false);
+        try {
+            for (T entity : entities) {
+                save(entity);
+            }
+            connection.commit();
+            CSend.debug("Saved batch of {} entities in table '{}'", entities.size(), tableName);
+        } catch (SQLException e) {
+            connection.rollback();
+            throw e;
+        } finally {
+            connection.setAutoCommit(true);
         }
     }
 
     public Optional<T> load(Object primaryKeyValue) throws SQLException {
-        String pkColumn = getColumnName(primaryKeyField);
-        String sql = "SELECT * FROM " + tableName + " WHERE " + pkColumn + " = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setObject(1, primaryKeyValue);
-            try (ResultSet rs = stmt.executeQuery()) {
+        if (primaryKeyValue == null) return Optional.empty();
+
+        // Check cache first
+        T cached = getCachedEntity(primaryKeyValue);
+        if (cached != null) {
+            return Optional.of(cached);
+        }
+
+        try {
+            selectByPkStmt.setObject(1, primaryKeyValue);
+            try (ResultSet rs = selectByPkStmt.executeQuery()) {
                 if (!rs.next()) return Optional.empty();
-                T entity = entityClass.getDeclaredConstructor().newInstance();
-                for (Map.Entry<String, Field> entry : columnFieldMap.entrySet()) {
-                    String col = entry.getKey();
-                    Field field = entry.getValue();
-                    Object val = rs.getObject(col);
-                    if (val != null || !field.getType().isPrimitive()) {
-                        if (field.getType() == UUID.class && val instanceof String) {
-                            val = UUID.fromString((String) val);
-                        }
-                        field.set(entity, val);
-                    }
-                }
+
+                T entity = createEntityFromResultSet(rs);
+
+                // Cache the loaded entity
+                entityCache.put(primaryKeyValue, entity);
+                cacheTimestamps.put(primaryKeyValue, System.currentTimeMillis());
+
                 return Optional.of(entity);
             }
         } catch (ReflectiveOperationException e) {
@@ -117,18 +204,203 @@ public class GenericTableManager<T> {
         }
     }
 
+    // Load multiple entities by primary keys
+    public List<T> loadBatch(List<Object> primaryKeyValues) throws SQLException {
+        List<T> results = new ArrayList<>();
+        List<Object> toLoad = new ArrayList<>();
+
+        // Check cache for each key
+        for (Object pkValue : primaryKeyValues) {
+            T cached = getCachedEntity(pkValue);
+            if (cached != null) {
+                results.add(cached);
+            } else {
+                toLoad.add(pkValue);
+            }
+        }
+
+        // Load missing entities from database
+        if (!toLoad.isEmpty()) {
+            String pkColumn = getColumnName(primaryKeyField);
+            String placeholders = toLoad.stream().map(k -> "?").collect(Collectors.joining(", "));
+            String sql = "SELECT * FROM " + tableName + " WHERE " + pkColumn + " IN (" + placeholders + ")";
+
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                for (int i = 0; i < toLoad.size(); i++) {
+                    stmt.setObject(i + 1, toLoad.get(i));
+                }
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        T entity = createEntityFromResultSet(rs);
+                        Object pkValue = getPrimaryKeyValue(entity);
+                        results.add(entity);
+
+                        // Cache loaded entity
+                        entityCache.put(pkValue, entity);
+                        cacheTimestamps.put(pkValue, System.currentTimeMillis());
+                    }
+                }
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException("Failed to create entities from result set", e);
+            }
+        }
+
+        return results;
+    }
+
     public boolean delete(Object primaryKeyValue) throws SQLException {
+        if (primaryKeyValue == null) return false;
+
+        try {
+            deleteStmt.setObject(1, primaryKeyValue);
+            int affected = deleteStmt.executeUpdate();
+
+            if (affected > 0) {
+                // Remove from cache
+                entityCache.remove(primaryKeyValue);
+                cacheTimestamps.remove(primaryKeyValue);
+            }
+
+            return affected > 0;
+        } catch (SQLException e) {
+            CSend.error("Failed to delete entity with PK: " + primaryKeyValue, e);
+            throw e;
+        }
+    }
+
+    public List<T> findBy(String columnName, Object value) throws SQLException {
+        String sql = "SELECT * FROM " + tableName + " WHERE " + columnName + " = ?";
+        List<T> results = new ArrayList<>();
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setObject(1, value);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    T entity = createEntityFromResultSet(rs);
+                    results.add(entity);
+                }
+            }
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Failed to create entities from result set", e);
+        }
+
+        return results;
+    }
+
+    public long count() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM " + tableName;
+        try (PreparedStatement stmt = connection.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            return rs.next() ? rs.getLong(1) : 0;
+        }
+    }
+
+    public boolean exists(Object primaryKeyValue) throws SQLException {
+        if (primaryKeyValue == null) return false;
+
+        // Check cache first
+        if (getCachedEntity(primaryKeyValue) != null) {
+            return true;
+        }
+
         String pkColumn = getColumnName(primaryKeyField);
-        String sql = "DELETE FROM " + tableName + " WHERE " + pkColumn + " = ?";
+        String sql = "SELECT 1 FROM " + tableName + " WHERE " + pkColumn + " = ? LIMIT 1";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setObject(1, primaryKeyValue);
-            int affected = stmt.executeUpdate();
-            return affected > 0;
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    // Clear cache entries older than expiry time
+    public void clearExpiredCache() {
+        long now = System.currentTimeMillis();
+        List<Object> keysToRemove = new ArrayList<>();
+
+        for (Map.Entry<Object, Long> entry : cacheTimestamps.entrySet()) {
+            if (now - entry.getValue() > cacheExpiry) {
+                keysToRemove.add(entry.getKey());
+            }
+        }
+
+        for (Object key : keysToRemove) {
+            entityCache.remove(key);
+            cacheTimestamps.remove(key);
+        }
+    }
+
+    private T getCachedEntity(Object primaryKeyValue) {
+        Long timestamp = cacheTimestamps.get(primaryKeyValue);
+        if (timestamp == null || System.currentTimeMillis() - timestamp > cacheExpiry) {
+            entityCache.remove(primaryKeyValue);
+            cacheTimestamps.remove(primaryKeyValue);
+            return null;
+        }
+        return entityCache.get(primaryKeyValue);
+    }
+
+    private T createEntityFromResultSet(ResultSet rs) throws ReflectiveOperationException, SQLException {
+        T entity = entityClass.getDeclaredConstructor().newInstance();
+        for (Map.Entry<String, Field> entry : columnFieldMap.entrySet()) {
+            String col = entry.getKey();
+            Field field = entry.getValue();
+            Object val = rs.getObject(col);
+
+            if (val != null || !field.getType().isPrimitive()) {
+                // Handle UUID conversion
+                if (field.getType() == UUID.class && val instanceof String) {
+                    val = UUID.fromString((String) val);
+                }
+                field.set(entity, val);
+            }
+        }
+        return entity;
+    }
+
+    private Object getPrimaryKeyValue(T entity) {
+        try {
+            return primaryKeyField.get(entity);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Failed to get primary key value", e);
+        }
+    }
+
+    private void validateEntity(T entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("Entity cannot be null");
+        }
+
+        try {
+            for (Field field : columnFieldMap.values()) {
+                SQLColumn col = field.getAnnotation(SQLColumn.class);
+                Object value = field.get(entity);
+
+                // Check for null values in non-nullable fields
+                if (!col.nullable() && value == null && !field.getType().isPrimitive()) {
+                    throw new IllegalArgumentException("Field " + field.getName() + " cannot be null");
+                }
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Failed to validate entity", e);
         }
     }
 
     private String getColumnName(Field field) {
         SQLColumn col = field.getAnnotation(SQLColumn.class);
         return (col != null && !col.name().isEmpty()) ? col.name() : field.getName();
+    }
+
+    // Clean up prepared statements
+    public void close() {
+        try {
+            if (selectByPkStmt != null) selectByPkStmt.close();
+            if (insertStmt != null) insertStmt.close();
+            if (updateStmt != null) updateStmt.close();
+            if (deleteStmt != null) deleteStmt.close();
+        } catch (SQLException e) {
+            CSend.error("Failed to close prepared statements", e);
+        }
     }
 }

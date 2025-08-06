@@ -15,7 +15,7 @@ import cc.hubailmn.utility.interaction.CSend;
 import org.bukkit.event.Listener;
 
 import java.sql.Connection;
-import java.util.Set;
+import java.util.*;
 
 public final class Register {
 
@@ -62,12 +62,15 @@ public final class Register {
         DataBaseConnection.initialize();
         Connection conn = DataBaseConnection.getConnection();
 
+        List<GenericTableManager<?>> managers = new ArrayList<>();
+
         scanAndRegister(ReflectionsUtil.build(
                 BASE_PACKAGE + ".database"
         ).getTypesAnnotatedWith(DataBaseTable.class), "Database Table", entityClass -> {
             try {
                 GenericTableManager<?> manager = new GenericTableManager<>(entityClass, conn);
                 manager.createTable();
+                managers.add(manager);
 
                 CSend.debug("Registered database table for entity: " + entityClass.getSimpleName());
             } catch (Exception e) {
@@ -76,6 +79,30 @@ public final class Register {
             }
         });
 
+        schedulePeriodicCacheCleanup(managers);
+    }
+
+    private static void schedulePeriodicCacheCleanup(List<GenericTableManager<?>> managers) {
+        Timer cacheCleanupTimer = new Timer("DatabaseCacheCleanup", true);
+        cacheCleanupTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                for (GenericTableManager<?> manager : managers) {
+                    try {
+                        manager.clearExpiredCache();
+                    } catch (Exception e) {
+                        CSend.error("Error during cache cleanup", e);
+                    }
+                }
+            }
+        }, 300000, 300000);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            cacheCleanupTimer.cancel();
+            for (GenericTableManager<?> manager : managers) {
+                manager.close();
+            }
+        }));
     }
 
     public static void config() {

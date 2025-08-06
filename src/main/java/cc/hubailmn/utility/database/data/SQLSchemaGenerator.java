@@ -2,6 +2,7 @@ package cc.hubailmn.utility.database.data;
 
 import cc.hubailmn.utility.database.annotation.DataBaseTable;
 import cc.hubailmn.utility.database.annotation.SQLColumn;
+import cc.hubailmn.utility.interaction.CSend;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -22,6 +23,7 @@ public class SQLSchemaGenerator {
         boolean isSQLite = conn.getMetaData().getDatabaseProductName().toLowerCase().contains("sqlite");
 
         List<String> indexStatements = new ArrayList<>();
+        List<String> foreignKeyConstraints = new ArrayList<>();
 
         for (Field field : entityClass.getDeclaredFields()) {
             SQLColumn column = field.getAnnotation(SQLColumn.class);
@@ -42,7 +44,7 @@ public class SQLSchemaGenerator {
 
             if (column.autoIncrement()) {
                 if (isSQLite) {
-                    if (!(column.primaryKey() && field.getType() == int.class)) {
+                    if (!(column.primaryKey() && isIntegerType(field.getType()))) {
                         throw new IllegalArgumentException("SQLite requires auto-increment fields to be INTEGER PRIMARY KEY");
                     }
                     sql.append(" AUTOINCREMENT");
@@ -55,8 +57,12 @@ public class SQLSchemaGenerator {
                 sql.append(" NOT NULL");
             }
 
-            if (!column.references().isEmpty()) {
-                sql.append(" REFERENCES ").append(column.references());
+            if (column.foreignKey() && !column.references().isEmpty()) {
+                if (isSQLite) {
+                    sql.append(" REFERENCES ").append(column.references());
+                } else {
+                    foreignKeyConstraints.add("FOREIGN KEY (" + columnName + ") REFERENCES " + column.references());
+                }
             }
 
             sql.append(", ");
@@ -70,34 +76,59 @@ public class SQLSchemaGenerator {
             }
         }
 
+        for (String fkConstraint : foreignKeyConstraints) {
+            sql.append(fkConstraint).append(", ");
+        }
+
         if (sql.length() > 2) sql.setLength(sql.length() - 2);
         sql.append(")");
 
+        if (!isSQLite) {
+            sql.append(" ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        }
+
         try (Statement stmt = conn.createStatement()) {
             stmt.executeUpdate(sql.toString());
+
             for (String indexSql : indexStatements) {
-                stmt.executeUpdate(indexSql);
+                try {
+                    stmt.executeUpdate(indexSql);
+                } catch (SQLException e) {
+                    CSend.error("Warning: Failed to create index: {} - {}", indexSql, e.getMessage());
+                }
             }
         }
+    }
+
+    private static boolean isIntegerType(Class<?> type) {
+        return type == int.class || type == Integer.class ||
+                type == long.class || type == Long.class;
     }
 
     private static String adaptType(SQLType sqlType, boolean isSQLite) {
         return switch (sqlType) {
             case BOOLEAN -> isSQLite ? "INTEGER" : "TINYINT(1)";
             case TEXT -> isSQLite ? "TEXT" : "TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci";
-            case VARCHAR -> "VARCHAR(255)";
+            case VARCHAR -> isSQLite ? "TEXT" : "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci";
             case INTEGER -> "INTEGER";
             case BIGINT -> "BIGINT";
             case DOUBLE -> "DOUBLE";
             case FLOAT -> "FLOAT";
             case DATE -> "DATE";
-            case TIMESTAMP -> "TIMESTAMP";
+            case TIMESTAMP -> isSQLite ? "TEXT" : "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP";
             case BLOB -> "BLOB";
         };
     }
 
     private static String quoteDefaultIfNeeded(String value, Class<?> type) {
         if (value == null || value.isEmpty()) return "";
+
+        if ("CURRENT_TIMESTAMP".equalsIgnoreCase(value) ||
+                "NULL".equalsIgnoreCase(value) ||
+                value.matches("^\\d+$")) {
+            return value;
+        }
+
         if (type == String.class || type == char.class || type == Character.class) {
             if (!value.startsWith("'") && !value.endsWith("'")) {
                 return "'" + value.replace("'", "''") + "'";
@@ -105,5 +136,4 @@ public class SQLSchemaGenerator {
         }
         return value;
     }
-
 }
