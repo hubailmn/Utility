@@ -9,11 +9,12 @@ import cc.hubailmn.utility.config.ConfigBuilder;
 import cc.hubailmn.utility.config.ConfigUtil;
 import cc.hubailmn.utility.config.annotation.LoadConfig;
 import cc.hubailmn.utility.database.DataBaseConnection;
-import cc.hubailmn.utility.database.TableBuilder;
+import cc.hubailmn.utility.database.GenericTableManager;
 import cc.hubailmn.utility.database.annotation.DataBaseTable;
 import cc.hubailmn.utility.interaction.CSend;
 import org.bukkit.event.Listener;
 
+import java.sql.Connection;
 import java.util.Set;
 
 public final class Register {
@@ -59,18 +60,22 @@ public final class Register {
 
     public static void database() {
         DataBaseConnection.initialize();
+        Connection conn = DataBaseConnection.getConnection();
 
         scanAndRegister(ReflectionsUtil.build(
                 BASE_PACKAGE + ".database"
-        ).getTypesAnnotatedWith(DataBaseTable.class), "Database Table", tableClass -> {
-            if (!TableBuilder.class.isAssignableFrom(tableClass)) {
-                CSend.warn(tableClass.getName() + " is annotated with @DataBaseTable but does not extend TableBuilder.");
-                return;
-            }
+        ).getTypesAnnotatedWith(DataBaseTable.class), "Database Table", entityClass -> {
+            try {
+                GenericTableManager<?> manager = new GenericTableManager<>(entityClass, conn);
+                manager.createTable();
 
-            tableClass.getDeclaredConstructor().newInstance();
-            CSend.debug("Registered database table: " + tableClass.getSimpleName());
+                CSend.debug("Registered database table for entity: " + entityClass.getSimpleName());
+            } catch (Exception e) {
+                CSend.error("Failed to register database table for entity: " + entityClass.getName());
+                CSend.error(e);
+            }
         });
+
     }
 
     public static void config() {

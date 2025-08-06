@@ -21,8 +21,6 @@ public class SQLSchemaGenerator {
 
         boolean isSQLite = conn.getMetaData().getDatabaseProductName().toLowerCase().contains("sqlite");
 
-        boolean hasPrimaryKey = false;
-
         List<String> indexStatements = new ArrayList<>();
 
         for (Field field : entityClass.getDeclaredFields()) {
@@ -40,7 +38,6 @@ public class SQLSchemaGenerator {
 
             if (column.primaryKey()) {
                 sql.append(" PRIMARY KEY");
-                hasPrimaryKey = true;
             }
 
             if (column.autoIncrement()) {
