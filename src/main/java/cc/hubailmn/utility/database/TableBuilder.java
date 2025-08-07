@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+@Deprecated(since = "7 Aug 2025")
 @Getter
 public abstract class TableBuilder {
 

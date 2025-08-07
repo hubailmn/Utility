@@ -11,4 +11,5 @@ public @interface DataBaseTable {
 
     String name();
 
+    boolean serverPrefix() default false;
 }

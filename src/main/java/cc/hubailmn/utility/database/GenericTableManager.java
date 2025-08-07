@@ -34,6 +34,10 @@ public class GenericTableManager<T> {
     private boolean statementsReady = false;
 
     public GenericTableManager(Class<T> entityClass, Connection connection) {
+        this(entityClass, connection, null);
+    }
+
+    public GenericTableManager(Class<T> entityClass, Connection connection, String serverPrefix) {
         this.entityClass = entityClass;
         this.connection = connection;
 
@@ -41,10 +45,16 @@ public class GenericTableManager<T> {
         if (tableAnno == null) {
             throw new IllegalArgumentException("Entity class must be annotated with @DataBaseTable");
         }
-        this.tableName = tableAnno.name();
+
+        String baseName = tableAnno.name();
+        if (tableAnno.serverPrefix() && serverPrefix != null && !serverPrefix.isEmpty()) {
+            this.tableName = serverPrefix + "_" + baseName;
+        } else {
+            this.tableName = baseName;
+        }
 
         Field pkField = null;
-        for (Field field : entityClass.getDeclaredFields()) {
+        for (Field field : getAllFields(entityClass)) {
             SQLColumn col = field.getAnnotation(SQLColumn.class);
             if (col == null) continue;
             field.setAccessible(true);
@@ -63,34 +73,42 @@ public class GenericTableManager<T> {
             throw new IllegalArgumentException("Entity class must have one primary key field annotated with @SQLColumn(primaryKey=true)");
         }
         this.primaryKeyField = pkField;
+    }
 
+    private List<Field> getAllFields(Class<?> clazz) {
+        List<Field> fields = new ArrayList<>();
+        while (clazz != null) {
+            Collections.addAll(fields, clazz.getDeclaredFields());
+            clazz = clazz.getSuperclass();
+        }
+        return fields;
     }
 
     private void prepareStatements() throws SQLException {
         String pkColumn = getColumnName(primaryKeyField);
 
-        String selectSql = "SELECT * FROM " + tableName + " WHERE " + pkColumn + " = ?";
+        String selectSql = "SELECT * FROM \"" + tableName + "\" WHERE " + pkColumn + " = ?";
         selectByPkStmt = connection.prepareStatement(selectSql);
 
         String columns = String.join(", ", columnFieldMap.keySet());
         String placeholders = columnFieldMap.keySet().stream().map(k -> "?").collect(Collectors.joining(", "));
-        String insertSql = "INSERT INTO " + tableName + " (" + columns + ") VALUES (" + placeholders + ")";
+        String insertSql = "INSERT INTO \"" + tableName + "\" (" + columns + ") VALUES (" + placeholders + ")";
         insertStmt = connection.prepareStatement(insertSql);
 
         if (!updatableFields.isEmpty()) {
             String updateFields = updatableFields.keySet().stream()
                     .map(col -> col + " = ?")
                     .collect(Collectors.joining(", "));
-            String updateSql = "UPDATE " + tableName + " SET " + updateFields + " WHERE " + pkColumn + " = ?";
+            String updateSql = "UPDATE \"" + tableName + "\" SET " + updateFields + " WHERE " + pkColumn + " = ?";
             updateStmt = connection.prepareStatement(updateSql);
         }
 
-        String deleteSql = "DELETE FROM " + tableName + " WHERE " + pkColumn + " = ?";
+        String deleteSql = "DELETE FROM \"" + tableName + "\" WHERE " + pkColumn + " = ?";
         deleteStmt = connection.prepareStatement(deleteSql);
     }
 
     public void createTable() throws SQLException {
-        SQLSchemaGenerator.createTable(entityClass, connection);
+        SQLSchemaGenerator.createTable(entityClass, connection, tableName);
         if (!statementsReady) {
             prepareStatements();
             statementsReady = true;
@@ -207,7 +225,7 @@ public class GenericTableManager<T> {
         if (!toLoad.isEmpty()) {
             String pkColumn = getColumnName(primaryKeyField);
             String placeholders = toLoad.stream().map(k -> "?").collect(Collectors.joining(", "));
-            String sql = "SELECT * FROM " + tableName + " WHERE " + pkColumn + " IN (" + placeholders + ")";
+            String sql = "SELECT * FROM \"" + tableName + "\" WHERE " + pkColumn + " IN (" + placeholders + ")";
 
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 for (int i = 0; i < toLoad.size(); i++) {
@@ -252,7 +270,7 @@ public class GenericTableManager<T> {
     }
 
     public List<T> findBy(String columnName, Object value) throws SQLException {
-        String sql = "SELECT * FROM " + tableName + " WHERE " + columnName + " = ?";
+        String sql = "SELECT * FROM \"" + tableName + "\" WHERE " + columnName + " = ?";
         List<T> results = new ArrayList<>();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -271,7 +289,7 @@ public class GenericTableManager<T> {
     }
 
     public long count() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM " + tableName;
+        String sql = "SELECT COUNT(*) FROM \"" + tableName + "\"";
         try (PreparedStatement stmt = connection.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
             return rs.next() ? rs.getLong(1) : 0;
@@ -286,7 +304,7 @@ public class GenericTableManager<T> {
         }
 
         String pkColumn = getColumnName(primaryKeyField);
-        String sql = "SELECT 1 FROM " + tableName + " WHERE " + pkColumn + " = ? LIMIT 1";
+        String sql = "SELECT 1 FROM \"" + tableName + "\" WHERE " + pkColumn + " = ? LIMIT 1";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setObject(1, primaryKeyValue);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -329,13 +347,63 @@ public class GenericTableManager<T> {
             Object val = rs.getObject(col);
 
             if (val != null || !field.getType().isPrimitive()) {
-                if (field.getType() == UUID.class && val instanceof String) {
-                    val = UUID.fromString((String) val);
-                }
+                val = convertDatabaseValue(val, field.getType());
                 field.set(entity, val);
             }
         }
         return entity;
+    }
+
+    /**
+     * Converts database values to proper Java types
+     */
+    private Object convertDatabaseValue(Object dbValue, Class<?> targetType) {
+        if (dbValue == null) {
+            return null;
+        }
+
+        if (targetType == UUID.class && dbValue instanceof String) {
+            return UUID.fromString((String) dbValue);
+        }
+
+        if (targetType == boolean.class || targetType == Boolean.class) {
+            if (dbValue instanceof Number) {
+                return ((Number) dbValue).intValue() != 0;
+            }
+            if (dbValue instanceof String) {
+                String str = ((String) dbValue).toLowerCase();
+                return "true".equals(str) || "1".equals(str);
+            }
+            if (dbValue instanceof Boolean) {
+                return dbValue;
+            }
+        }
+
+        if (targetType == int.class || targetType == Integer.class) {
+            if (dbValue instanceof Number) {
+                return ((Number) dbValue).intValue();
+            }
+        }
+
+        if (targetType == long.class || targetType == Long.class) {
+            if (dbValue instanceof Number) {
+                return ((Number) dbValue).longValue();
+            }
+        }
+
+        if (targetType == double.class || targetType == Double.class) {
+            if (dbValue instanceof Number) {
+                return ((Number) dbValue).doubleValue();
+            }
+        }
+
+        if (targetType == float.class || targetType == Float.class) {
+            if (dbValue instanceof Number) {
+                return ((Number) dbValue).floatValue();
+            }
+        }
+
+        return dbValue;
     }
 
     private Object getPrimaryKeyValue(T entity) {

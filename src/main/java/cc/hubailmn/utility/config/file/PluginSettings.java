@@ -4,6 +4,7 @@ import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.config.ConfigBuilder;
 import cc.hubailmn.utility.config.annotation.LoadConfig;
 import cc.hubailmn.utility.interaction.CSend;
+import cc.hubailmn.utility.util.CodeGenerator;
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -17,6 +18,7 @@ public class PluginSettings extends ConfigBuilder {
 
     public String prefix;
     public String version;
+    public String serverId;
     public boolean checkForUpdates;
     public boolean debug;
     public TimeZone timeZone;
@@ -27,6 +29,10 @@ public class PluginSettings extends ConfigBuilder {
         this.prefix = getConfig().getString(PREFIX + "prefix");
         getConfig().set(PREFIX + "prefix", getPrefix().replace("%plugin_name%", BasePlugin.getInstance().getPluginName()));
         getConfig().set(PREFIX + "version", BasePlugin.getInstance().getPluginVersion());
+
+        this.serverId = getConfig().getString(PREFIX + "server-id");
+        String code = new CodeGenerator(5, 0, 5).generate();
+        getConfig().set(PREFIX + "server-id", getServerId().replace("%generate_id%", code));
         save();
 
         reloadCache();
@@ -35,6 +41,7 @@ public class PluginSettings extends ConfigBuilder {
     public void reloadCache() {
         this.prefix = getConfig().getString(PREFIX + "prefix");
         this.version = getConfig().getString(PREFIX + "version");
+        this.serverId = getConfig().getString(PREFIX + "server-id");
         this.checkForUpdates = getConfig().getBoolean(PREFIX + "update-check");
         this.debug = getConfig().getBoolean(PREFIX + "debug");
         this.timeZone = getTimeZone();

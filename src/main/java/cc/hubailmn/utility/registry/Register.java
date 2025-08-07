@@ -8,6 +8,7 @@ import cc.hubailmn.utility.command.annotation.Command;
 import cc.hubailmn.utility.config.ConfigBuilder;
 import cc.hubailmn.utility.config.ConfigUtil;
 import cc.hubailmn.utility.config.annotation.LoadConfig;
+import cc.hubailmn.utility.config.file.PluginSettings;
 import cc.hubailmn.utility.database.DataBaseConnection;
 import cc.hubailmn.utility.database.GenericTableManager;
 import cc.hubailmn.utility.database.annotation.DataBaseTable;
@@ -68,7 +69,15 @@ public final class Register {
                 BASE_PACKAGE + ".database"
         ).getTypesAnnotatedWith(DataBaseTable.class), "Database Table", entityClass -> {
             try {
-                GenericTableManager<?> manager = new GenericTableManager<>(entityClass, conn);
+                var useServerPrefix = entityClass.getAnnotation(DataBaseTable.class).serverPrefix();
+
+                GenericTableManager<?> manager;
+                if (!useServerPrefix) {
+                    manager = new GenericTableManager<>(entityClass, conn);
+                } else {
+                    manager = new GenericTableManager<>(entityClass, conn, ConfigUtil.getConfig(PluginSettings.class).getServerId());
+                }
+
                 manager.createTable();
                 managers.add(manager);
                 DatabaseManagerRegistry.registerManager(entityClass, manager);

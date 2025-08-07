@@ -13,12 +13,11 @@ import java.util.List;
 
 public class SQLSchemaGenerator {
 
-    public static void createTable(Class<?> entityClass, Connection conn) throws SQLException {
+    public static void createTable(Class<?> entityClass, Connection conn, String tableName) throws SQLException {
         DataBaseTable tableAnno = entityClass.getAnnotation(DataBaseTable.class);
         if (tableAnno == null) throw new IllegalArgumentException("Missing @DataBaseTable");
 
-        String tableName = tableAnno.name();
-        StringBuilder sql = new StringBuilder("CREATE TABLE IF NOT EXISTS " + tableName + " (");
+        StringBuilder sql = new StringBuilder("CREATE TABLE IF NOT EXISTS \"" + tableName + "\" (");
 
         boolean isSQLite = conn.getMetaData().getDatabaseProductName().toLowerCase().contains("sqlite");
 

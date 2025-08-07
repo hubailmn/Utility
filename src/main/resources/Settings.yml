@@ -3,4 +3,5 @@ plugin:
   version: '%plugin_version%'
   check-updates: false
   time-zone: "Asia/Riyadh"
+  server-id: "%generate_id%"
   debug: false
