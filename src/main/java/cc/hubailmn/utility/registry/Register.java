@@ -11,6 +11,7 @@ import cc.hubailmn.utility.config.annotation.LoadConfig;
 import cc.hubailmn.utility.config.file.PluginSettings;
 import cc.hubailmn.utility.database.DataBaseConnection;
 import cc.hubailmn.utility.database.GenericTableManager;
+import cc.hubailmn.utility.database.TableBuilder;
 import cc.hubailmn.utility.database.annotation.DataBaseTable;
 import cc.hubailmn.utility.interaction.CSend;
 import org.bukkit.event.Listener;
@@ -69,7 +70,21 @@ public final class Register {
                 BASE_PACKAGE + ".database"
         ).getTypesAnnotatedWith(DataBaseTable.class), "Database Table", entityClass -> {
             try {
-                var useServerPrefix = entityClass.getAnnotation(DataBaseTable.class).serverPrefix();
+                DataBaseTable databaseAnnotation = entityClass.getAnnotation(DataBaseTable.class);
+
+                var manual = databaseAnnotation.manual();
+                if (manual) {
+                    if (!TableBuilder.class.isAssignableFrom(entityClass)) {
+                        CSend.warn(entityClass.getName() + " is annotated with @DataBaseTable but does not extend TableBuilder.");
+                        return;
+                    }
+
+                    entityClass.getDeclaredConstructor().newInstance();
+                    CSend.debug("Registered database table: " + databaseAnnotation.name());
+                    return;
+                }
+
+                var useServerPrefix = databaseAnnotation.serverPrefix();
 
                 GenericTableManager<?> manager;
                 if (!useServerPrefix) {
