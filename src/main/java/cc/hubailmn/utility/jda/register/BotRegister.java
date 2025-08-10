@@ -15,7 +15,6 @@ import cc.hubailmn.utility.jda.modal.annotation.BotModal;
 import cc.hubailmn.utility.registry.ReflectionsUtil;
 import lombok.Getter;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.reflections.Reflections;
 
 import java.util.Set;
 
@@ -26,12 +25,10 @@ public class BotRegister {
 
     public static void commands() {
         subCommands();
-        Reflections reflections = ReflectionsUtil.build(
-                BASE_PACKAGE + "discord.command"
-        );
 
-        Set<Class<?>> classes = reflections.getTypesAnnotatedWith(BotCommand.class);
-        scanAndRegister(classes, "Command", clazz -> {
+        scanAndRegister(ReflectionsUtil.build(
+                BASE_PACKAGE + "discord.command"
+        ).getTypesAnnotatedWith(BotCommand.class), "Command", clazz -> {
             if (!BotCommandBuilder.class.isAssignableFrom(clazz)) {
                 CSend.warn(clazz.getName() + " is annotated with @BotCommand but does not extend CommandBuilder.");
                 return;
@@ -48,12 +45,9 @@ public class BotRegister {
     }
 
     public static void subCommands() {
-        Reflections reflections = ReflectionsUtil.build(
+        scanAndRegister(ReflectionsUtil.build(
                 BASE_PACKAGE + "discord.command"
-        );
-
-        Set<Class<?>> classes = reflections.getTypesAnnotatedWith(BotSubCommand.class);
-        scanAndRegister(classes, "Sub Command", clazz -> {
+        ).getTypesAnnotatedWith(BotSubCommand.class), "Sub Command", clazz -> {
             if (!BotSubCommandBuilder.class.isAssignableFrom(clazz)) {
                 CSend.warn(clazz.getName() + " is annotated with @BotSubCommand but does not extend SubCommandBuilder.");
                 return;
@@ -69,12 +63,9 @@ public class BotRegister {
     }
 
     public static void listeners() {
-        Reflections reflections = ReflectionsUtil.build(
+        scanAndRegister(ReflectionsUtil.build(
                 BASE_PACKAGE + "discord.listener"
-        );
-
-        Set<Class<?>> classes = reflections.getTypesAnnotatedWith(BotListener.class);
-        scanAndRegister(classes, "Event Listener", clazz -> {
+        ).getTypesAnnotatedWith(BotListener.class), "Event Listener", clazz -> {
             if (!ListenerBuilder.class.isAssignableFrom(clazz)) {
                 CSend.warn(clazz.getName() + " is annotated with @BotListener but does not extend ListenerBuilder.");
                 return;
@@ -90,12 +81,9 @@ public class BotRegister {
     }
 
     public static void modals() {
-        Reflections reflections = ReflectionsUtil.build(
+        scanAndRegister(ReflectionsUtil.build(
                 BASE_PACKAGE + ".modal"
-        );
-
-        Set<Class<?>> classes = reflections.getTypesAnnotatedWith(BotModal.class);
-        scanAndRegister(classes, "Modal", clazz -> {
+        ).getTypesAnnotatedWith(BotModal.class), "Modal", clazz -> {
             if (!ModalBuilder.class.isAssignableFrom(clazz)) {
                 CSend.warn(clazz.getName() + " is annotated with @BotModal but does not extend ModalBuilder.");
                 return;
