@@ -37,7 +37,6 @@ public class CodeGenerator {
         return (char) ('0' + RANDOM.nextInt(10));
     }
 
-    // Optional static shortcut for default config
     public static String generateDefaultCode() {
         return new CodeGenerator(6, 2, 6).generate();
     }

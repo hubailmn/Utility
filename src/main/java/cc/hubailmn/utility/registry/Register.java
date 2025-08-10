@@ -10,7 +10,8 @@ import cc.hubailmn.utility.config.ConfigUtil;
 import cc.hubailmn.utility.config.annotation.LoadConfig;
 import cc.hubailmn.utility.config.file.PluginSettings;
 import cc.hubailmn.utility.database.DataBaseConnection;
-import cc.hubailmn.utility.database.GenericTableManager;
+import cc.hubailmn.utility.database.DatabaseRegistry;
+import cc.hubailmn.utility.database.TableManager;
 import cc.hubailmn.utility.database.TableBuilder;
 import cc.hubailmn.utility.database.annotation.DataBaseTable;
 import cc.hubailmn.utility.interaction.CSend;
@@ -64,7 +65,7 @@ public final class Register {
         DataBaseConnection.initialize();
         Connection conn = DataBaseConnection.getConnection();
 
-        List<GenericTableManager<?>> managers = new ArrayList<>();
+        List<TableManager<?>> managers = new ArrayList<>();
 
         scanAndRegister(ReflectionsUtil.build(
                 BASE_PACKAGE + ".database"
@@ -86,16 +87,16 @@ public final class Register {
 
                 var useServerPrefix = databaseAnnotation.serverPrefix();
 
-                GenericTableManager<?> manager;
+                TableManager<?> manager;
                 if (!useServerPrefix) {
-                    manager = new GenericTableManager<>(entityClass, conn);
+                    manager = new TableManager<>(entityClass, conn);
                 } else {
-                    manager = new GenericTableManager<>(entityClass, conn, ConfigUtil.getConfig(PluginSettings.class).getServerId());
+                    manager = new TableManager<>(entityClass, conn, ConfigUtil.getConfig(PluginSettings.class).getServerId());
                 }
 
                 manager.createTable();
                 managers.add(manager);
-                DatabaseManagerRegistry.registerManager(entityClass, manager);
+                DatabaseRegistry.registerManager(entityClass, manager);
 
                 CSend.debug("Registered database table for entity: " + entityClass.getSimpleName());
             } catch (Exception e) {
@@ -107,12 +108,12 @@ public final class Register {
         schedulePeriodicCacheCleanup(managers);
     }
 
-    private static void schedulePeriodicCacheCleanup(List<GenericTableManager<?>> managers) {
+    private static void schedulePeriodicCacheCleanup(List<TableManager<?>> managers) {
         Timer cacheCleanupTimer = new Timer("DatabaseCacheCleanup", true);
         cacheCleanupTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                for (GenericTableManager<?> manager : managers) {
+                for (TableManager<?> manager : managers) {
                     try {
                         manager.clearExpiredCache();
                     } catch (Exception e) {
@@ -124,7 +125,7 @@ public final class Register {
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             cacheCleanupTimer.cancel();
-            for (GenericTableManager<?> manager : managers) {
+            for (TableManager<?> manager : managers) {
                 manager.close();
             }
         }));

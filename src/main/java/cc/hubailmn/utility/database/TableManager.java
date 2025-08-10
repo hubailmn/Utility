@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public class GenericTableManager<T> {
+public class TableManager<T> {
 
     private final Class<T> entityClass;
     private final Connection connection;
@@ -33,11 +33,11 @@ public class GenericTableManager<T> {
     private PreparedStatement deleteStmt;
     private boolean statementsReady = false;
 
-    public GenericTableManager(Class<T> entityClass, Connection connection) {
+    public TableManager(Class<T> entityClass, Connection connection) {
         this(entityClass, connection, null);
     }
 
-    public GenericTableManager(Class<T> entityClass, Connection connection, String serverPrefix) {
+    public TableManager(Class<T> entityClass, Connection connection, String serverPrefix) {
         this.entityClass = entityClass;
         this.connection = connection;
 
