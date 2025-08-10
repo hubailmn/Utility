@@ -1,7 +1,7 @@
 package cc.hubailmn.utility.listener;
 
 import cc.hubailmn.utility.BasePlugin;
-import cc.hubailmn.utility.interaction.player.PMessage;
+import cc.hubailmn.utility.interaction.player.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -28,13 +28,13 @@ public class ItemInputManager implements Listener {
         UUID uuid = player.getUniqueId();
 
         if (sessions.containsKey(uuid)) {
-            PMessage.prefixed(player, "§cYou're already selecting an item.");
+            MessageUtil.prefixed(player, "§cYou're already selecting an item.");
             return;
         }
 
         int taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(BasePlugin.getInstance(), () -> {
             sessions.remove(uuid);
-            PMessage.prefixed(player, "§eItem selection timed out.");
+            MessageUtil.prefixed(player, "§eItem selection timed out.");
         }, timeoutTicks);
 
         sessions.put(uuid, new ItemInputSession(callback, validator, taskId));
@@ -57,7 +57,7 @@ public class ItemInputManager implements Listener {
         Bukkit.getScheduler().cancelTask(session.taskId);
 
         if (!session.validator.test(item)) {
-            PMessage.prefixed(player, "§cInvalid item selected. Try again.");
+            MessageUtil.prefixed(player, "§cInvalid item selected. Try again.");
             return;
         }
 

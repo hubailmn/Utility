@@ -16,6 +16,22 @@ public class LocationUtil {
                 && z >= Math.min(min.getZ(), max.getZ()) && z <= Math.max(min.getZ(), max.getZ());
     }
 
+    public static float getCardinalYaw(float originalYaw) {
+        float yaw = (originalYaw % 360 + 360) % 360;
+
+        if (yaw >= 337.5 || yaw < 22.5) return 0f;
+        if (yaw >= 22.5 && yaw < 67.5) return 45f;
+        if (yaw >= 67.5 && yaw < 112.5) return 90f;
+        if (yaw >= 112.5 && yaw < 157.5) return 135f;
+
+        if (yaw >= 157.5 && yaw < 202.5) return 180;
+        if (yaw >= 202.5 && yaw < 247.5) return 225f;
+        if (yaw >= 247.5 && yaw < 292.5) return 270f;
+        if (yaw >= 292.5 && yaw < 337.5) return 315f;
+
+        return 0f;
+    }
+
     public static String serialize(Location location) {
         if (location == null) return "";
         return location.getWorld().getName() + ";" + location.getX() + ";" + location.getY() + ";" + location.getZ() + ";" + location.getYaw() + ";" + location.getPitch();

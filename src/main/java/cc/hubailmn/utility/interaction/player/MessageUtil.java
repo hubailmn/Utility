@@ -11,35 +11,36 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Sound;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.Duration;
 import java.util.Objects;
 
-public final class PMessage {
+public final class MessageUtil {
 
-    private PMessage() {
+    private MessageUtil() {
         throw new UnsupportedOperationException("This is a utility class.");
     }
 
-    public static void send(Player player, Component content) {
-        if (player == null || content == null) return;
-        player.sendMessage(content);
+    public static void send(CommandSender sender, Component content) {
+        if (sender == null || content == null) return;
+        sender.sendMessage(content);
     }
 
-    public static void send(Player player, String content) {
-        if (player == null || content == null) return;
-        player.sendMessage(TextParserUtil.parse(content));
+    public static void send(CommandSender sender, String content) {
+        if (sender == null || content == null) return;
+        sender.sendMessage(TextParserUtil.parse(content));
     }
 
-    public static void prefixed(Player player, Component content) {
+    public static void prefixed(CommandSender sender, Component content) {
         Component prefix = TextParserUtil.parse(BasePlugin.getPrefix());
-        send(player, prefix.append(Component.space()).append(content));
+        send(sender, prefix.append(Component.space()).append(content));
     }
 
-    public static void prefixed(Player player, String content) {
-        prefixed(player, TextParserUtil.parse(content));
+    public static void prefixed(CommandSender sender, String content) {
+        prefixed(sender, TextParserUtil.parse(content));
     }
 
     public static void sendActionBarMessage(Player player, Component message) {
