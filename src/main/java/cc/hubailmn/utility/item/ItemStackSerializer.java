@@ -18,7 +18,7 @@ public final class ItemStackSerializer {
         throw new UnsupportedOperationException("This is a utility class.");
     }
 
-    public static byte[] toBytes(ItemStack[] items) throws IOException {
+    public static byte[] toBytes(ItemStack[] items) {
         if (items == null) items = new ItemStack[0];
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream);
@@ -30,10 +30,12 @@ public final class ItemStackSerializer {
             boos.flush();
             gzipOutputStream.finish();
             return byteArrayOutputStream.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public static ItemStack[] fromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
+    public static ItemStack[] fromBytes(byte[] bytes) {
         if (bytes == null || bytes.length == 0) return new ItemStack[0];
         try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
              GZIPInputStream gzipInputStream = new GZIPInputStream(byteArrayInputStream);
@@ -44,10 +46,12 @@ public final class ItemStackSerializer {
                 items[i] = (ItemStack) bois.readObject();
             }
             return items;
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public static byte[] singleToBytes(ItemStack item) throws IOException {
+    public static byte[] singleToBytes(ItemStack item) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream);
              BukkitObjectOutputStream boos = new BukkitObjectOutputStream(gzipOutputStream)) {
@@ -55,19 +59,23 @@ public final class ItemStackSerializer {
             boos.flush();
             gzipOutputStream.finish();
             return byteArrayOutputStream.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public static ItemStack singleFromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
+    public static ItemStack singleFromBytes(byte[] bytes) {
         if (bytes == null || bytes.length == 0) return null;
         try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
              GZIPInputStream gzipInputStream = new GZIPInputStream(byteArrayInputStream);
              BukkitObjectInputStream bois = new BukkitObjectInputStream(gzipInputStream)) {
             return (ItemStack) bois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public static byte[] mapToBytes(Map<Integer, ItemStack> map) throws IOException {
+    public static byte[] mapToBytes(Map<Integer, ItemStack> map) {
         if (map == null) map = new HashMap<>();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream);
@@ -80,10 +88,12 @@ public final class ItemStackSerializer {
             boos.flush();
             gzipOutputStream.finish();
             return byteArrayOutputStream.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public static Map<Integer, ItemStack> mapFromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
+    public static Map<Integer, ItemStack> mapFromBytes(byte[] bytes) {
         Map<Integer, ItemStack> map = new HashMap<>();
         if (bytes == null || bytes.length == 0) return map;
         try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
@@ -96,6 +106,8 @@ public final class ItemStackSerializer {
                 map.put(key, value);
             }
             return map;
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 }
