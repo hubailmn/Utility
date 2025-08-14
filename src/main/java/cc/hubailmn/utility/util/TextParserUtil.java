@@ -6,6 +6,8 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
+import java.util.regex.Pattern;
+
 public class TextParserUtil {
 
     private static final MiniMessage MINI = MiniMessage.miniMessage();
@@ -17,6 +19,11 @@ public class TextParserUtil {
                     .useUnusualXRepeatedCharacterHexFormat()
                     .build();
 
+    private static final LegacyComponentSerializer LEGACY_SECTION_SERIALIZER =
+            LegacyComponentSerializer.legacySection();
+
+    private static final Pattern MINI_PATTERN = Pattern.compile("<[^>]+>");
+
     private TextParserUtil() {
         throw new UnsupportedOperationException("Utility class");
     }
@@ -25,10 +32,12 @@ public class TextParserUtil {
         if (input == null || input.isEmpty()) return Component.empty();
 
         Component result;
-        if (input.contains("<") && input.contains(">")) {
+        boolean looksLikeMiniMessage = MINI_PATTERN.matcher(input).find();
+
+        if (looksLikeMiniMessage) {
             try {
                 result = MINI.deserialize(input);
-            } catch (Exception ignored) {
+            } catch (Exception e) {
                 result = LEGACY_SERIALIZER.deserialize(input);
             }
         } else {
@@ -39,7 +48,7 @@ public class TextParserUtil {
     }
 
     public static String toPlainText(Component component) {
-        return LegacyComponentSerializer.legacySection().serialize(component);
+        return LEGACY_SECTION_SERIALIZER.serialize(component);
     }
 
     public static Component stripNewlinesPreservingStyle(Component component) {
