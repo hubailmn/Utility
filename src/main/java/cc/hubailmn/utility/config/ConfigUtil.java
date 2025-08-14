@@ -28,6 +28,24 @@ public class ConfigUtil {
         CSend.info("Reloaded all configs (" + CONFIG_INSTANCE.size() + ")");
     }
 
+    public static boolean reloadByPath(String path) {
+        if (!path.endsWith(".yml")) {
+            path += ".yml";
+        }
+        String pathLower = path.toLowerCase();
+
+        for (Map.Entry<Class<?>, ConfigBuilder> entry : CONFIG_INSTANCE.entrySet()) {
+            if (entry.getValue().getFileName().equalsIgnoreCase(pathLower)) {
+                reload(entry.getKey());
+                CSend.info("Reloaded config by path: {} -> {}", path, entry.getKey().getSimpleName());
+                return true;
+            }
+        }
+
+        CSend.warn("No config found for path: " + path);
+        return false;
+    }
+
     public static void reloadAllExcept(Class<?>... exclude) {
         Set<Class<?>> exclusions = exclude.length > 0 ? new HashSet<>(Set.of(exclude)) : Collections.emptySet();
 

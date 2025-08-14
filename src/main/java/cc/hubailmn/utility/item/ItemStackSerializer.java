@@ -75,6 +75,10 @@ public final class ItemStackSerializer {
         }
     }
 
+    public static int getSerializedSize(byte[] data) {
+        return data != null ? data.length : 0;
+    }
+
     public static byte[] mapToBytes(Map<Integer, ItemStack> map) {
         if (map == null) map = new HashMap<>();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();

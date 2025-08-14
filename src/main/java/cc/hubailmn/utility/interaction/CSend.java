@@ -247,6 +247,7 @@ public final class CSend {
         }
 
         error("Exception: {} - {}", throwable.getClass().getSimpleName(), throwable.getMessage());
+        throwable.printStackTrace();
         logThrowable(throwable);
     }
 

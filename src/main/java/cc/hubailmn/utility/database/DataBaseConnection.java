@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.concurrent.TimeUnit;
 
 public final class DataBaseConnection {
 
@@ -89,9 +90,36 @@ public final class DataBaseConnection {
         hikariConfig.setJdbcUrl(mysql.getConnectionString());
         hikariConfig.setUsername(mysql.getUsername());
         hikariConfig.setPassword(mysql.getPassword());
-        hikariConfig.setMaximumPoolSize(10);
-        hikariConfig.setPoolName(BasePlugin.getInstance().getPluginName() + "-Hikari");
 
+        int coreCount = Runtime.getRuntime().availableProcessors();
+        hikariConfig.setMaximumPoolSize(Math.max(10, coreCount * 2));
+        hikariConfig.setMinimumIdle(Math.max(2, coreCount / 2));
+
+        hikariConfig.setConnectionTimeout(8000);
+        hikariConfig.setIdleTimeout(TimeUnit.MINUTES.toMillis(10));
+        hikariConfig.setMaxLifetime(TimeUnit.MINUTES.toMillis(30));
+        hikariConfig.setLeakDetectionThreshold(TimeUnit.SECONDS.toMillis(15));
+        hikariConfig.setValidationTimeout(3000);
+
+        hikariConfig.addDataSourceProperty("cachePrepStmts", true);
+        hikariConfig.addDataSourceProperty("prepStmtCacheSize", 300);
+        hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);
+        hikariConfig.addDataSourceProperty("useServerPrepStmts", true);
+        hikariConfig.addDataSourceProperty("useLocalSessionState", true);
+        hikariConfig.addDataSourceProperty("rewriteBatchedStatements", true);
+        hikariConfig.addDataSourceProperty("cacheResultSetMetadata", true);
+        hikariConfig.addDataSourceProperty("cacheServerConfiguration", true);
+        hikariConfig.addDataSourceProperty("elideSetAutoCommits", true);
+        hikariConfig.addDataSourceProperty("maintainTimeStats", false);
+        hikariConfig.addDataSourceProperty("useUnicode", true);
+        hikariConfig.addDataSourceProperty("characterEncoding", "utf8");
+        hikariConfig.addDataSourceProperty("autoReconnect", true);
+        hikariConfig.addDataSourceProperty("failOverReadOnly", false);
+        hikariConfig.addDataSourceProperty("maxReconnects", 3);
+
+        hikariConfig.setConnectionTestQuery("SELECT 1");
+
+        hikariConfig.setPoolName(BasePlugin.getInstance().getPluginName() + "-MySQLPool");
         hikariDataSource = new HikariDataSource(hikariConfig);
         connection = hikariDataSource.getConnection();
 

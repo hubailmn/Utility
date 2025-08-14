@@ -33,8 +33,9 @@ public abstract class BasePlugin extends JavaPlugin {
 
     static {
         Configurator.setLevel("SpigotLibraryLoader", org.apache.logging.log4j.Level.OFF);
-        Configurator.setLevel("cc.hubailmn.shaded.reflections", org.apache.logging.log4j.Level.OFF);
         Configurator.setLevel("org.reflections", org.apache.logging.log4j.Level.OFF);
+        Configurator.setLevel("com.zaxxer.hikari", org.apache.logging.log4j.Level.OFF);
+        Configurator.setLevel("cc.hubailmn.shaded.reflections", org.apache.logging.log4j.Level.OFF);
     }
 
     private PluginManager pluginManager;
@@ -42,6 +43,7 @@ public abstract class BasePlugin extends JavaPlugin {
     private String packageName;
     private String pluginName;
     private String pluginVersion;
+    private String serverID;
 
     private HashUtil hashUtil;
     private BaseBot baseBot;
@@ -80,6 +82,7 @@ public abstract class BasePlugin extends JavaPlugin {
 
         setPluginConfig(ConfigUtil.getConfig(PluginSettings.class));
         setPrefix(pluginConfig.getPrefix());
+        setServerID(pluginConfig.getServerId());
 
         setDebug(forceDebug || pluginConfig.isDebug());
 

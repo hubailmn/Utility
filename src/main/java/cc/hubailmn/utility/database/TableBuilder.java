@@ -3,6 +3,7 @@ package cc.hubailmn.utility.database;
 import cc.hubailmn.utility.database.annotation.DataBaseTable;
 import cc.hubailmn.utility.interaction.CSend;
 import lombok.Getter;
+import lombok.SneakyThrows;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -43,7 +44,8 @@ public abstract class TableBuilder {
     protected void init() throws SQLException {
     }
 
-    protected void executeUpdate(String sql) throws SQLException {
+    @SneakyThrows
+    protected void executeUpdate(String sql) {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.executeUpdate();
         }
