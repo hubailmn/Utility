@@ -5,7 +5,7 @@ import cc.hubailmn.utility.command.annotation.Command;
 import cc.hubailmn.utility.command.annotation.SubCommand;
 import cc.hubailmn.utility.interaction.CSend;
 import cc.hubailmn.utility.interaction.SoundUtil;
-import cc.hubailmn.utility.registry.ReflectionsUtil;
+import cc.hubailmn.utility.registry.ClasspathScanner;
 import lombok.Data;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -45,9 +45,10 @@ public abstract class CommandBuilder implements TabExecutor {
     }
 
     private void addSubCommand() {
-        Set<Class<?>> subCommandClasses = ReflectionsUtil.build(
+        Set<Class<?>> subCommandClasses = ClasspathScanner.getTypesAnnotatedWith(
+                SubCommand.class,
                 BasePlugin.getInstance().getPackageName() + ".command"
-        ).getTypesAnnotatedWith(SubCommand.class);
+        );
 
         for (Class<?> clazz : subCommandClasses) {
             SubCommand subAnnotation = clazz.getAnnotation(SubCommand.class);

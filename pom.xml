@@ -86,20 +86,6 @@
     </repositories>
 
     <dependencies>
-        <!-- Compiled -->
-        <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-            <version>0.10.2</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.graalvm.js</groupId>
-            <artifactId>js-scriptengine</artifactId>
-            <version>24.2.1</version>
-            <scope>provided</scope>
-        </dependency>
-
         <!-- Provided -->
         <dependency>
             <groupId>io.papermc.paper</groupId>
@@ -137,6 +123,13 @@
         </dependency>
 
         <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js-scriptengine</artifactId>
+            <version>24.2.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>6.3.0</version>
@@ -149,7 +142,6 @@
             <version>5.6.1</version>
             <scope>provided</scope>
         </dependency>
-
 
         <!-- Other Plugins -->
         <dependency>

@@ -19,6 +19,8 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+
 @Getter
 @Setter
 public abstract class BasePlugin extends JavaPlugin {
@@ -30,6 +32,10 @@ public abstract class BasePlugin extends JavaPlugin {
     @Getter
     @Setter
     private static String prefix;
+
+    @Getter
+    @Setter
+    private static File source;
 
     static {
         Configurator.setLevel("SpigotLibraryLoader", org.apache.logging.log4j.Level.OFF);
@@ -51,7 +57,7 @@ public abstract class BasePlugin extends JavaPlugin {
     private DebugCommand debugCommand;
 
     private boolean debug = false;
-    private boolean scanFullPackage = false;
+    private boolean scanFullPackage = true;
     private boolean forceDebug = false;
     private boolean database = true;
     private boolean license = false;
@@ -62,6 +68,7 @@ public abstract class BasePlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         setInstance(this);
+        setSource(getFile());
         setPluginManager(getServer().getPluginManager());
         setPluginName(getInstance().getName());
         setPluginVersion(getInstance().getDescription().getVersion());
