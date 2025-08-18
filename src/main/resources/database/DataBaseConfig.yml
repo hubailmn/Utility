@@ -13,14 +13,14 @@ database:
   MySQL:
     # JDBC connection string for MySQL database
     # If provided, other MySQL settings below are not required
-    connection-string: 'jdbc:mysql://username:password@endpoint/database'
+    connection-string: 'jdbc:mysql://root:password@127.0.0.1:3306/server_db'
 
     # MySQL server address and port
-    endpoint: 'ADDRESS'
+    endpoint: "127.0.0.1:3306"
 
     # Name of the MySQL database
-    database-name: 'DATABASE_NAME'
+    database-name: 'server_db'
 
     # MySQL user credentials
-    username: 'USERNAME'
-    password: 'PASSWORD'
+    username: 'root'
+    password: 'password'
