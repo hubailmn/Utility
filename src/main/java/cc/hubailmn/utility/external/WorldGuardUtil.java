@@ -15,6 +15,7 @@ import com.sk89q.worldguard.protection.regions.RegionContainer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -400,4 +401,56 @@ public class WorldGuardUtil {
     private static Location getMaxLocation(Location loc1, Location loc2) {
         return new Location(loc1.getWorld(), Math.max(loc1.getX(), loc2.getX()), Math.max(loc1.getY(), loc2.getY()), Math.max(loc1.getZ(), loc2.getZ()));
     }
+
+    /**
+     * Checks whether a block is in one of the allowed/excluded regions.
+     * Lightweight and cache-friendly.
+     *
+     * @param block          The block to check
+     * @param regionIds      The region IDs to check against
+     * @param useAsBlacklist True if regionIds should be excluded, false if only regionIds are allowed
+     * @return True if the block is "allowed" according to the mode
+     */
+    public static boolean isBlockInAllowedRegion(Block block, Set<String> regionIds, boolean useAsBlacklist) {
+        if (block == null || regionIds == null || regionIds.isEmpty()) return true;
+
+        RegionManager manager = getRegionManager(block.getWorld());
+        if (manager == null) return true;
+
+        var applicableRegions = manager.getApplicableRegions(BukkitAdapter.asBlockVector(block.getLocation()));
+        boolean intersects = applicableRegions.getRegions().stream().anyMatch(r -> regionIds.contains(r.getId()));
+
+        return useAsBlacklist != intersects;
+    }
+
+    /**
+     * Checks whether a player is in one of the allowed/excluded regions.
+     * Useful for future player-based checks.
+     *
+     * @param player         The player to check
+     * @param regionIds      The region IDs to check against
+     * @param useAsBlacklist True if regionIds should be excluded, false if only regionIds are allowed
+     * @return True if the player is "allowed" according to the mode
+     */
+    public static boolean isPlayerInAllowedRegion(Player player, Set<String> regionIds, boolean useAsBlacklist) {
+        if (player == null) return true;
+        return isLocationInAllowedRegion(player.getLocation(), regionIds, useAsBlacklist);
+    }
+
+    /**
+     * Checks whether a location is in one of the allowed/excluded regions.
+     * Reusable for both blocks and players.
+     */
+    public static boolean isLocationInAllowedRegion(Location loc, Set<String> regionIds, boolean useAsBlacklist) {
+        if (loc == null || regionIds == null || regionIds.isEmpty()) return true;
+
+        RegionManager manager = getRegionManager(loc.getWorld());
+        if (manager == null) return true;
+
+        var applicableRegions = manager.getApplicableRegions(BukkitAdapter.asBlockVector(loc));
+        boolean intersects = applicableRegions.getRegions().stream().anyMatch(r -> regionIds.contains(r.getId()));
+
+        return useAsBlacklist != intersects;
+    }
+
 }
