@@ -12,7 +12,7 @@ public class ConfigUtil {
     private static final Map<Class<?>, ConfigBuilder> CONFIG_INSTANCE = new HashMap<>();
 
     private ConfigUtil() {
-        throw new UnsupportedOperationException("This is a utility class.");
+        throw new UnsupportedOperationException("Utility class");
     }
 
     @SuppressWarnings("unchecked")

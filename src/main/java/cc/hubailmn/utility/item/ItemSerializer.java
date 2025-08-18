@@ -20,7 +20,7 @@ public class ItemSerializer {
     private static final Gson gson = new Gson();
 
     private ItemSerializer() {
-        throw new UnsupportedOperationException("This is a utility class.");
+        throw new UnsupportedOperationException("Utility class");
     }
 
     public static String toBase64Array(ItemStack[] items) {

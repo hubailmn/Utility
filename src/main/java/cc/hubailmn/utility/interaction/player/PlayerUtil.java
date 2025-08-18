@@ -13,7 +13,7 @@ import java.util.UUID;
 public final class PlayerUtil {
 
     private PlayerUtil() {
-        throw new UnsupportedOperationException("This is a utility class.");
+        throw new UnsupportedOperationException("Utility class");
     }
 
     public static boolean isOnline(UUID uuid) {

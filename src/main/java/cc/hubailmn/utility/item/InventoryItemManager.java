@@ -12,7 +12,7 @@ import java.util.Map;
 public class InventoryItemManager {
 
     private InventoryItemManager() {
-        throw new UnsupportedOperationException("This is a utility class.");
+        throw new UnsupportedOperationException("Utility class");
     }
 
     public static boolean hasEnough(PlayerInventory inventory, ItemStack target, int requiredAmount) {

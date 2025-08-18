@@ -5,7 +5,7 @@ import java.util.Locale;
 public final class StringUtil {
 
     private StringUtil() {
-        throw new UnsupportedOperationException("This is a utility class.");
+        throw new UnsupportedOperationException("Utility class");
     }
 
     public static String capitalizeWords(String input) {

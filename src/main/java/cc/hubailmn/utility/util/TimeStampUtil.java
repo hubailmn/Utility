@@ -13,7 +13,7 @@ public class TimeStampUtil {
     private static final ZoneId DEFAULT_ZONE_ID = ZoneId.of("Asia/Riyadh");
 
     private TimeStampUtil() {
-        throw new UnsupportedOperationException("This is a utility class.");
+        throw new UnsupportedOperationException("Utility class");
     }
 
     public static String formatTimestamp(long timestamp) {

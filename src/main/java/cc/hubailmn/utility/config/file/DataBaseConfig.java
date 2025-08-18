@@ -4,8 +4,8 @@ import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.annotation.IgnoreFile;
 import cc.hubailmn.utility.config.ConfigBuilder;
 import cc.hubailmn.utility.config.annotation.LoadConfig;
-import lombok.Getter;
-import org.bukkit.configuration.file.FileConfiguration;
+import cc.hubailmn.utility.database.config.MySQLConfig;
+import cc.hubailmn.utility.database.config.SQLiteConfig;
 
 @LoadConfig(path = "database/DataBaseConfig.yml")
 @IgnoreFile(database = true)
@@ -42,30 +42,4 @@ public class DataBaseConfig extends ConfigBuilder {
         return new SQLiteConfig(getConfig());
     }
 
-    @Getter
-    public static class MySQLConfig {
-        private final String connectionString;
-        private final String endPoint;
-        private final String databaseName;
-        private final String username;
-        private final String password;
-
-        public MySQLConfig(FileConfiguration config) {
-            String path = "database.MySQL.";
-            this.connectionString = config.getString(path + "connection-string");
-            this.endPoint = config.getString(path + "endpoint");
-            this.databaseName = config.getString(path + "database-name");
-            this.username = config.getString(path + "username");
-            this.password = config.getString(path + "password");
-        }
-    }
-
-    @Getter
-    public static class SQLiteConfig {
-        private final String sqlitePath;
-
-        public SQLiteConfig(FileConfiguration config) {
-            this.sqlitePath = config.getString("database.SQLite.path");
-        }
-    }
 }

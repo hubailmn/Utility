@@ -56,6 +56,6 @@ public class ItemPreset {
             .build();
 
     private ItemPreset() {
-        throw new UnsupportedOperationException("This is a utility class.");
+        throw new UnsupportedOperationException("Utility class");
     }
 }

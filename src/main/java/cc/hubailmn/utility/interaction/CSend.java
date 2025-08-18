@@ -31,7 +31,7 @@ public final class CSend {
     private static volatile boolean running = true;
 
     private CSend() {
-        throw new UnsupportedOperationException("This is a utility class.");
+        throw new UnsupportedOperationException("Utility class");
     }
 
     public static void init(File dataFolder) {

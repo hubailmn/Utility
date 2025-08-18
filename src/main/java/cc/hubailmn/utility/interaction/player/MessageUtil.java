@@ -21,7 +21,7 @@ import java.util.Objects;
 public final class MessageUtil {
 
     private MessageUtil() {
-        throw new UnsupportedOperationException("This is a utility class.");
+        throw new UnsupportedOperationException("Utility class");
     }
 
     public static void send(CommandSender sender, Component content) {

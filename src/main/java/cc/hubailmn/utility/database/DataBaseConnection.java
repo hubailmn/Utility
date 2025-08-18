@@ -3,6 +3,8 @@ package cc.hubailmn.utility.database;
 import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.config.ConfigUtil;
 import cc.hubailmn.utility.config.file.DataBaseConfig;
+import cc.hubailmn.utility.database.config.MySQLConfig;
+import cc.hubailmn.utility.database.config.SQLiteConfig;
 import cc.hubailmn.utility.interaction.CSend;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -83,7 +85,7 @@ public final class DataBaseConnection {
     }
 
     private static void connectToMySQL() throws SQLException {
-        DataBaseConfig.MySQLConfig mysql = config.getMySQLConfig();
+        MySQLConfig mysql = config.getMySQLConfig();
         CSend.info("§fConnecting to §9MySQL with HikariCP...");
 
         HikariConfig hikariConfig = new HikariConfig();
@@ -139,7 +141,7 @@ public final class DataBaseConnection {
     }
 
     private static String getSQLitePath() {
-        DataBaseConfig.SQLiteConfig sqlite = config.getSQLiteConfig();
+        SQLiteConfig sqlite = config.getSQLiteConfig();
         String fileName = sqlite.getSqlitePath();
 
         File dataFolder = new File(BasePlugin.getInstance().getDataFolder(), "database");

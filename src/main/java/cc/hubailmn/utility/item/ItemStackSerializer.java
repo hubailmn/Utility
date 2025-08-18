@@ -15,7 +15,7 @@ import java.util.zip.GZIPOutputStream;
 public final class ItemStackSerializer {
 
     private ItemStackSerializer() {
-        throw new UnsupportedOperationException("This is a utility class.");
+        throw new UnsupportedOperationException("Utility class");
     }
 
     public static byte[] toBytes(ItemStack[] items) {
