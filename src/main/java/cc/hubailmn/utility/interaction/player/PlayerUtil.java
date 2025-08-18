@@ -39,9 +39,9 @@ public final class PlayerUtil {
         int minX = (int) Math.floor(box.getMinX());
         int minY = Math.max(world.getMinHeight(), (int) Math.floor(box.getMinY()));
         int minZ = (int) Math.floor(box.getMinZ());
-        int maxX = (int) Math.floor(box.getMaxX()); // Changed from ceil to floor
-        int maxY = Math.min(world.getMaxHeight() - 1, (int) Math.floor(box.getMaxY())); // Changed from ceil to floor
-        int maxZ = (int) Math.floor(box.getMaxZ()); // Changed from ceil to floor
+        int maxX = (int) Math.floor(box.getMaxX());
+        int maxY = Math.min(world.getMaxHeight() - 1, (int) Math.floor(box.getMaxY()));
+        int maxZ = (int) Math.floor(box.getMaxZ());
 
         for (int x = minX; x <= maxX; x++) {
             for (int y = minY; y <= maxY; y++) {
