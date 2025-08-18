@@ -1,12 +1,12 @@
 package cc.hubailmn.utility.interaction.player;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.util.BoundingBox;
 
 import java.util.UUID;
 
@@ -29,6 +29,30 @@ public final class PlayerUtil {
             if (meta.asBoolean()) return true;
         }
 
+        return false;
+    }
+
+    public static boolean isInCobweb(Player player, double inflateX, double inflateY, double inflateZ) {
+        BoundingBox box = player.getBoundingBox().expand(inflateX, inflateY, inflateZ);
+        World world = player.getWorld();
+
+        int minX = (int) Math.floor(box.getMinX());
+        int minY = Math.max(world.getMinHeight(), (int) Math.floor(box.getMinY()));
+        int minZ = (int) Math.floor(box.getMinZ());
+        int maxX = (int) Math.floor(box.getMaxX()); // Changed from ceil to floor
+        int maxY = Math.min(world.getMaxHeight() - 1, (int) Math.floor(box.getMaxY())); // Changed from ceil to floor
+        int maxZ = (int) Math.floor(box.getMaxZ()); // Changed from ceil to floor
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    Block block = world.getBlockAt(x, y, z);
+                    if (block.getType() == Material.COBWEB) {
+                        return true;
+                    }
+                }
+            }
+        }
         return false;
     }
 
