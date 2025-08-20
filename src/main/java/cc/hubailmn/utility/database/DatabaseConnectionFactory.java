@@ -18,7 +18,7 @@ public final class DatabaseConnectionFactory {
         throw new UnsupportedOperationException("Utility class");
     }
 
-    public static Connection createConnection(MySQLConfig config) throws SQLException {
+    public static Connection createConnection(MySQLConfig config) {
         HikariConfig hikariConfig = new HikariConfig();
         if (config.getConnectionString() != null) {
             hikariConfig.setJdbcUrl(config.getConnectionString());
@@ -31,21 +31,30 @@ public final class DatabaseConnectionFactory {
         hikariConfig.setMinimumIdle(2);
         hikariConfig.setPoolName("MySQLPool");
         HikariDataSource dataSource = new HikariDataSource(hikariConfig);
-        return dataSource.getConnection();
+        try {
+            return dataSource.getConnection();
+        } catch (SQLException e) {
+            CSend.error("Failed to connect to MySQL.");
+            CSend.error(e);
+            return null;
+        }
     }
 
     public static Connection createConnection(SQLiteConfig config) {
         File dbFile = new File(BasePlugin.getInstance().getDataFolder(), config.getSqlitePath());
-        if (!dbFile.exists()) {
-            if (!dbFile.getParentFile().mkdirs()) {
-                CSend.error("Failed to create database folder.");
+
+        File parentDir = dbFile.getParentFile();
+        if (parentDir != null && !parentDir.exists()) {
+            if (!parentDir.mkdirs()) {
+                CSend.error("Failed to create database folder: {}", parentDir.getAbsolutePath());
+                return null;
             }
         }
 
         try {
             return DriverManager.getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath());
         } catch (SQLException e) {
-            CSend.error("Failed to connect to SQLite.");
+            CSend.error("Failed to connect to SQLite: {}", dbFile.getAbsolutePath());
             CSend.error(e);
             return null;
         }

@@ -23,12 +23,12 @@ public final class MySQLConfig {
         validate();
     }
 
-    public MySQLConfig(String endPoint, String databaseName, String username, String password) {
+    public MySQLConfig(String connectionString, String endPoint, String databaseName, String username, String password) {
+        this.connectionString = connectionString;
         this.endPoint = endPoint;
         this.databaseName = databaseName;
         this.username = username;
         this.password = password;
-        this.connectionString = null;
         validate();
     }
 
