@@ -145,17 +145,17 @@ public abstract class BasePlugin extends JavaPlugin {
             });
         }
 
-        if (isDatabase()) {
-            CSend.info("Closing Database Connection...");
-            DataBaseConnection.close();
-        }
+        getHashUtil().clearCache();
+        CSend.info(getPluginName() + " has been disabled.");
 
         if (isLicense()) {
             LicenseValidation.endLicenseSession();
         }
 
-        getHashUtil().clearCache();
-        CSend.info(getPluginName() + " has been disabled.");
+        if (isDatabase()) {
+            CSend.info("Closing Database Connection...");
+            DataBaseConnection.close();
+        }
         CSend.shutdown();
     }
 

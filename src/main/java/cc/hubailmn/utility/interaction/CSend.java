@@ -22,12 +22,14 @@ public final class CSend {
     private static final int RETENTION_DAYS = 14;
 
     private static final BlockingQueue<LogEntry> logQueue = new LinkedBlockingQueue<>();
+    private static final BlockingQueue<LogEntry> consoleQueue = new LinkedBlockingQueue<>();
 
     private static File DEBUG_LOG;
     private static File ERROR_LOG;
     private static File PLUGIN_LOG;
 
     private static Thread logThread;
+    private static Thread consoleThread;
     private static volatile boolean running = true;
 
     private CSend() {
@@ -46,7 +48,7 @@ public final class CSend {
         rotateLogs(logDir);
         deleteOldLogs(logDir, RETENTION_DAYS);
 
-        startLoggerThread();
+        startLoggerThreads();
     }
 
     public static void shutdown() {
@@ -54,15 +56,19 @@ public final class CSend {
         if (logThread != null) {
             logThread.interrupt();
         }
+        if (consoleThread != null) {
+            consoleThread.interrupt();
+        }
     }
 
-    private static void startLoggerThread() {
+    private static void startLoggerThreads() {
         logThread = new Thread(() -> {
             while (running || !logQueue.isEmpty()) {
                 try {
                     LogEntry entry = logQueue.poll(1, TimeUnit.SECONDS);
                     if (entry != null) {
-                        writeToFile(entry.file, entry.message);
+                        String formattedMessage = formatMessage(entry.messagePattern(), entry.arguments());
+                        writeToFile(entry.file(), "[" + FORMAT.format(new Date()) + "] " + stripColor(formattedMessage));
                     }
                 } catch (InterruptedException ignored) {
                     Thread.currentThread().interrupt();
@@ -72,6 +78,25 @@ public final class CSend {
         }, "CSend-Logger-Thread");
         logThread.setDaemon(true);
         logThread.start();
+
+        consoleThread = new Thread(() -> {
+            while (running || !consoleQueue.isEmpty()) {
+                try {
+                    LogEntry entry = consoleQueue.poll(100, TimeUnit.MILLISECONDS);
+                    if (entry != null) {
+                        Bukkit.getScheduler().runTask(BasePlugin.getInstance(), () -> {
+                            String prefixedMessage = getPrefix() + " " + formatMessage(entry.messagePattern(), entry.arguments());
+                            Bukkit.getConsoleSender().sendMessage(prefixedMessage);
+                        });
+                    }
+                } catch (InterruptedException ignored) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }, "CSend-Console-Thread");
+        consoleThread.setDaemon(true);
+        consoleThread.start();
     }
 
     private static String getPrefix() {
@@ -166,7 +191,7 @@ public final class CSend {
     }
 
     public static void plain(String messagePattern, Object... arguments) {
-        plain(formatMessage(messagePattern, arguments));
+        Bukkit.getConsoleSender().sendMessage(formatMessage(messagePattern, arguments));
     }
 
     public static void prefixed(String message) {
@@ -178,55 +203,55 @@ public final class CSend {
     }
 
     public static void info(String message) {
-        String fullMessage = "§e[INFO] §r" + message;
-        prefixed(fullMessage);
-        logAsync(DEBUG_LOG, fullMessage);
+        consoleQueue.offer(new LogEntry(null, "§e[INFO] §r" + message));
+        logQueue.offer(new LogEntry(DEBUG_LOG, "§e[INFO] §r" + message));
     }
 
     public static void info(String messagePattern, Object... arguments) {
-        info(formatMessage(messagePattern, arguments));
+        consoleQueue.offer(new LogEntry(null, "§e[INFO] §r" + messagePattern, arguments));
+        logQueue.offer(new LogEntry(DEBUG_LOG, "§e[INFO] §r" + messagePattern, arguments));
     }
 
     public static void warn(String message) {
-        String fullMessage = "§c[WARNING] §r" + message;
-        prefixed(fullMessage);
-        logAsync(DEBUG_LOG, fullMessage);
+        consoleQueue.offer(new LogEntry(null, "§c[WARNING] §r" + message));
+        logQueue.offer(new LogEntry(DEBUG_LOG, "§c[WARNING] §r" + message));
     }
 
     public static void warn(String messagePattern, Object... arguments) {
-        warn(formatMessage(messagePattern, arguments));
+        consoleQueue.offer(new LogEntry(null, "§c[WARNING] §r" + messagePattern, arguments));
+        logQueue.offer(new LogEntry(DEBUG_LOG, "§c[WARNING] §r" + messagePattern, arguments));
     }
 
     public static void debug(String message) {
-        String fullMessage = "§b[DEBUG] §r" + message;
         if (BasePlugin.getInstance().isDebug()) {
-            prefixed(fullMessage);
-            logAsync(DEBUG_LOG, fullMessage);
-        } else {
-            logAsync(DEBUG_LOG, fullMessage);
+            consoleQueue.offer(new LogEntry(null, "§b[DEBUG] §r" + message));
         }
+        logQueue.offer(new LogEntry(DEBUG_LOG, "§b[DEBUG] §r" + message));
     }
 
     public static void debug(String messagePattern, Object... arguments) {
-        debug(formatMessage(messagePattern, arguments));
+        if (BasePlugin.getInstance().isDebug()) {
+            consoleQueue.offer(new LogEntry(null, "§b[DEBUG] §r" + messagePattern, arguments));
+        }
+        logQueue.offer(new LogEntry(DEBUG_LOG, "§b[DEBUG] §r" + messagePattern, arguments));
     }
 
     public static void log(String message) {
-        logAsync(PLUGIN_LOG, message);
+        logQueue.offer(new LogEntry(PLUGIN_LOG, message));
     }
 
     public static void log(String messagePattern, Object... arguments) {
-        log(formatMessage(messagePattern, arguments));
+        logQueue.offer(new LogEntry(PLUGIN_LOG, messagePattern, arguments));
     }
 
     public static void error(String message) {
-        String fullMessage = "§4[ERROR] §r" + message;
-        prefixed(fullMessage);
-        logAsync(ERROR_LOG, fullMessage);
+        consoleQueue.offer(new LogEntry(null, "§4[ERROR] §r" + message));
+        logQueue.offer(new LogEntry(ERROR_LOG, "§4[ERROR] §r" + message));
     }
 
     public static void error(String messagePattern, Object... arguments) {
-        error(formatMessage(messagePattern, arguments));
+        consoleQueue.offer(new LogEntry(null, "§4[ERROR] §r" + messagePattern, arguments));
+        logQueue.offer(new LogEntry(ERROR_LOG, "§4[ERROR] §r" + messagePattern, arguments));
     }
 
     public static void error(String message, Throwable throwable) {
@@ -253,12 +278,12 @@ public final class CSend {
 
     private static void logThrowable(Throwable throwable) {
         for (StackTraceElement ste : throwable.getStackTrace()) {
-            logAsync(ERROR_LOG, "  at " + ste);
+            log(ERROR_LOG, "  at " + ste);
         }
 
         Throwable cause = throwable.getCause();
         if (cause != null && cause != throwable) {
-            logAsync(ERROR_LOG, "Caused by: " + cause.getClass().getSimpleName() + ": " + cause.getMessage());
+            log(ERROR_LOG, "Caused by: " + cause.getClass().getSimpleName() + ": " + cause.getMessage());
             logThrowable(cause);
         }
     }
@@ -284,11 +309,11 @@ public final class CSend {
     // ===== Trace level logging (only to file, not console) =====
 
     public static void trace(String message) {
-        logAsync(DEBUG_LOG, "§8[TRACE] §r" + message);
+        logQueue.offer(new LogEntry(DEBUG_LOG, "§8[TRACE] §r" + message));
     }
 
     public static void trace(String messagePattern, Object... arguments) {
-        trace(formatMessage(messagePattern, arguments));
+        logQueue.offer(new LogEntry(DEBUG_LOG, "§8[TRACE] §r" + messagePattern, arguments));
     }
 
     // ===== Performance-aware logging =====
@@ -315,10 +340,12 @@ public final class CSend {
         }
     }
 
-    // ===== Original methods (unchanged) =====
-
     private static void logAsync(File file, String message) {
-        logQueue.offer(new LogEntry(file, "[" + FORMAT.format(new Date()) + "] " + stripColor(message)));
+        logQueue.offer(new LogEntry(file, message));
+    }
+
+    private static void log(File file, String message) {
+        logQueue.offer(new LogEntry(file, message));
     }
 
     private static void writeToFile(File file, String message) {
@@ -419,6 +446,9 @@ public final class CSend {
         return input.replaceAll("§[0-9a-fk-or]", "");
     }
 
-    private record LogEntry(File file, String message) {
+    private record LogEntry(File file, String messagePattern, Object... arguments) {
+        public LogEntry(File file, String message) {
+            this(file, message, new Object[0]);
+        }
     }
 }
