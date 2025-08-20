@@ -52,12 +52,29 @@ public final class CSend {
     }
 
     public static void shutdown() {
-        running = false;
-        if (logThread != null) {
-            logThread.interrupt();
-        }
-        if (consoleThread != null) {
-            consoleThread.interrupt();
+        try {
+            running = false;
+            if (logThread != null) {
+                logThread.interrupt();
+            }
+
+            while (!logQueue.isEmpty()) {
+                LogEntry entry = logQueue.poll();
+                if (entry != null) {
+                    String formattedMessage = formatMessage(entry.messagePattern(), entry.arguments());
+                    writeToFile(entry.file(), "[" + FORMAT.format(new Date()) + "] " + stripColor(formattedMessage));
+                }
+            }
+
+            if (consoleThread != null) {
+                consoleThread.interrupt();
+            }
+
+            if (logThread != null) {
+                logThread.interrupt();
+            }
+        } catch (Exception ignored) {
+
         }
     }
 
