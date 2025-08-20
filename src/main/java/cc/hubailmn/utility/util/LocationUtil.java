@@ -18,18 +18,18 @@ public class LocationUtil {
 
     public static float getCardinalYaw(float originalYaw) {
         float yaw = (originalYaw % 360 + 360) % 360;
+        return Math.round(yaw / 45f) * 45f % 360;
+    }
 
-        if (yaw >= 337.5 || yaw < 22.5) return 0f;
-        if (yaw >= 22.5 && yaw < 67.5) return 45f;
-        if (yaw >= 67.5 && yaw < 112.5) return 90f;
-        if (yaw >= 112.5 && yaw < 157.5) return 135f;
+    public static Location fixLocation(Location location) {
+        double x = location.getBlockX() + 0.5;
+        double y = location.getY();
+        double z = location.getBlockZ() + 0.5;
 
-        if (yaw >= 157.5 && yaw < 202.5) return 180;
-        if (yaw >= 202.5 && yaw < 247.5) return 225f;
-        if (yaw >= 247.5 && yaw < 292.5) return 270f;
-        if (yaw >= 292.5 && yaw < 337.5) return 315f;
+        float yaw = LocationUtil.getCardinalYaw(location.getYaw());
+        float pitch = 0.0f;
 
-        return 0f;
+        return new Location(location.getWorld(), x, y, z, yaw, pitch);
     }
 
     public static String serialize(Location location) {
