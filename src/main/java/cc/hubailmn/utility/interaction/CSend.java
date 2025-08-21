@@ -101,10 +101,8 @@ public final class CSend {
                 try {
                     LogEntry entry = consoleQueue.poll(100, TimeUnit.MILLISECONDS);
                     if (entry != null) {
-                        Bukkit.getScheduler().runTask(BasePlugin.getInstance(), () -> {
-                            String prefixedMessage = getPrefix() + " " + formatMessage(entry.messagePattern(), entry.arguments());
-                            Bukkit.getConsoleSender().sendMessage(prefixedMessage);
-                        });
+                        String prefixedMessage = getPrefix() + " " + formatMessage(entry.messagePattern(), entry.arguments());
+                        Bukkit.getConsoleSender().sendMessage(prefixedMessage);
                     }
                 } catch (InterruptedException ignored) {
                     Thread.currentThread().interrupt();
@@ -289,7 +287,6 @@ public final class CSend {
         }
 
         error("Exception: {} - {}", throwable.getClass().getSimpleName(), throwable.getMessage());
-        throwable.printStackTrace();
         logThrowable(throwable);
     }
 

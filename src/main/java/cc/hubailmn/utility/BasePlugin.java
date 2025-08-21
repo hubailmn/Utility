@@ -54,25 +54,27 @@ public abstract class BasePlugin extends JavaPlugin {
     private PluginSettings pluginConfig;
     private DebugCommand debugCommand;
 
-    private boolean debug = false;
     private boolean scanFullPackage = true;
-    private boolean forceDebug = false;
+    private boolean sendPluginUsage = true;
     private boolean database = true;
+    private boolean checkUpdates = false;
+    private boolean forceDebug = false;
+    private boolean debug = false;
     private boolean license = false;
     private boolean discord = false;
-    private boolean checkUpdates = false;
-    private boolean sendPluginUsage = true;
 
     @Override
     public void onEnable() {
         setInstance(this);
         setSource(getFile());
+
         setPluginManager(getServer().getPluginManager());
+
+        setPackageName(this.getClass().getPackage().getName());
         setPluginName(getInstance().getName());
         setPluginVersion(getInstance().getDescription().getVersion());
 
         CSend.init(getDataFolder());
-
         preEnable();
 
         setDebug(forceDebug);
