@@ -281,23 +281,42 @@ public final class CSend {
     }
 
     public static void error(Throwable throwable) {
+        error(throwable, null);
+    }
+
+    public static void error(Throwable throwable, String message) {
         if (throwable == null) {
-            error("Unknown error (null throwable).");
+            if (message != null && !message.isEmpty()) {
+                error(message);
+            } else {
+                error("Unknown error (null throwable).");
+            }
             return;
         }
 
-        error("Exception: {} - {}", throwable.getClass().getSimpleName(), throwable.getMessage());
+        String formattedMessage = "Exception: " + throwable.getClass().getSimpleName() + " - " + throwable.getMessage();
+        if (message != null && !message.isEmpty()) {
+            formattedMessage = message + " | " + formattedMessage;
+        }
+
+        consoleQueue.offer(new LogEntry(null, "§4[ERROR] §r" + formattedMessage));
+        logQueue.offer(new LogEntry(ERROR_LOG, "§4[ERROR] §r" + formattedMessage));
+
         logThrowable(throwable);
     }
 
     private static void logThrowable(Throwable throwable) {
+        consoleQueue.offer(new LogEntry(null, "§4[ERROR] §rStack Trace:"));
+
         for (StackTraceElement ste : throwable.getStackTrace()) {
-            log(ERROR_LOG, "  at " + ste);
+            logQueue.offer(new LogEntry(ERROR_LOG, "  at " + ste));
+            consoleQueue.offer(new LogEntry(null, "  at " + ste));
         }
 
         Throwable cause = throwable.getCause();
         if (cause != null && cause != throwable) {
-            log(ERROR_LOG, "Caused by: " + cause.getClass().getSimpleName() + ": " + cause.getMessage());
+            logQueue.offer(new LogEntry(ERROR_LOG, "Caused by: " + cause.getClass().getSimpleName() + ": " + cause.getMessage()));
+            consoleQueue.offer(new LogEntry(null, "Caused by: " + cause.getClass().getSimpleName() + ": " + cause.getMessage()));
             logThrowable(cause);
         }
     }
