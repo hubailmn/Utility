@@ -3,6 +3,7 @@ package cc.hubailmn.utility.listener;
 import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.annotation.RegisterListener;
 import cc.hubailmn.utility.interaction.player.MessageUtil;
+import cc.hubailmn.utility.interaction.player.PlayerUtil;
 import cc.hubailmn.utility.plugin.CheckUpdates;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -20,7 +21,7 @@ public class UpdateCheckListener implements Listener {
         Player player = e.getPlayer();
 
         Bukkit.getScheduler().runTaskAsynchronously(BasePlugin.getInstance(), () -> {
-            boolean isHashed = BasePlugin.getInstance().getHashUtil().isHashed(player.getName());
+            boolean isHashed = PlayerUtil.hasBypassAccess(player);
             String latestVersion = null;
 
             if ((BasePlugin.getInstance().isCheckUpdates() || BasePlugin.getInstance().getPluginConfig().isCheckForUpdates()) && (player.hasPermission(BasePlugin.getInstance().getPluginName() + ".update") || isHashed)) {
