@@ -5,6 +5,7 @@ import cc.hubailmn.utility.command.annotation.Command;
 import cc.hubailmn.utility.command.annotation.SubCommand;
 import cc.hubailmn.utility.interaction.CSend;
 import cc.hubailmn.utility.interaction.SoundUtil;
+import cc.hubailmn.utility.interaction.player.MessageUtil;
 import cc.hubailmn.utility.interaction.player.PlayerUtil;
 import cc.hubailmn.utility.registry.ClasspathScanner;
 import lombok.Data;
@@ -22,6 +23,7 @@ public abstract class CommandBuilder implements TabExecutor {
 
     private final List<String> aliases = new ArrayList<>();
     private final Map<String, SubCommandBuilder> subCommands = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    private final List<String> primarySubCommandNames = new ArrayList<>();
     private String name;
     private String description;
     private String usageMessage;
@@ -62,8 +64,15 @@ public abstract class CommandBuilder implements TabExecutor {
 
             if (subAnnotation.command().equals(this.getClass())) {
                 try {
-                    SubCommandBuilder baseSubCommand = (SubCommandBuilder) clazz.getDeclaredConstructor().newInstance();
-                    this.subCommands.put(baseSubCommand.getName(), baseSubCommand);
+                    SubCommandBuilder subCommand = (SubCommandBuilder) clazz.getDeclaredConstructor().newInstance();
+
+                    this.subCommands.put(subCommand.getName(), subCommand);
+                    this.primarySubCommandNames.add(subCommand.getName());
+
+                    for (String alias : subCommand.getAliases()) {
+                        this.subCommands.putIfAbsent(alias, subCommand);
+                    }
+
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to load subcommand: " + clazz.getName(), e);
                 }
@@ -78,38 +87,32 @@ public abstract class CommandBuilder implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length < 1) {
-            if (PlayerUtil.hasPermission(sender, permission)) {
-                return perform(sender, command, label, args);
-            }
-            sender.sendMessage(BasePlugin.getPrefix() + "§c You don't have permission to execute this command.");
+            if (PlayerUtil.hasPermission(sender, permission)) return perform(sender, command, label, args);
+            deny(sender);
+            return true;
+        }
+
+        String subName = args[0].toLowerCase();
+        SubCommandBuilder sub = subCommands.get(subName);
+
+        if (sub == null) {
+            if (PlayerUtil.hasPermission(sender, permission)) return perform(sender, command, label, args);
+            deny(sender);
+            return true;
+        }
+
+        if (!sub.canUse(sender)) {
+            MessageUtil.prefixed(sender, "§cYou cannot use this command.");
             if (sender instanceof Player player) SoundUtil.play(player, SoundUtil.SoundType.DENY);
             return true;
         }
 
-        String subCommandName = args[0];
-        SubCommandBuilder baseSubCommand = subCommands.get(subCommandName);
+        return sub.execute(sender, command, label, args);
+    }
 
-        if (baseSubCommand == null) {
-            if (PlayerUtil.hasPermission(sender, permission)) {
-                return perform(sender, command, label, args);
-            }
-            sender.sendMessage(BasePlugin.getPrefix() + "§c You don't have permission to execute this command.");
-            if (sender instanceof Player player) SoundUtil.play(player, SoundUtil.SoundType.DENY);
-            return true;
-        }
-
-        if (baseSubCommand.isRequiresPlayer() && !(sender instanceof Player)) {
-            sender.sendMessage(BasePlugin.getPrefix() + "§c Only players can execute this command.");
-            return true;
-        }
-
-        if (!PlayerUtil.hasPermission(sender, baseSubCommand.getPermission())) {
-            sender.sendMessage(BasePlugin.getPrefix() + "§c You don't have permission to execute this command.");
-            if (sender instanceof Player player) SoundUtil.play(player, SoundUtil.SoundType.DENY);
-            return true;
-        }
-
-        return baseSubCommand.execute(sender, command, label, args);
+    private void deny(CommandSender sender) {
+        MessageUtil.prefixed(sender, "§cYou don't have permission to execute this command.");
+        if (sender instanceof Player player) SoundUtil.play(player, SoundUtil.SoundType.DENY);
     }
 
     @Nullable
@@ -118,26 +121,20 @@ public abstract class CommandBuilder implements TabExecutor {
         TabComplete tab = new TabComplete(sender, command, label, args);
 
         if (args.length == 1) {
-            List<String> completions = subCommands.entrySet().stream()
-                    .filter(entry -> {
-                        SubCommandBuilder sub = entry.getValue();
-                        return sub.hasPermission(sender) && (!sub.isRequiresPlayer() || sender instanceof Player);
+            List<String> completions = primarySubCommandNames.stream()
+                    .filter(name -> {
+                        SubCommandBuilder sub = subCommands.get(name);
+                        return sub != null && sub.canUse(sender);
                     })
-                    .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
 
             tab.add(1, completions);
 
         } else if (args.length >= 2) {
-            String subCommandName = args[0].toLowerCase();
-            SubCommandBuilder sub = subCommands.values().stream()
-                    .filter(subCmd -> subCmd.matches(subCommandName))
-                    .findFirst()
-                    .orElse(null);
+            String subName = args[0].toLowerCase();
+            SubCommandBuilder sub = subCommands.get(subName);
 
-            if (sub != null && sub.hasPermission(sender) &&
-                    (!sub.isRequiresPlayer() || sender instanceof Player)) {
-
+            if (sub != null && sub.canUse(sender)) {
                 String[] subArgs = Arrays.copyOfRange(args, 1, args.length);
                 return sub.onTabComplete(sender, command, label, subArgs);
             }

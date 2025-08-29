@@ -7,7 +7,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -25,14 +24,18 @@ public abstract class SubCommandBuilder {
             this.name = this.getClass().getSimpleName().replaceAll("Command$", "").toLowerCase();
             this.permission = null;
             this.requiresPlayer = false;
-            this.aliases = Collections.emptyList();
+            this.aliases = List.of();
             return;
         }
 
-        this.name = annotation.name();
+        this.name = annotation.name().toLowerCase();
         this.permission = annotation.permission().isEmpty() ? null : annotation.permission();
         this.requiresPlayer = annotation.requiresPlayer();
-        this.aliases = Arrays.asList(annotation.aliases());
+        this.aliases = List.copyOf(
+                Arrays.stream(annotation.aliases())
+                        .map(String::toLowerCase)
+                        .toList()
+        );
     }
 
     public abstract boolean execute(CommandSender sender, Command command, String label, String[] args);
@@ -43,12 +46,12 @@ public abstract class SubCommandBuilder {
         return tabCompleteBuilder.build();
     }
 
-    protected void performTabComplete(TabComplete builder, CommandSender sender, org.bukkit.command.Command command, String label, String[] args) {
+    protected void performTabComplete(TabComplete builder, CommandSender sender, Command command, String label, String[] args) {
     }
 
     public boolean matches(String input) {
-        String lowerInput = input.toLowerCase();
-        return name.equalsIgnoreCase(lowerInput) || aliases.stream().anyMatch(alias -> alias.equalsIgnoreCase(lowerInput));
+        String lower = input.toLowerCase();
+        return name.equals(lower) || (!aliases.isEmpty() && aliases.contains(lower));
     }
 
     public boolean hasPermission(CommandSender sender) {
