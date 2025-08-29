@@ -17,4 +17,6 @@ public @interface SubCommand {
 
     boolean requiresPlayer() default true;
 
+    String[] aliases() default {};
+
 }

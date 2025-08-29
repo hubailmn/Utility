@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -12,49 +13,64 @@ import java.util.stream.Collectors;
 
 @Getter
 public class TabComplete {
-    public static final List<String> ALL_MATERIAL_NAMES = Arrays.stream(Material.values())
-            .map(Material::name)
-            .toList();
-    public static final List<String> ITEM_MATERIAL_NAMES = Arrays.stream(Material.values())
-            .filter(Material::isItem)
-            .map(Material::name)
-            .toList();
-    public static final List<String> FOOD_MATERIALS = Arrays.stream(Material.values())
-            .filter(Material::isEdible)
-            .map(Material::name)
-            .toList();
-    public static final List<String> TOOL_MATERIALS = Arrays.stream(Material.values())
-            .filter(m -> m.name().endsWith("_AXE")
-                    || m.name().endsWith("_PICKAXE")
-                    || m.name().endsWith("_SHOVEL")
-                    || m.name().endsWith("_HOE")
-                    || m.name().equals("MACE")
-                    || m.name().endsWith("_SWORD")
-                    || m.name().contains("SHEARS")
-                    || m.name().contains("FISHING_ROD")
-            )
-            .map(Material::name)
-            .toList();
-    public static final List<String> BLOCK_MATERIALS = Arrays.stream(Material.values())
-            .filter(Material::isBlock)
-            .map(Material::name)
-            .toList();
+
+    public static final List<String> ALL_MATERIALS = Collections.unmodifiableList(
+            toReadableNames(Arrays.stream(Material.values())
+                    .map(Material::name)
+                    .collect(Collectors.toList()))
+    );
+
+    public static final List<String> ITEM_MATERIALS = Collections.unmodifiableList(
+            toReadableNames(Arrays.stream(Material.values())
+                    .filter(Material::isItem)
+                    .map(Material::name)
+                    .collect(Collectors.toList()))
+    );
+
+    public static final List<String> FOOD_MATERIALS = Collections.unmodifiableList(
+            toReadableNames(Arrays.stream(Material.values())
+                    .filter(Material::isEdible)
+                    .map(Material::name)
+                    .collect(Collectors.toList()))
+    );
+
+    public static final List<String> TOOL_MATERIALS = Collections.unmodifiableList(
+            toReadableNames(Arrays.stream(Material.values())
+                    .map(Material::name)
+                    .filter(name -> name.endsWith("_AXE") || name.endsWith("_PICKAXE") ||
+                            name.endsWith("_SHOVEL") || name.endsWith("_HOE") ||
+                            name.equals("MACE") || name.endsWith("_SWORD") ||
+                            name.contains("SHEARS") || name.contains("FISHING_ROD"))
+                    .collect(Collectors.toList()))
+    );
+
+    public static final List<String> BLOCK_MATERIALS = Collections.unmodifiableList(
+            toReadableNames(Arrays.stream(Material.values())
+                    .filter(Material::isBlock)
+                    .map(Material::name)
+                    .collect(Collectors.toList()))
+    );
+
     private final CommandSender sender;
     private final Command command;
     private final String alias;
     private final String[] args;
-    private final TreeMap<Integer, List<String>> entries = new TreeMap<>();
-    private String currentArg;
-    private int currentArgLength;
+    private final Map<Integer, Set<String>> entries = new HashMap<>();
+    private final String currentArg;
+    private final int currentArgLength;
 
     public TabComplete(CommandSender sender, Command command, String alias, String[] args) {
         this.sender = sender;
         this.command = command;
         this.alias = alias;
         this.args = args;
+
         if (args.length > 0) {
             this.currentArg = args[args.length - 1].toLowerCase();
             this.currentArgLength = currentArg.length();
+        } else {
+            this.currentArg = "";
+            this.currentArgLength = 0;
         }
     }
 
@@ -63,7 +79,7 @@ public class TabComplete {
                 .map(name -> Arrays.stream(name.split("_"))
                         .map(part -> part.substring(0, 1).toUpperCase() + part.substring(1).toLowerCase())
                         .collect(Collectors.joining("_")))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public TabComplete add(int atIndex, String[] entry, Predicate<String[]> condition) {
@@ -78,16 +94,16 @@ public class TabComplete {
             return this;
         }
         atIndex = Math.max(1, atIndex);
-        entries.computeIfAbsent(atIndex, k -> new ArrayList<>(entry.length)).addAll(List.of(entry));
+        entries.computeIfAbsent(atIndex, k -> new LinkedHashSet<>()).addAll(Arrays.asList(entry));
         return this;
     }
 
-    public TabComplete add(int atIndex, List<String> entry) {
+    public TabComplete add(int atIndex, Collection<String> entry) {
         if (entry == null || entry.isEmpty()) {
             return this;
         }
         atIndex = Math.max(1, atIndex);
-        entries.computeIfAbsent(atIndex, k -> new ArrayList<>(entry.size())).addAll(entry);
+        entries.computeIfAbsent(atIndex, k -> new LinkedHashSet<>()).addAll(entry);
         return this;
     }
 
@@ -96,7 +112,7 @@ public class TabComplete {
             return this;
         }
         atIndex = Math.max(1, atIndex);
-        entries.computeIfAbsent(atIndex, k -> new ArrayList<>()).add(entry);
+        entries.computeIfAbsent(atIndex, k -> new LinkedHashSet<>()).add(entry);
         return this;
     }
 
@@ -107,7 +123,7 @@ public class TabComplete {
         return this;
     }
 
-    public TabComplete addIfPerm(int index, String perm, List<String> values) {
+    public TabComplete addIfPerm(int index, String perm, Collection<String> values) {
         if (sender.hasPermission(perm)) {
             add(index, values);
         }
@@ -115,7 +131,9 @@ public class TabComplete {
     }
 
     public TabComplete addPlayerNames(int index) {
-        return add(index, sender.getServer().getOnlinePlayers().stream().map(Player::getName).toList());
+        return add(index, sender.getServer().getOnlinePlayers().stream()
+                .map(Player::getName)
+                .collect(Collectors.toList()));
     }
 
     public TabComplete addPlayerIfOnline(int index, String playerName) {
@@ -130,7 +148,7 @@ public class TabComplete {
             List<String> names = sender.getServer().getOnlinePlayers()
                     .stream()
                     .map(Player::getName)
-                    .toList();
+                    .collect(Collectors.toList());
             add(index, names);
         }
         return this;
@@ -146,16 +164,16 @@ public class TabComplete {
     public TabComplete addWildcardAndPlayersIfPerm(int index, String perm) {
         if (sender.hasPermission(perm)) {
             add(index, "*");
-            add(index, sender.getServer().getOnlinePlayers().stream().map(Player::getName).toList());
+            addPlayerNames(index);
         }
         return this;
     }
 
     public <E extends Enum<E>> TabComplete addEnum(int index, Class<E> enumClass) {
-        for (E e : enumClass.getEnumConstants()) {
-            add(index, e.name().toLowerCase());
-        }
-        return this;
+        Set<String> enumNames = Arrays.stream(enumClass.getEnumConstants())
+                .map(e -> e.name().toLowerCase())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        return add(index, enumNames);
     }
 
     public TabComplete addIf(int index, Predicate<CommandSender> condition, String... values) {
@@ -165,13 +183,12 @@ public class TabComplete {
         return this;
     }
 
-    public TabComplete addMatching(int index, List<String> values, String filter) {
-        for (String value : values) {
-            if (value.toLowerCase().startsWith(filter.toLowerCase())) {
-                add(index, value);
-            }
-        }
-        return this;
+    public TabComplete addMatching(int index, Collection<String> values, String filter) {
+        String filterLower = filter.toLowerCase();
+        Set<String> matching = values.stream()
+                .filter(value -> value.toLowerCase().startsWith(filterLower))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        return add(index, matching);
     }
 
     public TabComplete addBoolean(int index) {
@@ -179,23 +196,23 @@ public class TabComplete {
     }
 
     public TabComplete addBlocks(int index) {
-        return add(index, toReadableNames(BLOCK_MATERIALS));
+        return add(index, BLOCK_MATERIALS);
     }
 
     public TabComplete addItems(int index) {
-        return add(index, toReadableNames(ITEM_MATERIAL_NAMES));
+        return add(index, ITEM_MATERIALS);
     }
 
     public TabComplete addFood(int index) {
-        return add(index, toReadableNames(FOOD_MATERIALS));
+        return add(index, FOOD_MATERIALS);
     }
 
     public TabComplete addTools(int index) {
-        return add(index, toReadableNames(TOOL_MATERIALS));
+        return add(index, TOOL_MATERIALS);
     }
 
     public TabComplete addMaterials(int index) {
-        return add(index, toReadableNames(ALL_MATERIAL_NAMES));
+        return add(index, ALL_MATERIALS);
     }
 
     public List<String> build() {
@@ -203,7 +220,7 @@ public class TabComplete {
             return Collections.emptyList();
         }
 
-        List<String> suggestions = entries.get(args.length);
+        Set<String> suggestions = entries.get(args.length);
         if (suggestions == null || suggestions.isEmpty()) {
             return Collections.emptyList();
         }
@@ -212,12 +229,8 @@ public class TabComplete {
             return new ArrayList<>(suggestions);
         }
 
-        List<String> filtered = new ArrayList<>(suggestions.size());
-        for (String suggestion : suggestions) {
-            if (suggestion.toLowerCase().startsWith(currentArg)) {
-                filtered.add(suggestion);
-            }
-        }
+        List<String> filtered = new ArrayList<>();
+        StringUtil.copyPartialMatches(currentArg, suggestions, filtered);
 
         return filtered;
     }
@@ -225,7 +238,7 @@ public class TabComplete {
     public List<String> buildSorted() {
         List<String> results = build();
         if (results.size() > 1) {
-            Collections.sort(results);
+            results.sort(String.CASE_INSENSITIVE_ORDER);
         }
         return results;
     }

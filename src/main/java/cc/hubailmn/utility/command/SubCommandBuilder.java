@@ -1,41 +1,61 @@
 package cc.hubailmn.utility.command;
 
 import cc.hubailmn.utility.command.annotation.SubCommand;
+import cc.hubailmn.utility.interaction.player.PlayerUtil;
 import lombok.Data;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Data
 public abstract class SubCommandBuilder {
 
-    private String name;
-    private String permission;
-    private boolean requiresPlayer;
+    private final String name;
+    private final String permission;
+    private final boolean requiresPlayer;
+    private final List<String> aliases;
 
     public SubCommandBuilder() {
         SubCommand annotation = this.getClass().getAnnotation(SubCommand.class);
 
         if (annotation == null) {
             this.name = this.getClass().getSimpleName().replaceAll("Command$", "").toLowerCase();
+            this.permission = null;
+            this.requiresPlayer = false;
+            this.aliases = Collections.emptyList();
             return;
         }
 
         this.name = annotation.name();
-        this.permission = annotation.permission();
+        this.permission = annotation.permission().isEmpty() ? null : annotation.permission();
         this.requiresPlayer = annotation.requiresPlayer();
+        this.aliases = Arrays.asList(annotation.aliases());
     }
 
     public abstract boolean execute(CommandSender sender, Command command, String label, String[] args);
 
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         TabComplete tabCompleteBuilder = new TabComplete(sender, command, label, args);
+        performTabComplete(tabCompleteBuilder, sender, command, label, args);
         return tabCompleteBuilder.build();
     }
 
-    public void addComplete(int index, TabComplete tabCompleteBuilder, String... strings) {
-        tabCompleteBuilder.add(index, strings);
+    protected void performTabComplete(TabComplete builder, CommandSender sender, org.bukkit.command.Command command, String label, String[] args) {
     }
 
+    public boolean matches(String input) {
+        String lowerInput = input.toLowerCase();
+        return name.equalsIgnoreCase(lowerInput) || aliases.stream().anyMatch(alias -> alias.equalsIgnoreCase(lowerInput));
+    }
+
+    public boolean hasPermission(CommandSender sender) {
+        return permission == null || PlayerUtil.hasPermission(sender, permission);
+    }
+
+    public boolean canUse(CommandSender sender) {
+        return hasPermission(sender) && (!requiresPlayer || sender instanceof org.bukkit.entity.Player);
+    }
 }

@@ -50,6 +50,11 @@ public class ItemPreset {
             .name("§f")
             .build();
 
+    public static final ItemStack LIGHT_BLUE_GLASS = new ItemBuilder()
+            .material(Material.LIGHT_BLUE_STAINED_GLASS_PANE)
+            .name("§f")
+            .build();
+
     public static final ItemStack INFO_BOOK = new ItemBuilder()
             .material(Material.BOOK)
             .name("§b§lInformation")

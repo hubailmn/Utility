@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Data
 public abstract class CommandBuilder implements TabExecutor {
@@ -114,29 +115,43 @@ public abstract class CommandBuilder implements TabExecutor {
     @Nullable
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command, @NotNull String label, @NotNull String[] args) {
-        TabComplete tabComplBuilder = new TabComplete(sender, command, label, args);
+        TabComplete tab = new TabComplete(sender, command, label, args);
 
         if (args.length == 1) {
-            List<String> completions = new ArrayList<>();
-            for (Map.Entry<String, SubCommandBuilder> entry : subCommands.entrySet()) {
-                String subCommandName = entry.getKey();
-                SubCommandBuilder baseSubCommand = entry.getValue();
+            List<String> completions = subCommands.entrySet().stream()
+                    .filter(entry -> {
+                        SubCommandBuilder sub = entry.getValue();
+                        return sub.hasPermission(sender) && (!sub.isRequiresPlayer() || sender instanceof Player);
+                    })
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList());
 
-                if (PlayerUtil.hasPermission(sender, baseSubCommand.getPermission())) {
-                    completions.add(subCommandName);
-                }
-            }
-            tabComplBuilder.add(0, completions.toArray(new String[0]));
-        } else if (args.length > 1) {
+            tab.add(1, completions);
+
+        } else if (args.length >= 2) {
             String subCommandName = args[0].toLowerCase();
-            SubCommandBuilder baseSubCommand = subCommands.get(subCommandName);
+            SubCommandBuilder sub = subCommands.values().stream()
+                    .filter(subCmd -> subCmd.matches(subCommandName))
+                    .findFirst()
+                    .orElse(null);
 
-            if (baseSubCommand != null && PlayerUtil.hasPermission(sender, baseSubCommand.getPermission())) {
-                return baseSubCommand.onTabComplete(sender, command, label, args);
+            if (sub != null && sub.hasPermission(sender) &&
+                    (!sub.isRequiresPlayer() || sender instanceof Player)) {
+
+                String[] subArgs = Arrays.copyOfRange(args, 1, args.length);
+                return sub.onTabComplete(sender, command, label, subArgs);
             }
         }
 
-        return tabComplBuilder.build();
+        if (sender.hasPermission(permission)) {
+            performTabComplete(tab, sender, command, label, args);
+        }
+
+        return tab.build();
+    }
+
+    protected void performTabComplete(TabComplete builder, CommandSender sender, org.bukkit.command.Command command, String label, String[] args) {
+
     }
 
     public boolean sendHelp(CommandSender sender) {
