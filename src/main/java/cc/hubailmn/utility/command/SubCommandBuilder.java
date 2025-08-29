@@ -29,13 +29,12 @@ public abstract class SubCommandBuilder {
         }
 
         this.name = annotation.name().toLowerCase();
-        this.permission = annotation.permission().isEmpty() ? null : annotation.permission();
+        this.permission = annotation.permission().isBlank() ? null : annotation.permission();
         this.requiresPlayer = annotation.requiresPlayer();
-        this.aliases = List.copyOf(
-                Arrays.stream(annotation.aliases())
-                        .map(String::toLowerCase)
-                        .toList()
-        );
+        this.aliases = Arrays.stream(annotation.aliases())
+                .map(String::toLowerCase)
+                .filter(s -> !s.isBlank())
+                .toList();
     }
 
     public abstract boolean execute(CommandSender sender, Command command, String label, String[] args);
@@ -47,11 +46,6 @@ public abstract class SubCommandBuilder {
     }
 
     protected void performTabComplete(TabComplete builder, CommandSender sender, Command command, String label, String[] args) {
-    }
-
-    public boolean matches(String input) {
-        String lower = input.toLowerCase();
-        return name.equals(lower) || (!aliases.isEmpty() && aliases.contains(lower));
     }
 
     public boolean hasPermission(CommandSender sender) {

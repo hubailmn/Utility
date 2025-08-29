@@ -23,7 +23,7 @@ public abstract class CommandBuilder implements TabExecutor {
 
     private final List<String> aliases = new ArrayList<>();
     private final Map<String, SubCommandBuilder> subCommands = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-    private final List<String> primarySubCommandNames = new ArrayList<>();
+    private final List<String> subCommandNames = new ArrayList<>();
     private String name;
     private String description;
     private String usageMessage;
@@ -43,12 +43,12 @@ public abstract class CommandBuilder implements TabExecutor {
         this.permission = annotation.permission();
 
         this.aliases.addAll(Arrays.asList(annotation.aliases()));
-        this.aliases.removeIf(String::isEmpty);
+        this.aliases.removeIf(String::isBlank);
 
-        addSubCommand();
+        loadSubcommands();
     }
 
-    private void addSubCommand() {
+    private void loadSubcommands() {
         Set<Class<?>> subCommandClasses = ClasspathScanner.getTypesAnnotatedWith(
                 SubCommand.class,
                 BasePlugin.getInstance().getPackageName() + ".command"
@@ -57,61 +57,57 @@ public abstract class CommandBuilder implements TabExecutor {
         for (Class<?> clazz : subCommandClasses) {
             SubCommand subAnnotation = clazz.getAnnotation(SubCommand.class);
 
-            if (subAnnotation == null) {
-                CSend.warn("Failed to load subcommand: " + clazz.getName() + ". No @SubCommand annotation found.");
+            if (subAnnotation == null || !subAnnotation.command().equals(this.getClass())) {
                 continue;
             }
 
-            if (subAnnotation.command().equals(this.getClass())) {
-                try {
-                    SubCommandBuilder subCommand = (SubCommandBuilder) clazz.getDeclaredConstructor().newInstance();
-
-                    this.subCommands.put(subCommand.getName(), subCommand);
-                    this.primarySubCommandNames.add(subCommand.getName());
-
-                    for (String alias : subCommand.getAliases()) {
-                        this.subCommands.putIfAbsent(alias, subCommand);
-                    }
-
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to load subcommand: " + clazz.getName(), e);
-                }
+            try {
+                SubCommandBuilder subCommand = (SubCommandBuilder) clazz.getDeclaredConstructor().newInstance();
+                this.addSubCommand(subCommand);
+            } catch (Exception e) {
+                CSend.warn("Failed to load subcommand '" + clazz.getName() + "'. Reason: " + e.getMessage());
             }
         }
     }
 
     public void addSubCommand(SubCommandBuilder subCommandBuilder) {
+        this.subCommandNames.add(subCommandBuilder.getName());
         this.subCommands.put(subCommandBuilder.getName(), subCommandBuilder);
+        subCommandBuilder.getAliases().forEach(alias -> this.subCommands.put(alias, subCommandBuilder));
     }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command, @NotNull String label, @NotNull String[] args) {
+        if (!PlayerUtil.hasPermission(sender, permission)) {
+            deny(sender);
+            return true;
+        }
+
         if (args.length < 1) {
-            if (PlayerUtil.hasPermission(sender, permission)) return perform(sender, command, label, args);
-            deny(sender);
-            return true;
+            return perform(sender, command, label, args);
         }
 
-        String subName = args[0].toLowerCase();
-        SubCommandBuilder sub = subCommands.get(subName);
+        SubCommandBuilder sub = subCommands.get(args[0]);
 
-        if (sub == null) {
-            if (PlayerUtil.hasPermission(sender, permission)) return perform(sender, command, label, args);
-            deny(sender);
-            return true;
+        if (sub != null) {
+            if (!sub.canUse(sender)) {
+                deny(sender, "§cYou cannot use this command.");
+                return true;
+            }
+
+            String[] subArgs = Arrays.copyOfRange(args, 1, args.length);
+            return sub.execute(sender, command, label, subArgs);
         }
 
-        if (!sub.canUse(sender)) {
-            MessageUtil.prefixed(sender, "§cYou cannot use this command.");
-            if (sender instanceof Player player) SoundUtil.play(player, SoundUtil.SoundType.DENY);
-            return true;
-        }
-
-        return sub.execute(sender, command, label, args);
+        return perform(sender, command, label, args);
     }
 
     private void deny(CommandSender sender) {
-        MessageUtil.prefixed(sender, "§cYou don't have permission to execute this command.");
+        deny(sender, "§cYou don't have permission to execute this command.");
+    }
+
+    private void deny(CommandSender sender, String message) {
+        MessageUtil.prefixed(sender, message);
         if (sender instanceof Player player) SoundUtil.play(player, SoundUtil.SoundType.DENY);
     }
 
@@ -121,56 +117,32 @@ public abstract class CommandBuilder implements TabExecutor {
         TabComplete tab = new TabComplete(sender, command, label, args);
 
         if (args.length == 1) {
-            List<String> completions = primarySubCommandNames.stream()
-                    .filter(name -> {
-                        SubCommandBuilder sub = subCommands.get(name);
-                        return sub != null && sub.canUse(sender);
-                    })
-                    .collect(Collectors.toList());
-
-            tab.add(1, completions);
-
-        } else if (args.length >= 2) {
-            String subName = args[0].toLowerCase();
-            SubCommandBuilder sub = subCommands.get(subName);
-
+            tab.add(1, subCommandNames.stream()
+                    .filter(name -> subCommands.get(name).canUse(sender))
+                    .collect(Collectors.toList()));
+        } else if (args.length > 1) {
+            SubCommandBuilder sub = subCommands.get(args[0]);
             if (sub != null && sub.canUse(sender)) {
-                String[] subArgs = Arrays.copyOfRange(args, 1, args.length);
-                return sub.onTabComplete(sender, command, label, subArgs);
+                tab.add(args.length, sub.onTabComplete(sender, command, label, Arrays.copyOfRange(args, 1, args.length)));
             }
         }
 
-        if (PlayerUtil.hasPermission(sender, permission)) {
-            performTabComplete(tab, sender, command, label, args);
-        }
-
+        performTabComplete(tab, sender, command, label, args);
         return tab.build();
     }
 
     protected void performTabComplete(TabComplete builder, CommandSender sender, org.bukkit.command.Command command, String label, String[] args) {
-
     }
 
     public boolean sendHelp(CommandSender sender) {
         sender.sendMessage("§eCommand Info:");
         sender.sendMessage("§7 - §fName: §b" + name);
-
-        if (!description.isEmpty()) {
-            sender.sendMessage("§7 - §fDescription: §a" + description);
-        }
-
-        if (!usageMessage.isEmpty()) {
-            sender.sendMessage("§7 - §fUsage: §6" + usageMessage);
-        }
-
+        if (!description.isBlank()) sender.sendMessage("§7 - §fDescription: §a" + description);
+        if (!usageMessage.isBlank()) sender.sendMessage("§7 - §fUsage: §6" + usageMessage);
         sender.sendMessage("§7 - §fPermission: §c" + (permission != null ? permission : "None"));
-        sender.sendMessage("§7 - §fAliases: §d" + (!aliases.isEmpty() ? aliases : "None"));
-        sender.sendMessage("§7 - §fSubcommands: §9" + (!subCommands.isEmpty() ? subCommands.keySet() : "None"));
-
-        if (sender instanceof Player player) {
-            SoundUtil.play(player, SoundUtil.SoundType.CONFIRM);
-        }
-
+        sender.sendMessage("§7 - §fAliases: §d" + (aliases.isEmpty() ? "None" : String.join(", ", aliases)));
+        sender.sendMessage("§7 - §fSubcommands: §9" + (subCommandNames.isEmpty() ? "None" : String.join(", ", subCommandNames)));
+        if (sender instanceof Player player) SoundUtil.play(player, SoundUtil.SoundType.CONFIRM);
         return true;
     }
 
