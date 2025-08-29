@@ -45,10 +45,12 @@ public abstract class ConfigBuilder {
 
         config = YamlConfiguration.loadConfiguration(file);
 
-        InputStream resource = BasePlugin.getInstance().getResource(fileName);
-        if (resource != null) {
-            YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(resource));
-            config.setDefaults(defaultConfig);
+        try (InputStream resource = BasePlugin.getInstance().getResource(fileName)) {
+            if (resource != null) {
+                YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(resource));
+                config.setDefaults(defaultConfig);
+            }
+        } catch (IOException ignored) {
         }
 
     }

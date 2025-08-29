@@ -32,7 +32,7 @@ public final class SoundUtil {
         ALERT(Sound.ENTITY_ENDERMAN_SCREAM, 0.8F, 1.2F),
         NOTIFY(Sound.BLOCK_NOTE_BLOCK_PLING, 1F, 1.5F),
         PING(Sound.UI_BUTTON_CLICK, 1F, 1.6F),
-        BLINK(Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 2F),
+        BLINK(Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1.5F),
         CLICK(Sound.UI_BUTTON_CLICK, 1F, 1F),
         OPEN_MENU(Sound.BLOCK_CHEST_OPEN, 1F, 1F),
         CLOSE_MENU(Sound.BLOCK_CHEST_CLOSE, 1F, 1F),
