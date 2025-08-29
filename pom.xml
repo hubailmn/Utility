@@ -6,7 +6,7 @@
 
     <groupId>cc.hubailmn</groupId>
     <artifactId>Utility</artifactId>
-    <version>LocalBuild</version>
+    <version>1.2.0</version>
     <packaging>jar</packaging>
 
     <name>Utility</name>
@@ -151,12 +151,12 @@
         </dependency>
 
         <!-- Other Plugins -->
-        <dependency>
-            <groupId>com.comphenix.protocol</groupId>
-            <artifactId>ProtocolLib</artifactId>
-            <version>5.3.0</version>
-            <scope>provided</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.comphenix.protocol</groupId>-->
+<!--            <artifactId>ProtocolLib</artifactId>-->
+<!--            <version>5.3.0</version>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>com.github.MilkBowl</groupId>
@@ -187,19 +187,19 @@
         </dependency>
 
         <!-- Bedrock Freak -->
-        <dependency>
-            <groupId>org.geysermc.geyser</groupId>
-            <artifactId>api</artifactId>
-            <version>2.7.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.geysermc.geyser</groupId>-->
+<!--            <artifactId>api</artifactId>-->
+<!--            <version>2.7.0-SNAPSHOT</version>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
 
-        <dependency>
-            <groupId>org.geysermc.floodgate</groupId>
-            <artifactId>api</artifactId>
-            <version>2.2.4-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.geysermc.floodgate</groupId>-->
+<!--            <artifactId>api</artifactId>-->
+<!--            <version>2.2.4-SNAPSHOT</version>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
 
     </dependencies>
 </project>
