@@ -1,5 +1,6 @@
 package cc.hubailmn.utility.command;
 
+import cc.hubailmn.utility.interaction.player.PlayerUtil;
 import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -117,14 +118,14 @@ public class TabComplete {
     }
 
     public TabComplete addIfPerm(int index, String perm, String... values) {
-        if (sender.hasPermission(perm)) {
+        if (PlayerUtil.hasPermission(sender, perm)) {
             add(index, values);
         }
         return this;
     }
 
     public TabComplete addIfPerm(int index, String perm, Collection<String> values) {
-        if (sender.hasPermission(perm)) {
+        if (PlayerUtil.hasPermission(sender, perm)) {
             add(index, values);
         }
         return this;
@@ -144,7 +145,7 @@ public class TabComplete {
     }
 
     public TabComplete addPlayersWithPerm(int index, String perm) {
-        if (sender.hasPermission(perm)) {
+        if (PlayerUtil.hasPermission(sender, perm)) {
             List<String> names = sender.getServer().getOnlinePlayers()
                     .stream()
                     .map(Player::getName)
@@ -155,14 +156,14 @@ public class TabComplete {
     }
 
     public TabComplete addWildcardAndPlayers(int index, String wildcardPermission) {
-        if (sender.hasPermission(wildcardPermission)) {
+        if (PlayerUtil.hasPermission(sender, wildcardPermission)) {
             add(index, "*");
         }
         return addPlayerNames(index);
     }
 
     public TabComplete addWildcardAndPlayersIfPerm(int index, String perm) {
-        if (sender.hasPermission(perm)) {
+        if (PlayerUtil.hasPermission(sender, perm)) {
             add(index, "*");
             addPlayerNames(index);
         }

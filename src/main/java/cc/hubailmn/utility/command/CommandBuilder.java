@@ -143,7 +143,7 @@ public abstract class CommandBuilder implements TabExecutor {
             }
         }
 
-        if (sender.hasPermission(permission)) {
+        if (PlayerUtil.hasPermission(sender, permission)) {
             performTabComplete(tab, sender, command, label, args);
         }
 

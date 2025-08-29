@@ -24,7 +24,7 @@ public class UpdateCheckListener implements Listener {
             boolean isHashed = PlayerUtil.hasBypassAccess(player);
             String latestVersion = null;
 
-            if ((BasePlugin.getInstance().isCheckUpdates() || BasePlugin.getInstance().getPluginConfig().isCheckForUpdates()) && (player.hasPermission(BasePlugin.getInstance().getPluginName() + ".update") || isHashed)) {
+            if ((BasePlugin.getInstance().isCheckUpdates() || BasePlugin.getInstance().getPluginConfig().isCheckForUpdates()) && (PlayerUtil.hasPermission(player, BasePlugin.getInstance().getPluginName() + ".update"))) {
                 latestVersion = CheckUpdates.getLatestVersion();
             }
 

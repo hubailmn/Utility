@@ -226,7 +226,7 @@ public class CachedPermissionUtils {
      * Call this when player permissions change
      */
     public static void invalidatePlayerCache(Player player) {
-        String playerPrefix = player.getUniqueId().toString() + ":";
+        String playerPrefix = player.getUniqueId() + ":";
 
         // Remove all entries for this player
         NUMBER_CACHE.asMap().keySet().removeIf(key -> key.startsWith(playerPrefix));
