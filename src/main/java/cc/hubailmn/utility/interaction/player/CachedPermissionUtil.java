@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-public class CachedPermissionUtils {
+public class CachedPermissionUtil {
 
     private static final Pattern NUMBER_PATTERN = Pattern.compile("\\d+");
 

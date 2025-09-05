@@ -12,13 +12,11 @@ import java.util.function.Consumer;
 public class GuiSlotButton extends GuiElement {
 
     private final int slot;
-    private final ItemStack item;
     boolean clickCancel;
 
     public GuiSlotButton(int slot, ItemStack item, Consumer<Player> onClick, boolean clickCancel) {
         super(item, onClick);
         this.slot = slot;
-        this.item = item;
         this.clickCancel = clickCancel;
     }
 

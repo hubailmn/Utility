@@ -25,7 +25,7 @@ public class ChatInputManager implements Listener {
 
     private static final Map<UUID, InputSession> sessions = new ConcurrentHashMap<>();
     private static final long DEFAULT_TIMEOUT_TICKS = 20 * 60;
-    private static final Set<String> CANCEL_WORDS = Set.of("cancel", "stop", "exit", "quit", "abort");
+    private static final Set<String> CANCEL_WORDS = Set.of("#cancel", "#stop", "#exit", "#quit", "#abort");
 
     public static void ask(Player player, String prompt, Consumer<String> callback) {
         ask(player, prompt, callback, s -> true, DEFAULT_TIMEOUT_TICKS, true);
@@ -55,7 +55,7 @@ public class ChatInputManager implements Listener {
 
         MessageUtil.prefixed(player, prompt);
         if (cancellable) {
-            MessageUtil.prefixed(player, "§7Type 'cancel' to cancel this input.");
+            MessageUtil.prefixed(player, "§7Type '#cancel' to cancel this input.");
         }
 
         int taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(BasePlugin.getInstance(), () -> {
