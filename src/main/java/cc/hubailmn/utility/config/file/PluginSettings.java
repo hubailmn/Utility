@@ -3,7 +3,7 @@ package cc.hubailmn.utility.config.file;
 import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.config.ConfigBuilder;
 import cc.hubailmn.utility.config.annotation.LoadConfig;
-import cc.hubailmn.utility.interaction.CSend;
+import cc.hubailmn.utility.plugin.CSend;
 import cc.hubailmn.utility.util.CodeGenerator;
 import cc.hubailmn.utility.util.TextParserUtil;
 import lombok.Getter;

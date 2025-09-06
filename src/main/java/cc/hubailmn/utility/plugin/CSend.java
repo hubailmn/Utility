@@ -1,4 +1,4 @@
-package cc.hubailmn.utility.interaction;
+package cc.hubailmn.utility.plugin;
 
 import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.util.TextParserUtil;
@@ -118,12 +118,13 @@ public final class CSend {
 
     private static Component getPrefix() {
         if (BasePlugin.getInstance() == null || BasePlugin.getInstance().getPluginName() == null) {
-            return TextParserUtil.parse("§7[§aPlugin§7] §b>>§r");
+            return TextParserUtil.parse("<gradient:#00CFFF:#0099FF>plugin ⚡ </gradient>");
         }
 
         Component prefix = BasePlugin.getPrefix();
         return (prefix == null) ?
-               TextParserUtil.parse("<gradient:#00CFFF:#0099FF>" + BasePlugin.getInstance().getPluginName() + " </gradient>") : prefix;
+               TextParserUtil.parse("<gradient:#00CFFF:#0099FF>" + BasePlugin.getInstance().getPluginName() + "  ⚡ </gradient>") :
+               prefix;
     }
 
     // ===== SLF4J-style parameterized methods =====

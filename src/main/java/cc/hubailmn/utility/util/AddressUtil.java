@@ -1,7 +1,7 @@
 package cc.hubailmn.utility.util;
 
 import cc.hubailmn.utility.BasePlugin;
-import cc.hubailmn.utility.interaction.CSend;
+import cc.hubailmn.utility.plugin.CSend;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 

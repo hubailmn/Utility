@@ -1,7 +1,7 @@
 package cc.hubailmn.utility.registry;
 
 import cc.hubailmn.utility.BasePlugin;
-import cc.hubailmn.utility.interaction.CSend;
+import cc.hubailmn.utility.plugin.CSend;
 
 import java.io.File;
 import java.io.IOException;

@@ -2,7 +2,7 @@ package cc.hubailmn.utility.database.data;
 
 import cc.hubailmn.utility.database.annotation.DataBaseTable;
 import cc.hubailmn.utility.database.annotation.SQLColumn;
-import cc.hubailmn.utility.interaction.CSend;
+import cc.hubailmn.utility.plugin.CSend;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;

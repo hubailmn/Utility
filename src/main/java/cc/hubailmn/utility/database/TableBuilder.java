@@ -1,7 +1,7 @@
 package cc.hubailmn.utility.database;
 
 import cc.hubailmn.utility.database.annotation.DataBaseTable;
-import cc.hubailmn.utility.interaction.CSend;
+import cc.hubailmn.utility.plugin.CSend;
 import lombok.Getter;
 import lombok.SneakyThrows;
 

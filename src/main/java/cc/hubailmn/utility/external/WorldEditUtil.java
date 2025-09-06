@@ -1,7 +1,7 @@
 package cc.hubailmn.utility.external;
 
 import cc.hubailmn.utility.BasePlugin;
-import cc.hubailmn.utility.interaction.CSend;
+import cc.hubailmn.utility.plugin.CSend;
 import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.bukkit.BukkitPlayer;

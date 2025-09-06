@@ -14,7 +14,7 @@ import cc.hubailmn.utility.database.DatabaseRegistry;
 import cc.hubailmn.utility.database.TableBuilder;
 import cc.hubailmn.utility.database.TableManager;
 import cc.hubailmn.utility.database.annotation.DataBaseTable;
-import cc.hubailmn.utility.interaction.CSend;
+import cc.hubailmn.utility.plugin.CSend;
 import org.bukkit.event.Listener;
 
 import java.sql.Connection;

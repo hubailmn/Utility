@@ -3,7 +3,7 @@ package cc.hubailmn.utility.jda;
 import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.config.ConfigUtil;
 import cc.hubailmn.utility.config.file.BotSettingsConfig;
-import cc.hubailmn.utility.interaction.CSend;
+import cc.hubailmn.utility.plugin.CSend;
 import cc.hubailmn.utility.jda.commands.BotCommandUtil;
 import cc.hubailmn.utility.jda.register.BotRegister;
 import cc.hubailmn.utility.jda.register.InstanceManager;

@@ -5,7 +5,7 @@ import cc.hubailmn.utility.config.ConfigUtil;
 import cc.hubailmn.utility.config.file.DataBaseConfig;
 import cc.hubailmn.utility.database.config.MySQLConfig;
 import cc.hubailmn.utility.database.config.SQLiteConfig;
-import cc.hubailmn.utility.interaction.CSend;
+import cc.hubailmn.utility.plugin.CSend;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;

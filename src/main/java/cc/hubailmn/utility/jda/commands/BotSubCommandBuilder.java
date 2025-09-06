@@ -1,6 +1,6 @@
 package cc.hubailmn.utility.jda.commands;
 
-import cc.hubailmn.utility.interaction.CSend;
+import cc.hubailmn.utility.plugin.CSend;
 import cc.hubailmn.utility.jda.commands.annotation.BotCommand;
 import cc.hubailmn.utility.jda.commands.annotation.BotSubCommand;
 import lombok.Data;

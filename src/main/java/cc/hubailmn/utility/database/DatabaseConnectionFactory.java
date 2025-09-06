@@ -3,7 +3,7 @@ package cc.hubailmn.utility.database;
 import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.database.config.MySQLConfig;
 import cc.hubailmn.utility.database.config.SQLiteConfig;
-import cc.hubailmn.utility.interaction.CSend;
+import cc.hubailmn.utility.plugin.CSend;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 

@@ -3,7 +3,7 @@ package cc.hubailmn.utility.command;
 import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.command.annotation.Command;
 import cc.hubailmn.utility.command.annotation.SubCommand;
-import cc.hubailmn.utility.interaction.CSend;
+import cc.hubailmn.utility.plugin.CSend;
 import cc.hubailmn.utility.interaction.SoundUtil;
 import cc.hubailmn.utility.interaction.player.MessageUtil;
 import cc.hubailmn.utility.interaction.player.PlayerUtil;

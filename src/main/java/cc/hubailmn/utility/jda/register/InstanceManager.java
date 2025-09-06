@@ -1,6 +1,6 @@
 package cc.hubailmn.utility.jda.register;
 
-import cc.hubailmn.utility.interaction.CSend;
+import cc.hubailmn.utility.plugin.CSend;
 import cc.hubailmn.utility.jda.commands.BotCommandBuilder;
 import cc.hubailmn.utility.jda.commands.BotSubCommandBuilder;
 import cc.hubailmn.utility.jda.modal.ModalBuilder;
