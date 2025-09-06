@@ -36,7 +36,6 @@ public class UpdateCheckListener implements Listener {
                 if (isHashed) {
                     String pluginName = BasePlugin.getInstance().getPluginName();
                     String version = BasePlugin.getInstance().getPluginVersion();
-                    String prefix = BasePlugin.getPrefix();
                     String authors = String.join(", ", BasePlugin.getInstance().getPluginMeta().getAuthors());
 
                     Component info = Component.text("Plugin Information:", NamedTextColor.YELLOW)
@@ -51,7 +50,7 @@ public class UpdateCheckListener implements Listener {
                             .append(Component.text(authors, NamedTextColor.LIGHT_PURPLE))
                             .append(Component.newline())
                             .append(Component.text(" - Prefix: ", NamedTextColor.GRAY))
-                            .append(Component.text(prefix, NamedTextColor.GOLD));
+                            .append(BasePlugin.getPrefix());
 
                     MessageUtil.send(player, info);
                 }

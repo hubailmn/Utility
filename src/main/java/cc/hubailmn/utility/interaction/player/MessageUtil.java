@@ -35,8 +35,7 @@ public final class MessageUtil {
     }
 
     public static void prefixed(CommandSender sender, Component content) {
-        Component prefix = TextParserUtil.parse(BasePlugin.getPrefix());
-        send(sender, prefix.append(Component.space()).append(content));
+        send(sender, BasePlugin.getPrefix().append(Component.space()).append(content));
     }
 
     public static void prefixed(CommandSender sender, String content) {
@@ -54,8 +53,7 @@ public final class MessageUtil {
     }
 
     public static void sendPrefixedActionBarMessage(Player player, Component message) {
-        Component prefix = TextParserUtil.parse(BasePlugin.getPrefix());
-        sendActionBarMessage(player, prefix.append(Component.space()).append(message));
+        sendActionBarMessage(player, BasePlugin.getPrefix().append(Component.space()).append(message));
     }
 
     public static void sendPrefixedActionBarMessage(Player player, String message) {

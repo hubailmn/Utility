@@ -15,6 +15,7 @@ import cc.hubailmn.utility.util.AddressUtil;
 import cc.hubailmn.utility.util.HashUtil;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.text.Component;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -31,7 +32,7 @@ public abstract class BasePlugin extends JavaPlugin {
 
     @Getter
     @Setter
-    private static String prefix;
+    private static Component prefix;
 
     @Getter
     @Setter

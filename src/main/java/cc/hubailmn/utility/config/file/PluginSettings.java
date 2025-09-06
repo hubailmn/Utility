@@ -5,7 +5,9 @@ import cc.hubailmn.utility.config.ConfigBuilder;
 import cc.hubailmn.utility.config.annotation.LoadConfig;
 import cc.hubailmn.utility.interaction.CSend;
 import cc.hubailmn.utility.util.CodeGenerator;
+import cc.hubailmn.utility.util.TextParserUtil;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 
 import java.util.Arrays;
 import java.util.TimeZone;
@@ -16,7 +18,7 @@ public class PluginSettings extends ConfigBuilder {
 
     private static final String PREFIX = "plugin.";
 
-    public String prefix;
+    public Component prefix;
     public String version;
     public String serverId;
     public boolean checkForUpdates;
@@ -26,8 +28,11 @@ public class PluginSettings extends ConfigBuilder {
     public PluginSettings() {
         super();
 
-        this.prefix = getConfig().getString(PREFIX + "prefix");
-        getConfig().set(PREFIX + "prefix", getPrefix().replace("%plugin_name%", BasePlugin.getInstance().getPluginName()));
+        String prefixString = getConfig().getString(PREFIX + "prefix");
+        if (prefixString != null) {
+            getConfig().set(PREFIX + "prefix", prefixString.replace("%plugin_name%", BasePlugin.getInstance().getPluginName()));
+        }
+
         getConfig().set(PREFIX + "version", BasePlugin.getInstance().getPluginVersion());
 
         this.serverId = getConfig().getString(PREFIX + "server-id");
@@ -39,7 +44,7 @@ public class PluginSettings extends ConfigBuilder {
     }
 
     public void reloadCache() {
-        this.prefix = getConfig().getString(PREFIX + "prefix");
+        this.prefix = getComponent(PREFIX + "prefix", TextParserUtil.parse("<gradient:#00CFFF:#0099FF>" + BasePlugin.getInstance().getPluginName() + " </gradient>"));
         this.version = getConfig().getString(PREFIX + "version");
         this.serverId = getConfig().getString(PREFIX + "server-id");
         this.checkForUpdates = getConfig().getBoolean(PREFIX + "update-check");

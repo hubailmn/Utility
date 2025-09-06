@@ -1,5 +1,5 @@
 plugin:
-  prefix: '§7[§a%plugin_name%§7] §b§l>>§r'
+  prefix: '<gradient:#00CFFF:#0099FF>%plugin_name% ⚡ </gradient>'
   version: '%plugin_version%'
   check-updates: false
   time-zone: "Asia/Riyadh"
