@@ -1,5 +1,5 @@
 plugin:
-  prefix: '<gradient:#00CFFF:#0099FF>%plugin_name% ⚡ </gradient>'
+  prefix: '<gradient:#00CFFF:#0099FF>%plugin_name% ⚡</gradient>'
   version: '%plugin_version%'
   check-updates: false
   time-zone: "Asia/Riyadh"

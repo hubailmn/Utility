@@ -11,9 +11,17 @@ import java.util.regex.Pattern;
 public class TextParserUtil {
 
     private static final MiniMessage MINI = MiniMessage.miniMessage();
-    private static final LegacyComponentSerializer LEGACY_SERIALIZER =
+    private static final LegacyComponentSerializer LEGACY_SERIALIZER_ALTERNATIVE =
             LegacyComponentSerializer.builder()
                     .character('&')
+                    .hexCharacter('#')
+                    .hexColors()
+                    .useUnusualXRepeatedCharacterHexFormat()
+                    .build();
+
+    private static final LegacyComponentSerializer LEGACY_SERIALIZER =
+            LegacyComponentSerializer.builder()
+                    .character('§')
                     .hexCharacter('#')
                     .hexColors()
                     .useUnusualXRepeatedCharacterHexFormat()
@@ -38,10 +46,10 @@ public class TextParserUtil {
             try {
                 result = MINI.deserialize(input);
             } catch (Exception e) {
-                result = LEGACY_SERIALIZER.deserialize(input);
+                result = LEGACY_SERIALIZER_ALTERNATIVE.deserialize(input);
             }
         } else {
-            result = LEGACY_SERIALIZER.deserialize(input);
+            result = LEGACY_SERIALIZER_ALTERNATIVE.deserialize(input);
         }
 
         return result.decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
@@ -49,6 +57,11 @@ public class TextParserUtil {
 
     public static String toPlainText(Component component) {
         return LEGACY_SECTION_SERIALIZER.serialize(component);
+    }
+
+    public static String toLegacy(Component component) {
+        if (component == null) return "";
+        return LEGACY_SERIALIZER.serialize(component);
     }
 
     public static Component stripNewlinesPreservingStyle(Component component) {

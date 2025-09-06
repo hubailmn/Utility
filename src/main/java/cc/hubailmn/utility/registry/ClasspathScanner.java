@@ -117,8 +117,7 @@ public final class ClasspathScanner {
     private static Class<?> loadClassSafely(String className) {
         try {
             return BasePlugin.class.getClassLoader().loadClass(className);
-        } catch (ClassNotFoundException | NoClassDefFoundError | IncompatibleClassChangeError | VerifyError | ClassFormatError e) {
-            CSend.debug("Skipped class {}: {}", className, e.getClass().getSimpleName());
+        } catch (ClassNotFoundException | NoClassDefFoundError | IncompatibleClassChangeError | VerifyError | ClassFormatError ignored) {
             return null;
         }
     }

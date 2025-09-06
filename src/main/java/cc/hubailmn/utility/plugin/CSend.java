@@ -2,7 +2,6 @@ package cc.hubailmn.utility.plugin;
 
 import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.util.TextParserUtil;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 
 import java.io.*;
@@ -103,7 +102,7 @@ public final class CSend {
                 try {
                     LogEntry entry = consoleQueue.poll(100, TimeUnit.MILLISECONDS);
                     if (entry != null) {
-                        Component prefixedMessage = getPrefix().append(TextParserUtil.parse(formatMessage(entry.messagePattern(), entry.arguments())));
+                        String prefixedMessage = getPrefix() + " " + formatMessage(entry.messagePattern(), entry.arguments());
                         Bukkit.getConsoleSender().sendMessage(prefixedMessage);
                     }
                 } catch (InterruptedException ignored) {
@@ -116,15 +115,11 @@ public final class CSend {
         consoleThread.start();
     }
 
-    private static Component getPrefix() {
+    private static String getPrefix() {
         if (BasePlugin.getInstance() == null || BasePlugin.getInstance().getPluginName() == null) {
-            return TextParserUtil.parse("<gradient:#00CFFF:#0099FF>plugin ⚡ </gradient>");
+            return TextParserUtil.toLegacy(TextParserUtil.parse("<gradient:#00CFFF:#0099FF>plugin ⚡</gradient>"));
         }
-
-        Component prefix = BasePlugin.getPrefix();
-        return (prefix == null) ?
-               TextParserUtil.parse("<gradient:#00CFFF:#0099FF>" + BasePlugin.getInstance().getPluginName() + "  ⚡ </gradient>") :
-               prefix;
+        return TextParserUtil.toLegacy(BasePlugin.getPrefix());
     }
 
     // ===== SLF4J-style parameterized methods =====
@@ -207,16 +202,12 @@ public final class CSend {
         Bukkit.getConsoleSender().sendMessage(message);
     }
 
-    public static void plain(Component message) {
-        Bukkit.getConsoleSender().sendMessage(message);
-    }
-
     public static void plain(String messagePattern, Object... arguments) {
         Bukkit.getConsoleSender().sendMessage(formatMessage(messagePattern, arguments));
     }
 
     public static void prefixed(String message) {
-        plain(getPrefix().append(TextParserUtil.parse(message)));
+        plain(getPrefix() + " " + message);
     }
 
     public static void prefixed(String messagePattern, Object... arguments) {
