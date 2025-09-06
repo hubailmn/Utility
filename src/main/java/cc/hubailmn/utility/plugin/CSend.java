@@ -1,6 +1,8 @@
 package cc.hubailmn.utility.plugin;
 
 import cc.hubailmn.utility.BasePlugin;
+import cc.hubailmn.utility.config.ConfigUtil;
+import cc.hubailmn.utility.config.file.PluginSettings;
 import cc.hubailmn.utility.util.TextParserUtil;
 import org.bukkit.Bukkit;
 
@@ -24,14 +26,14 @@ public final class CSend {
 
     private static final BlockingQueue<LogEntry> logQueue = new LinkedBlockingQueue<>();
     private static final BlockingQueue<LogEntry> consoleQueue = new LinkedBlockingQueue<>();
-
+    private static final String DEFAULT_PREFIX = TextParserUtil.toLegacy(TextParserUtil.parse("<gradient:#00CFFF:#0099FF>" + BasePlugin.getInstance().getPluginName() + " ⚡</gradient>"));
     private static File DEBUG_LOG;
     private static File ERROR_LOG;
     private static File PLUGIN_LOG;
-
     private static Thread logThread;
     private static Thread consoleThread;
     private static volatile boolean running = true;
+    private static String PREFIX;
 
     private CSend() {
         throw new UnsupportedOperationException("Utility class");
@@ -116,10 +118,17 @@ public final class CSend {
     }
 
     private static String getPrefix() {
-        if (BasePlugin.getInstance() == null || BasePlugin.getInstance().getPluginName() == null) {
-            return TextParserUtil.toLegacy(TextParserUtil.parse("<gradient:#00CFFF:#0099FF>plugin ⚡</gradient>"));
+        if (PREFIX != null) {
+            return PREFIX;
         }
-        return TextParserUtil.toLegacy(BasePlugin.getPrefix());
+
+        var config = ConfigUtil.getConfig(PluginSettings.class);
+        if (config != null) {
+            PREFIX = TextParserUtil.toLegacy(config.getPrefix());
+            return PREFIX;
+        }
+
+        return DEFAULT_PREFIX;
     }
 
     // ===== SLF4J-style parameterized methods =====

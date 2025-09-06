@@ -1,7 +1,7 @@
 package cc.hubailmn.utility.jda.listener;
 
-import cc.hubailmn.utility.plugin.CSend;
 import cc.hubailmn.utility.jda.listener.annotation.BotListener;
+import cc.hubailmn.utility.plugin.CSend;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;

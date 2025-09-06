@@ -1,8 +1,8 @@
 package cc.hubailmn.utility.jda.commands;
 
-import cc.hubailmn.utility.plugin.CSend;
 import cc.hubailmn.utility.jda.BaseBot;
 import cc.hubailmn.utility.jda.commands.annotation.BotCommand;
+import cc.hubailmn.utility.plugin.CSend;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.Permission;

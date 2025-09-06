@@ -2,9 +2,9 @@ package cc.hubailmn.utility.listener;
 
 import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.annotation.RegisterListener;
-import cc.hubailmn.utility.plugin.CSend;
 import cc.hubailmn.utility.interaction.SoundUtil;
 import cc.hubailmn.utility.interaction.player.MessageUtil;
+import cc.hubailmn.utility.plugin.CSend;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
