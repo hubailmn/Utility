@@ -12,6 +12,7 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
+import com.sk89q.worldguard.protection.regions.RegionQuery;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -25,6 +26,7 @@ public class WorldGuardUtil {
 
     private static final RegionContainer REGION_CONTAINER = WorldGuard.getInstance().getPlatform().getRegionContainer();
     private static final FlagRegistry FLAG_REGISTRY = WorldGuard.getInstance().getFlagRegistry();
+    private static final RegionQuery REGION_QUERY = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
 
     private static final Map<World, RegionManager> REGION_MANAGER_CACHE = new ConcurrentHashMap<>();
     private static final Map<String, World> REGION_WORLD_CACHE = new ConcurrentHashMap<>();
@@ -202,7 +204,7 @@ public class WorldGuardUtil {
         try {
             ProtectedRegion region = getProtectedRegion(regionName);
             if (region != null) {
-                region.getMembers().removeAll();
+                region.getMembers().clear();
                 return true;
             }
             return false;
@@ -451,6 +453,15 @@ public class WorldGuardUtil {
         boolean intersects = applicableRegions.getRegions().stream().anyMatch(r -> regionIds.contains(r.getId()));
 
         return useAsBlacklist != intersects;
+    }
+
+    public static Set<String> getPlayerRegions(Player player) {
+        com.sk89q.worldedit.util.Location location = BukkitAdapter.adapt(player.getLocation());
+
+        Set<String> regionIds = new HashSet<>();
+        REGION_QUERY.getApplicableRegions(location).forEach(region -> regionIds.add(region.getId()));
+
+        return regionIds;
     }
 
 }

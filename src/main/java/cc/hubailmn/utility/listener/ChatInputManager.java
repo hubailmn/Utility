@@ -3,6 +3,7 @@ package cc.hubailmn.utility.listener;
 import cc.hubailmn.utility.BasePlugin;
 import cc.hubailmn.utility.annotation.RegisterListener;
 import cc.hubailmn.utility.interaction.CSend;
+import cc.hubailmn.utility.interaction.SoundUtil;
 import cc.hubailmn.utility.interaction.player.MessageUtil;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -137,6 +138,7 @@ public class ChatInputManager implements Listener {
             sessions.remove(uuid);
             Bukkit.getScheduler().cancelTask(session.taskId);
             MessageUtil.prefixed(player, "§eInput cancelled.");
+            SoundUtil.play(player, SoundUtil.SoundType.GAME_TRIGGER);
 
             if (session.cancelCallback != null) {
                 session.cancelCallback.run();

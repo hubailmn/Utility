@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -171,9 +172,67 @@ public class TabComplete {
     }
 
     public <E extends Enum<E>> TabComplete addEnum(int index, Class<E> enumClass) {
+        Objects.requireNonNull(enumClass, "Enum class cannot be null");
+
         Set<String> enumNames = Arrays.stream(enumClass.getEnumConstants())
                 .map(e -> e.name().toLowerCase())
                 .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        return add(index, enumNames);
+    }
+
+    public <E extends Enum<E>> TabComplete addEnum(int index, Class<E> enumClass, Collection<Predicate<E>> excludePredicates) {
+        Objects.requireNonNull(enumClass, "Enum class cannot be null");
+        Objects.requireNonNull(excludePredicates, "Exclude predicates cannot be null");
+
+        Set<String> enumNames = Arrays.stream(enumClass.getEnumConstants())
+                .filter(e -> excludePredicates.stream().noneMatch(pred -> pred.test(e)))
+                .map(e -> e.name().toLowerCase())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        return add(index, enumNames);
+    }
+
+    @SafeVarargs
+    public final <E extends Enum<E>> TabComplete addEnumExclude(int index, Class<E> enumClass, E... excludeValues) {
+        Objects.requireNonNull(enumClass, "Enum class cannot be null");
+
+        if (excludeValues == null || excludeValues.length == 0) {
+            return addEnum(index, enumClass);
+        }
+
+        Set<E> excludeSet = Set.of(excludeValues);
+        Set<String> enumNames = Arrays.stream(enumClass.getEnumConstants())
+                .filter(e -> !excludeSet.contains(e))
+                .map(e -> e.name().toLowerCase())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        return add(index, enumNames);
+    }
+
+    public <E extends Enum<E>> TabComplete addEnum(int index, Class<E> enumClass, Function<E, String> nameMapper) {
+        Objects.requireNonNull(enumClass, "Enum class cannot be null");
+        Objects.requireNonNull(nameMapper, "Name mapper cannot be null");
+
+        Set<String> enumNames = Arrays.stream(enumClass.getEnumConstants())
+                .map(nameMapper)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        return add(index, enumNames);
+    }
+
+    public <E extends Enum<E>> TabComplete addEnum(int index, Class<E> enumClass, Predicate<E> filter, java.util.function.Function<E, String> nameMapper) {
+        Objects.requireNonNull(enumClass, "Enum class cannot be null");
+        Objects.requireNonNull(filter, "Filter cannot be null");
+        Objects.requireNonNull(nameMapper, "Name mapper cannot be null");
+
+        Set<String> enumNames = Arrays.stream(enumClass.getEnumConstants())
+                .filter(filter)
+                .map(nameMapper)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
         return add(index, enumNames);
     }
 
